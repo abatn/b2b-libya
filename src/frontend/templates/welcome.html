@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{welcome.title}}</title>
+    <meta name="description" content="{{welcome.meta_description}}">
+    <link rel="canonical" href="{{canonical_url}}">
+    <link rel="alternate" hreflang="en" href="{{hreflang_en}}">
+    <link rel="alternate" hreflang="ar" href="{{hreflang_ar}}">
+    <meta property="og:title" content="{{welcome.title}}">
+    <meta property="og:description" content="{{welcome.meta_description}}">
+    <meta property="og:url" content="{{canonical_url}}">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{{welcome.title}}">
+    <meta name="twitter:description" content="{{welcome.meta_description}}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; }
+        :root { --primary: #ff6a00; --primary-dark: #e55d00; --secondary: #1a1a2e; --accent: #00d2ff; --border: #e8e8e8; --radius: 12px; --success: #10b981; }
+        .welcome-hero { background: linear-gradient(135deg, var(--secondary) 0%, #16213e 50%, #0f3460 100%); padding: 80px 30px; text-align: center; color: white; position: relative; overflow: hidden; }
+        .welcome-hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,106,0,0.08) 0%, transparent 50%); animation: glow 8s ease-in-out infinite; }
+        @keyframes glow { 0%,100% { transform: translate(0,0); } 50% { transform: translate(20px,-20px); } }
+        .welcome-hero h1 { font-size: 2.5rem; margin-bottom: 12px; position: relative; }
+        .welcome-hero h1 span { color: var(--primary); }
+        .welcome-hero p { color: #8892b0; font-size: 1.1rem; max-width: 600px; margin: 0 auto; position: relative; }
+        .welcome-check { font-size: 4rem; margin-bottom: 20px; position: relative; }
+        .container { max-width: 900px; margin: 40px auto; padding: 0 30px; }
+        .role-card { background: white; border-radius: var(--radius); padding: 30px; margin-bottom: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-left: 4px solid var(--primary); }
+        .role-card h2 { color: var(--secondary); margin-bottom: 8px; font-size: 1.3rem; }
+        .role-card p { color: #666; margin-bottom: 15px; }
+        .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+        .step-card { background: #f8f9fa; border-radius: 10px; padding: 20px; text-align: center; transition: 0.2s; border: 2px solid transparent; }
+        .step-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+        .step-num { width: 36px; height: 36px; border-radius: 50%; background: var(--primary); color: white; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-bottom: 10px; }
+        .step-card h3 { font-size: 0.95rem; color: var(--secondary); margin-bottom: 6px; }
+        .step-card p { font-size: 0.8rem; color: #888; }
+        .cta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 30px; }
+        .cta-card { background: white; border-radius: var(--radius); padding: 24px; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.06); text-decoration: none; color: inherit; transition: 0.2s; border: 2px solid transparent; }
+        .cta-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+        .cta-icon { font-size: 2.5rem; margin-bottom: 12px; }
+        .cta-card h3 { color: var(--secondary); margin-bottom: 6px; }
+        .cta-card p { color: #888; font-size: 0.85rem; }
+        .btn-outline:hover { background: var(--primary); color: white; }
+        .text-center { text-align: center; }
+        .mt-20 { margin-top: 20px; }
+        .mt-30 { margin-top: 30px; }
+        .tip-box { background: rgba(255,106,0,0.08); border: 1px solid rgba(255,106,0,0.2); border-radius: 10px; padding: 20px; margin-top: 20px; }
+        .tip-box h3 { color: var(--primary); margin-bottom: 8px; font-size: 1rem; }
+        .tip-box ul { padding-left: 20px; }
+        .tip-box li { color: #555; margin-bottom: 6px; font-size: 0.9rem; }
+        @media (max-width: 768px) {
+            .welcome-hero { padding: 50px 20px; }
+            .welcome-hero h1 { font-size: 1.8rem; }
+            .steps { grid-template-columns: 1fr; }
+            .cta-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+<!-- NAV_CSS_INCLUDE -->
+</head>
+<body>
+<!-- NAV_INCLUDE -->
+
+<div class="welcome-hero">
+    <div class="welcome-check">🎉</div>
+    <h1>{{welcome.title}}</h1>
+    <p>{{welcome.subtitle}}</p>
+</div>
+
+<div class="container">
+    <!-- Buyer Onboarding -->
+    <div class="role-card" id="buyer-steps">
+        <h2>🛒 {{welcome.buyer_title}}</h2>
+        <p>{{welcome.buyer_desc}}</p>
+        <div class="steps">
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <h3>{{welcome.step1_title}}</h3>
+                <p>{{welcome.step1_desc}}</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <h3>{{welcome.step2_title}}</h3>
+                <p>{{welcome.step2_desc}}</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <h3>{{welcome.step3_title}}</h3>
+                <p>{{welcome.step3_desc}}</p>
+            </div>
+            <div class="step-card">
+                <div class="step-num">4</div>
+                <h3>{{welcome.step4_title}}</h3>
+                <p>{{welcome.step4_desc}}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="cta-grid">
+        <a href="/b2b/products" class="cta-card">
+            <div class="cta-icon">🔍</div>
+            <h3>{{welcome.cta_browse}}</h3>
+            <p>{{welcome.cta_browse_desc}}</p>
+        </a>
+        <a href="/b2b/rfq/new" class="cta-card">
+            <div class="cta-icon">📋</div>
+            <h3>{{welcome.cta_rfq}}</h3>
+            <p>{{welcome.cta_rfq_desc}}</p>
+        </a>
+        <a href="/b2b/suppliers" class="cta-card">
+            <div class="cta-icon">🏭</div>
+            <h3>{{welcome.cta_suppliers}}</h3>
+            <p>{{welcome.cta_suppliers_desc}}</p>
+        </a>
+        <a href="/faq" class="cta-card">
+            <div class="cta-icon">❓</div>
+            <h3>{{welcome.cta_faq}}</h3>
+            <p>{{welcome.cta_faq_desc}}</p>
+        </a>
+    </div>
+
+    <!-- Tips -->
+    <div class="tip-box">
+        <h3>💡 {{welcome.tips_title}}</h3>
+        <ul>
+            <li>{{welcome.tip1}}</li>
+            <li>{{welcome.tip2}}</li>
+            <li>{{welcome.tip3}}</li>
+            <li>{{welcome.tip4}}</li>
+        </ul>
+    </div>
+
+    <div class="text-center mt-30">
+        <a href="/" class="btn-primary">{{welcome.cta_start}}</a>
+        <a href="/guide" class="btn-outline" style="margin-left: 10px;">{{welcome.cta_guide}}</a>
+    </div>
+</div>
+
+<!-- NAV_JS_INCLUDE -->
+<script src="/static/push-notifications.js" defer></script>
+</body>
+</html>

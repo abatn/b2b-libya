@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{import.title}}</title>
+    <meta name="description" content="{{import.meta_description}}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; }
+        :root { --primary: #ff6a00; --primary-dark: #e55d00; --secondary: #1a1a2e; --accent: #00d2ff; --success: #28a745; --warning: #ffc107; --danger: #dc3545; --border: #e8e8e8; --radius: 12px; }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 30px; }
+        .page-header { margin-bottom: 30px; }
+        .page-header h1 { font-size: 1.8rem; color: var(--secondary); margin-bottom: 8px; }
+        .page-header p { color: #666; font-size: 0.95rem; }
+
+        /* Drop Zone */
+        .drop-zone {
+            border: 3px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 60px 30px;
+            text-align: center;
+            background: white;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-bottom: 25px;
+        }
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: var(--primary);
+            background: #fff8f5;
+        }
+        .drop-zone-icon { font-size: 3rem; margin-bottom: 15px; }
+        .drop-zone h3 { color: var(--secondary); margin-bottom: 8px; font-size: 1.2rem; }
+        .drop-zone p { color: #888; font-size: 0.9rem; margin-bottom: 15px; }
+        .drop-zone input[type="file"] { display: none; }
+        .btn-browse {
+            display: inline-block;
+            padding: 10px 24px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .btn-browse:hover { background: var(--primary-dark); }
+
+        /* Format Info */
+        .format-info {
+            background: white;
+            border-radius: var(--radius);
+            padding: 20px 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .format-info h3 { color: var(--secondary); margin-bottom: 12px; font-size: 1.1rem; }
+        .format-info table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .format-info th { text-align: left; padding: 8px 12px; background: #f8f9fa; color: #555; font-weight: 600; }
+        .format-info td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+        .format-info .required { color: var(--danger); font-weight: 600; }
+        .format-info .optional { color: #888; }
+        .download-template {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 8px 16px;
+            background: var(--secondary);
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .download-template:hover { background: #2a2a4e; }
+
+        /* Results */
+        .results { display: none; }
+        .results.show { display: block; }
+        .results-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 20px;
+        }
+        .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .results-header h3 { color: var(--secondary); font-size: 1.2rem; }
+        .results-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat-box { text-align: center; padding: 15px; border-radius: 8px; }
+        .stat-box.success { background: #e6f9ee; }
+        .stat-box.warning { background: #fff3e0; }
+        .stat-box.danger { background: #fde8e8; }
+        .stat-box .number { font-size: 1.8rem; font-weight: bold; }
+        .stat-box.success .number { color: var(--success); }
+        .stat-box.warning .number { color: #e67e22; }
+        .stat-box.danger .number { color: var(--danger); }
+        .stat-box .label { font-size: 0.8rem; color: #888; margin-top: 4px; }
+
+        /* Preview Table */
+        .preview-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; max-height: 300px; overflow-y: auto; display: block; }
+        .preview-table th { position: sticky; top: 0; background: var(--secondary); color: white; padding: 10px; text-align: left; }
+        .preview-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+        .preview-table tr:hover { background: #f8f9fa; }
+
+        /* Error List */
+        .error-list { list-style: none; padding: 0; }
+        .error-list li { padding: 8px 12px; background: #fde8e8; border-radius: 6px; margin-bottom: 6px; font-size: 0.85rem; color: var(--danger); }
+
+        /* Actions */
+        .actions { display: flex; gap: 12px; margin-top: 20px; }
+        .btn-import {
+            padding: 12px 30px;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+        .btn-import:hover { background: #218838; }
+        .btn-import:disabled { background: #ccc; cursor: not-allowed; }
+        .btn-cancel {
+            padding: 12px 24px;
+            background: white;
+            color: #666;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Loading */
+        .loading { display: none; text-align: center; padding: 30px; }
+        .loading.show { display: block; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Stats */
+        .import-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 25px; }
+        .stat-card { background: white; border-radius: var(--radius); padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: center; }
+        .stat-card .value { font-size: 2rem; font-weight: bold; color: var(--primary); }
+        .stat-card .label { color: #888; font-size: 0.85rem; margin-top: 5px; }
+
+        footer { background: var(--secondary); color: #8892b0; padding: 30px; text-align: center; margin-top: 40px; }
+
+        @media (max-width: 640px) {
+            .results-stats { grid-template-columns: 1fr; }
+            .import-stats { grid-template-columns: 1fr; }
+        }
+    </style>
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+        {"@type":"ListItem","position":1,"name":"Home","item":"/"},
+        {"@type":"ListItem","position":2,"name":"Import Suppliers","item":"/import"}
+    ]}
+    </script>
+</head>
+<body>
+<!-- NAV_INCLUDE -->
+
+    <div class="container">
+        <div class="page-header">
+            <h1>  {{import.title}}</h1>
+            <p>{{import.subtitle}}</p>
+        </div>
+
+        <!-- Drop Zone -->
+        <div class="drop-zone" id="dropZone">
+            <div class="drop-zone-icon"> </div>
+            <h3>{{import.drop_title}}</h3>
+            <p>{{import.drop_subtitle}}</p>
+            <input type="file" id="fileInput" accept=".csv">
+            <button class="btn-browse" onclick="document.getElementById('fileInput').click()">{{import.browse_button}}</button>
+        </div>
+
+        <!-- Format Info -->
+        <div class="format-info">
+            <h3>  {{import.csv_format}}</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>{{import.column}}</th>
+                        <th>{{import.required}}</th>
+                        <th>{{import.example}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>name</td><td class="required">{{import.required}}</td><td>AlSahl Group</td></tr>
+                    <tr><td>name_arabic</td><td class="optional">{{import.optional}}</td><td>السهل جروب</td></tr>
+                    <tr><td>description</td><td class="optional">{{import.optional}}</td><td>Building materials supplier</td></tr>
+                    <tr><td>city</td><td class="optional">{{import.optional}}</td><td>Tripoli</td></tr>
+                    <tr><td>phone</td><td class="optional">{{import.optional}}</td><td>+218-91-2159527</td></tr>
+                    <tr><td>email</td><td class="optional">{{import.optional}}</td><td>info@alsahl.ly</td></tr>
+                    <tr><td>website</td><td class="optional">{{import.optional}}</td><td>alsahlgroup.com</td></tr>
+                    <tr><td>category</td><td class="optional">{{import.optional}}</td><td>Building Materials</td></tr>
+                    <tr><td>location</td><td class="optional">{{import.optional}}</td><td>Tripoli, Libya</td></tr>
+                </tbody>
+            </table>
+            <a href="/static/seed_suppliers.csv" download class="download-template">  {{import.download_template}}</a>
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>{{import.processing}}</p>
+        </div>
+
+        <!-- Results -->
+        <div class="results" id="results">
+            <div class="results-card">
+                <div class="results-header">
+                    <h3>  {{import.results_title}}</h3>
+                </div>
+                <div class="results-stats">
+                    <div class="stat-box success">
+                        <div class="number" id="importedCount">0</div>
+                        <div class="label">{{import.imported}}</div>
+                    </div>
+                    <div class="stat-box warning">
+                        <div class="number" id="skippedCount">0</div>
+                        <div class="label">{{import.skipped}}</div>
+                    </div>
+                    <div class="stat-box danger">
+                        <div class="number" id="errorCount">0</div>
+                        <div class="label">{{import.errors}}</div>
+                    </div>
+                </div>
+
+                <!-- Preview Table -->
+                <div id="previewSection" style="display:none;">
+                    <h4 style="margin-bottom:10px; color:var(--secondary);">{{import.preview}}</h4>
+                    <table class="preview-table" id="previewTable"></table>
+                </div>
+
+                <!-- Error List -->
+                <div id="errorSection" style="display:none;">
+                    <h4 style="margin-bottom:10px; color:var(--danger);">{{import.error_details}}</h4>
+                    <ul class="error-list" id="errorList"></ul>
+                </div>
+
+                <div class="actions">
+                    <button class="btn-import" id="importBtn" onclick="confirmImport()">{{import.confirm_import}}</button>
+                    <button class="btn-cancel" onclick="resetImport()">{{import.cancel}}</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Stats -->
+        <div class="import-stats" id="currentStats" style="display:none;">
+            <div class="stat-card">
+                <div class="value" id="totalSuppliers">0</div>
+                <div class="label">{{import.total_suppliers}}</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="verifiedSuppliers">0</div>
+                <div class="label">{{import.verified_suppliers}}</div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Libya B2B Platform | {{landing.footer_built}}</p>
+    </footer>
+
+    <script src="/static/auth.js"></script>
+    <script>
+        let pendingFile = null;
+        let parsedRows = [];
+
+        // Auth check
+        (async () => {
+            const user = await Auth.requireAuth();
+            if (!user) return;
+            Auth.updateNavAuth(user);
+            loadStats();
+        })();
+
+        // Drag & Drop
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.csv')) {
+                handleFile(file);
+            }
+        });
+        dropZone.addEventListener('click', () => {
+            fileInput.click();
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) handleFile(e.target.files[0]);
+        });
+
+        function handleFile(file) {
+            pendingFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const text = e.target.result;
+                const lines = text.split('\n').filter(l => l.trim());
+                if (lines.length < 2) {
+                    alert('CSV file is empty or has no data rows');
+                    return;
+                }
+                const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+                parsedRows = [];
+
+                for (let i = 1; i < lines.length; i++) {
+                    const values = lines[i].split(',').map(v => v.trim());
+                    const row = {};
+                    headers.forEach((h, idx) => { row[h] = values[idx] || ''; });
+                    if (row.name) parsedRows.push(row);
+                }
+
+                showPreview(headers, parsedRows);
+            };
+            reader.readAsText(file);
+        }
+
+        function showPreview(headers, rows) {
+            document.getElementById('dropZone').style.display = 'none';
+            document.getElementById('results').classList.add('show');
+
+            document.getElementById('importedCount').textContent = rows.length;
+            document.getElementById('skippedCount').textContent = 0;
+            document.getElementById('errorCount').textContent = 0;
+
+            // Preview table
+            const table = document.getElementById('previewTable');
+            const previewSection = document.getElementById('previewSection');
+            previewSection.style.display = 'block';
+
+            let html = '<thead><tr>';
+            headers.forEach(h => { html += `<th>${h}</th>`; });
+            html += '</tr></thead><tbody>';
+            rows.slice(0, 20).forEach(row => {
+                html += '<tr>';
+                headers.forEach(h => { html += `<td>${row[h] || ''}</td>`; });
+                html += '</tr>';
+            });
+            if (rows.length > 20) {
+                html += `<tr><td colspan="${headers.length}" style="text-align:center;color:#888;">... ${rows.length - 20} more rows</td></tr>`;
+            }
+            html += '</tbody>';
+            table.innerHTML = html;
+        }
+
+        async function confirmImport() {
+            if (!pendingFile) return;
+
+            const btn = document.getElementById('importBtn');
+            btn.disabled = true;
+            btn.textContent = 'Importing...';
+
+            const formData = new FormData();
+            formData.append('file', pendingFile);
+
+            try {
+                const res = await fetch('/api/b2b/suppliers/import', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                document.getElementById('importedCount').textContent = data.imported || 0;
+                document.getElementById('skippedCount').textContent = data.skipped || 0;
+                document.getElementById('errorCount').textContent = (data.errors || []).length;
+
+                if (data.errors && data.errors.length > 0) {
+                    const errorSection = document.getElementById('errorSection');
+                    const errorList = document.getElementById('errorList');
+                    errorSection.style.display = 'block';
+                    errorList.innerHTML = data.errors.map(e => `<li>${e}</li>`).join('');
+                }
+
+                btn.textContent = '✅ ' + (data.message || 'Import complete');
+                btn.style.background = 'var(--success)';
+
+                loadStats();
+            } catch (e) {
+                btn.textContent = '❌ Import failed';
+                btn.style.background = 'var(--danger)';
+                console.error(e);
+            }
+        }
+
+        function resetImport() {
+            pendingFile = null;
+            parsedRows = [];
+            document.getElementById('dropZone').style.display = 'block';
+            document.getElementById('results').classList.remove('show');
+            document.getElementById('importBtn').disabled = false;
+            document.getElementById('importBtn').textContent = '{{import.confirm_import}}';
+            document.getElementById('importBtn').style.background = 'var(--success)';
+        }
+
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/b2b/suppliers/stats');
+                const data = await res.json();
+                document.getElementById('totalSuppliers').textContent = data.total_suppliers || 0;
+                document.getElementById('verifiedSuppliers').textContent = data.verified_suppliers || 0;
+                document.getElementById('currentStats').style.display = 'grid';
+            } catch (e) { console.error(e); }
+        }
+    </script>
+<!-- NAV_JS_INCLUDE -->
+</body>
+</html>

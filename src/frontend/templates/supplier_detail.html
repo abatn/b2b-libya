@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{supplier_detail.title}}</title>
+    <meta name="description" content="{{supplier_detail.meta_description}}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; }
+        :root { --primary: #ff6a00; --primary-dark: #e55d00; --secondary: #1a1a2e; --accent: #00d2ff; --success: #28a745; --warning: #ffc107; --danger: #dc3545; --border: #e8e8e8; --radius: 12px; }
+
+        .breadcrumb { max-width: 1200px; margin: 0 auto; padding: 15px 30px 0; font-size: 0.85rem; color: #888; }
+        .breadcrumb a { color: var(--primary); text-decoration: none; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 15px 30px 30px; }
+
+        /* Profile Card */
+        .profile-card { background: white; border-radius: var(--radius); padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 25px; display: grid; grid-template-columns: 1fr 320px; gap: 30px; }
+        .profile-main h2 { font-size: 1.5rem; color: var(--secondary); margin-bottom: 5px; }
+        .profile-main .location { color: #888; margin-bottom: 15px; font-size: 0.95rem; }
+        .profile-main .description { color: #555; line-height: 1.7; margin-bottom: 15px; }
+        .badges { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+        .badge { padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+        .badge-verified { background: #e6f9ee; color: var(--success); }
+        .badge-trade { background: #fff3e0; color: #e67e22; }
+        .badge-years { background: #e8f4fd; color: var(--accent); }
+        .badge-category { background: #f0e6ff; color: #7c3aed; }
+
+        /* Contact Info */
+        .contact-info { margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; }
+        .contact-info h4 { color: var(--secondary); margin-bottom: 10px; font-size: 0.9rem; }
+        .contact-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.85rem; }
+        .contact-row .icon { width: 20px; text-align: center; }
+        .contact-row a { color: var(--primary); text-decoration: none; font-weight: 500; }
+        .contact-row a:hover { text-decoration: underline; }
+
+        /* Action Buttons */
+        .action-buttons { display: flex; gap: 10px; margin: 15px 0; flex-wrap: wrap; }
+        .btn-action {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 10px 18px; border-radius: 8px; font-weight: 600;
+            font-size: 0.85rem; cursor: pointer; text-decoration: none;
+            border: none; transition: 0.2s;
+        }
+        .btn-phone { background: var(--success); color: white; }
+        .btn-phone:hover { background: #218838; }
+        .btn-whatsapp { background: #25d366; color: white; }
+        .btn-whatsapp:hover { background: #1da851; }
+        .btn-email { background: var(--accent); color: white; }
+        .btn-email:hover { background: #00b8d4; }
+        .btn-website { background: var(--secondary); color: white; }
+        .btn-website:hover { background: #2a2a4e; }
+        .btn-message { background: var(--primary); color: white; flex: 1; justify-content: center; }
+        .btn-message:hover { background: var(--primary-dark); }
+
+        /* Rating Box */
+        .rating-box { text-align: center; background: var(--secondary); color: white; border-radius: var(--radius); padding: 25px; }
+        .rating-box .big-rating { font-size: 3rem; font-weight: bold; }
+        .rating-box .stars { color: #ffc107; font-size: 1.2rem; margin: 5px 0; }
+        .rating-box .count { color: #8892b0; font-size: 0.9rem; }
+
+        /* Contact Form */
+        .contact-section { background: white; border-radius: var(--radius); padding: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 25px; }
+        .contact-section h3 { color: var(--secondary); margin-bottom: 15px; font-size: 1.1rem; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600; color: #555; }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%; padding: 10px 14px; border: 2px solid var(--border); border-radius: 8px;
+            font-size: 0.9rem; transition: 0.2s;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            border-color: var(--primary); outline: none;
+        }
+        .form-group textarea { min-height: 100px; resize: vertical; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .btn-send {
+            width: 100%; padding: 12px; background: var(--primary); color: white;
+            border: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem;
+            cursor: pointer; transition: 0.2s;
+        }
+        .btn-send:hover { background: var(--primary-dark); }
+        .btn-send:disabled { background: #ccc; cursor: not-allowed; }
+        .form-success { display: none; padding: 15px; background: #e6f9ee; color: var(--success); border-radius: 8px; text-align: center; font-weight: 600; }
+
+        /* Products */
+        .section-title { font-size: 1.2rem; color: var(--secondary); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--primary); }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
+        .product-card { background: white; border-radius: var(--radius); overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+        .product-image { height: 140px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; }
+        .product-image.bg-1 { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .product-image.bg-2 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .product-image.bg-3 { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+        .product-body { padding: 14px; }
+        .product-name { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
+        .product-price { font-size: 1.1rem; color: var(--primary); font-weight: bold; }
+
+        .supplier-logo-large { width: 80px; height: 80px; border-radius: 16px; object-fit: cover; margin-bottom: 15px; }
+        .supplier-logo-placeholder { width: 80px; height: 80px; border-radius: 16px; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold; margin-bottom: 15px; }
+        .badge-gold { background: linear-gradient(135deg, #f5af19, #f12711); color: white; }
+        .badge-silver { background: linear-gradient(135deg, #bdc3c7, #95a5a6); color: white; }
+        .badge-top { background: linear-gradient(135deg, #ff6a00, #ff9a56); color: white; }
+        .badge-new { background: #f0e6ff; color: #7c3aed; }
+
+        .no-products { text-align: center; padding: 40px; color: #888; }
+        footer { background: var(--secondary); color: #8892b0; padding: 30px; text-align: center; margin-top: 40px; }
+        footer a { color: var(--primary); text-decoration: none; }
+
+        @media (max-width: 768px) {
+            .profile-card { grid-template-columns: 1fr; }
+            .products-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+            .form-row { grid-template-columns: 1fr; }
+            .action-buttons { flex-direction: column; }
+            .btn-action { width: 100%; justify-content: center; }
+        }
+    <!-- NAV_CSS_INCLUDE -->
+    </style>
+</head>
+<body>
+<!-- NAV_INCLUDE -->
+    <div class="breadcrumb">
+        <a href="/b2b/suppliers">B2B</a> &gt; <a href="/b2b/suppliers">{{nav.suppliers}}</a> &gt; <span id="breadcrumb-name">...</span>
+    </div>
+
+    <div class="container">
+        <div class="profile-card">
+            <div class="profile-main">
+                <div id="supplierLogo"></div>
+                <h2 id="supplierName">Loading...</h2>
+                <div class="location" id="supplierLocation">  Loading...</div>
+                <div class="badges" id="badges"></div>
+                <div class="description" id="supplierDesc"></div>
+
+                <!-- Contact Info -->
+                <div class="contact-info" id="contactInfo" style="display:none;">
+                    <h4>  {{supplier_detail.contact_info}}</h4>
+                    <div class="contact-row" id="contactPhone" style="display:none;">
+                        <span class="icon"> </span>
+                        <a id="phoneLink" href="#">—</a>
+                    </div>
+                    <div class="contact-row" id="contactEmail" style="display:none;">
+                        <span class="icon">✉️</span>
+                        <a id="emailLink" href="#">—</a>
+                    </div>
+                    <div class="contact-row" id="contactWebsite" style="display:none;">
+                        <span class="icon"> </span>
+                        <a id="websiteLink" href="#" target="_blank">—</a>
+                    </div>
+                    <div class="contact-row" id="contactCity" style="display:none;">
+                        <span class="icon"> </span>
+                        <span id="cityText">—</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons" id="actionButtons">
+                    <a id="btnPhone" href="#" class="btn-action btn-phone" style="display:none;">  {{supplier_detail.call}}</a>
+                    <a id="btnWhatsApp" href="#" class="btn-action btn-whatsapp" style="display:none;" target="_blank">  WhatsApp</a>
+                    <a id="btnEmail" href="#" class="btn-action btn-email" style="display:none;">  {{supplier_detail.email}}</a>
+                    <a id="btnWebsite" href="#" class="btn-action btn-website" style="display:none;" target="_blank">  {{supplier_detail.website}}</a>
+                </div>
+                <a id="btnMessage" href="/b2b/messages" class="btn-action btn-message" style="display:flex;">  {{supplier_detail.send_message}}</a>
+            </div>
+
+            <div class="rating-box">
+                <div class="big-rating" id="bigRating">0.0</div>
+                <div class="stars" id="bigStars">☆☆☆☆☆</div>
+                <div class="count" id="ratingCount">0 {{suppliers.reviews_label}}</div>
+            </div>
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="card" style="margin:20px 0;">
+            <h3 style="margin-bottom:15px;">  {{suppliers.reviews_label}}</h3>
+            <div id="reviewsList" style="margin-bottom:15px;">
+                <p style="color:#888;">Loading reviews...</p>
+            </div>
+            <div id="reviewForm" style="display:none;border-top:1px solid #eee;padding-top:15px;">
+                <div style="margin-bottom:10px;">
+                    <label style="font-weight:600;font-size:0.85rem;">Rating:</label>
+                    <select id="reviewRating" style="padding:6px 12px;border:1px solid #e0e0e0;border-radius:6px;margin-left:8px;">
+                        <option value="5">5 ★★★★★</option>
+                        <option value="4">4 ★★★★</option>
+                        <option value="3">3 ★★★</option>
+                        <option value="2">2 ★★</option>
+                        <option value="1">1 ★</option>
+                    </select>
+                </div>
+                <textarea id="reviewComment" placeholder="Your review..." rows="3" style="width:100%;padding:10px;border:1px solid #e0e0e0;border-radius:8px;font-size:0.9rem;resize:vertical;margin-bottom:10px;"></textarea>
+                <button onclick="submitReview()" style="padding:10px 24px;background:var(--primary);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">{{suppliers.submit_review}}</button>
+            </div>
+        </div>
+
+        <!-- Contact Form -->
+        <div class="contact-section">
+            <h3>  {{supplier_detail.contact_form_title}}</h3>
+            <div class="form-success" id="formSuccess">✅ {{supplier_detail.message_sent}}</div>
+            <form id="contactForm" onsubmit="sendMessage(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>{{supplier_detail.your_name}}</label>
+                        <input type="text" id="formName" placeholder="{{supplier_detail.name_placeholder}}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>{{supplier_detail.your_phone}}</label>
+                        <input type="tel" id="formPhone" placeholder="{{supplier_detail.phone_placeholder}}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>{{supplier_detail.subject}}</label>
+                    <select id="formSubject">
+                        <option value="inquiry">{{supplier_detail.subject_inquiry}}</option>
+                        <option value="quote">{{supplier_detail.subject_quote}}</option>
+                        <option value="partnership">{{supplier_detail.subject_partnership}}</option>
+                        <option value="other">{{supplier_detail.subject_other}}</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>{{supplier_detail.message}}</label>
+                    <textarea id="formMessage" placeholder="{{supplier_detail.message_placeholder}}" required></textarea>
+                </div>
+                <button type="submit" class="btn-send" id="sendBtn">{{supplier_detail.send_message}}</button>
+            </form>
+        </div>
+
+        <!-- Products -->
+        <h3 class="section-title">{{supplier_detail.our_products}}</h3>
+        <div class="products-grid" id="productsGrid"></div>
+        <div class="no-products" id="noProducts" style="display:none;">{{supplier_detail.no_products}}</div>
+    </div>
+
+    <footer>
+        <p>Libya B2B Platform | {{landing.footer_built}}</p>
+    </footer>
+
+    <script src="/static/auth.js"></script>
+    <script>
+        let supplierData = null;
+
+        (async () => {
+            const user = await Auth.requireAuth();
+            if (!user) return;
+            Auth.updateNavAuth(user);
+            // Pre-fill form with user data
+            if (user.username) document.getElementById('formName').value = user.username;
+        })();
+
+        const bgClasses = ['bg-1','bg-2','bg-3'];
+
+        function renderStars(rating) {
+            const full = Math.floor(rating); const half = rating % 1 >= 0.5 ? 1 : 0;
+            let s = '';
+            for (let i = 0; i < full; i++) s += '★';
+            if (half) s += '½';
+            for (let i = full + half; i < 5; i++) s += '☆';
+            return s;
+        }
+
+        function formatPhone(phone) {
+            if (!phone) return '';
+            return phone.replace(/[^+0-9]/g, '');
+        }
+
+        // Reviews
+        async function loadReviews() {
+            const id = window.location.pathname.split('/').pop();
+            try {
+                const res = await fetch(`/api/b2b/suppliers/${id}/reviews`);
+                if (!res.ok) return;
+                const reviews = await res.json();
+                const container = document.getElementById('reviewsList');
+                const form = document.getElementById('reviewForm');
+                form.style.display = 'block';
+                if (!reviews.length) {
+                    container.innerHTML = '<p style="color:#888;">No reviews yet. Be the first!</p>';
+                    return;
+                }
+                // Rating histogram
+                const dist = [0,0,0,0,0];
+                reviews.forEach(r => { if (r.rating >= 1 && r.rating <= 5) dist[r.rating-1]++; });
+                const total = reviews.length;
+                const avg = total ? (reviews.reduce((s,r) => s + r.rating, 0) / total).toFixed(1) : '0.0';
+                let histogramHtml = `<div style="background:#f8f9fa;border-radius:8px;padding:16px;margin-bottom:16px;">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+                        <span style="font-size:2rem;font-weight:700;color:#333;">${avg}</span>
+                        <div><span style="color:#ffc107;font-size:1.1rem;">${'★'.repeat(Math.round(avg))}${'☆'.repeat(5-Math.round(avg))}</span>
+                        <div style="font-size:0.8rem;color:#888;">${total} reviews</div></div>
+                    </div>`;
+                for (let s = 5; s >= 1; s--) {
+                    const pct = total ? (dist[s-1]/total*100) : 0;
+                    histogramHtml += `<div style="display:flex;align-items:center;gap:8px;margin:3px 0;font-size:0.8rem;">
+                        <span style="width:12px;text-align:right;">${s}</span>
+                        <span style="color:#ffc107;">★</span>
+                        <div style="flex:1;background:#e5e7eb;border-radius:4px;height:8px;overflow:hidden;"><div style="width:${pct}%;background:#ffc107;height:100%;"></div></div>
+                        <span style="width:30px;color:#888;">${dist[s-1]}</span>
+                    </div>`;
+                }
+                histogramHtml += '</div>';
+                container.innerHTML = histogramHtml + reviews.map(r => `
+                    <div style="padding:12px;border-bottom:1px solid #eee;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                            <span style="font-weight:600;font-size:0.9rem;">User #${r.user_id}</span>
+                            <span style="color:#ffc107;">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
+                        </div>
+                        ${r.comment ? '<p style="color:#555;font-size:0.85rem;margin:4px 0;">' + r.comment + '</p>' : ''}
+                        <div style="font-size:0.75rem;color:#aaa;">${new Date(r.created_at).toLocaleDateString()}</div>
+                    </div>
+                `).join('');
+            } catch (e) { console.error(e); }
+        }
+
+        async function submitReview() {
+            const id = window.location.pathname.split('/').pop();
+            const rating = parseInt(document.getElementById('reviewRating').value);
+            const comment = document.getElementById('reviewComment').value.trim();
+            try {
+                const res = await fetch(`/api/b2b/suppliers/${id}/reviews`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({rating, comment})
+                });
+                if (res.ok) {
+                    document.getElementById('reviewComment').value = '';
+                    loadReviews();
+                    showToast('Review submitted!');
+                } else {
+                    const data = await res.json();
+                    showToast(data.detail || 'Error submitting review', 'error');
+                }
+            } catch (e) { showToast('Network error', 'error'); }
+        }
+
+        async function loadSupplier() {
+            const id = window.location.pathname.split('/').pop();
+            try {
+                const res = await fetch(`/api/b2b/suppliers/${id}`);
+                if (!res.ok) { document.getElementById('supplierName').textContent = 'Supplier not found'; return; }
+                const s = await res.json();
+                supplierData = s;
+
+                const isAr = window.location.pathname.startsWith('/ar/');
+                const displayName = (isAr && s.name_arabic) ? s.name_arabic : s.name;
+                document.getElementById('supplierName').textContent = displayName;
+                document.getElementById('breadcrumb-name').textContent = displayName;
+                document.getElementById('supplierLocation').textContent = '  ' + (s.location || s.city || 'Libya');
+                document.getElementById('supplierDesc').textContent = s.description || 'No description available.';
+                document.getElementById('bigRating').textContent = s.rating.toFixed(1);
+                document.getElementById('bigStars').textContent = renderStars(s.rating);
+                document.getElementById('ratingCount').textContent = s.rating_count + ' {{suppliers.reviews_label}}';
+
+                // Logo
+                const logoContainer = document.getElementById('supplierLogo');
+                if (s.logo_url) {
+                    logoContainer.innerHTML = `<img src="${s.logo_url}" alt="${s.name}" class="supplier-logo-large">`;
+                } else {
+                    logoContainer.innerHTML = `<div class="supplier-logo-placeholder">${s.name.charAt(0)}</div>`;
+                }
+
+                // Badges from API
+                try {
+                    const badgeRes = await fetch(`/api/b2b/suppliers/${id}/badges`);
+                    const badgeData = await badgeRes.json();
+                    const badgeColors = { verified: 'badge-verified', trade: 'badge-trade', years: 'badge-years', gold: 'badge-gold', silver: 'badge-silver', top: 'badge-top', new: 'badge-new' };
+                    const badgeIcons = { verified: '✓', trade: ' ', years: ' ', gold: ' ', silver: ' ', top: '⭐', new: ' ' };
+                    let badgesHtml = '';
+                    (badgeData.badges || []).forEach(b => {
+                        badgesHtml += `<span class="badge ${badgeColors[b.type] || 'badge-trade'}">${badgeIcons[b.type] || ''} ${b.label}</span>`;
+                    });
+                    if (s.category) badgesHtml += `<span class="badge badge-category">  ${s.category}</span>`;
+                    document.getElementById('badges').innerHTML = badgesHtml;
+                } catch (e) {
+                    // Fallback to static badges
+                    let badgesHtml = '';
+                    if (s.is_verified) badgesHtml += '<span class="badge badge-verified">✓ {{supplier_detail.verified}}</span>';
+                    if (s.is_verified) badgesHtml += '<span class="badge badge-trade">  {{supplier_detail.trade_assurance}}</span>';
+                    if (s.category) badgesHtml += `<span class="badge badge-category">  ${s.category}</span>`;
+                    document.getElementById('badges').innerHTML = badgesHtml;
+                }
+
+                // Contact Info
+                const contactInfo = document.getElementById('contactInfo');
+                let hasContact = false;
+
+                if (s.phone) {
+                    const cleanPhone = formatPhone(s.phone);
+                    document.getElementById('contactPhone').style.display = 'flex';
+                    document.getElementById('phoneLink').href = 'tel:' + cleanPhone;
+                    document.getElementById('phoneLink').textContent = s.phone;
+                    document.getElementById('btnPhone').href = 'tel:' + cleanPhone;
+                    document.getElementById('btnPhone').style.display = 'inline-flex';
+                    document.getElementById('btnWhatsApp').href = 'https://wa.me/' + cleanPhone.replace('+', '');
+                    document.getElementById('btnWhatsApp').style.display = 'inline-flex';
+                    hasContact = true;
+                }
+                if (s.email) {
+                    document.getElementById('contactEmail').style.display = 'flex';
+                    document.getElementById('emailLink').href = 'mailto:' + s.email;
+                    document.getElementById('emailLink').textContent = s.email;
+                    document.getElementById('btnEmail').href = 'mailto:' + s.email;
+                    document.getElementById('btnEmail').style.display = 'inline-flex';
+                    hasContact = true;
+                }
+                if (s.website) {
+                    const url = s.website.startsWith('http') ? s.website : 'https://' + s.website;
+                    document.getElementById('contactWebsite').style.display = 'flex';
+                    document.getElementById('websiteLink').href = url;
+                    document.getElementById('websiteLink').textContent = s.website;
+                    document.getElementById('btnWebsite').href = url;
+                    document.getElementById('btnWebsite').style.display = 'inline-flex';
+                    hasContact = true;
+                }
+                if (s.city) {
+                    document.getElementById('contactCity').style.display = 'flex';
+                    document.getElementById('cityText').textContent = s.city;
+                    hasContact = true;
+                }
+                if (hasContact) contactInfo.style.display = 'block';
+
+                // Message button with supplier ID
+                document.getElementById('btnMessage').href = '/b2b/messages?new_supplier=' + s.id;
+
+                // Products
+                const grid = document.getElementById('productsGrid');
+                const noProducts = document.getElementById('noProducts');
+                if (s.products && s.products.length) {
+                    noProducts.style.display = 'none';
+                    grid.innerHTML = s.products.map((p, i) => `
+                        <div class="product-card">
+                            <div class="product-image ${bgClasses[i % bgClasses.length]}"> </div>
+                            <div class="product-body">
+                                <div class="product-name">${p.name}</div>
+                                <div class="product-price">${p.price.toFixed(2)} ${p.currency}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    grid.innerHTML = '';
+                    noProducts.style.display = 'block';
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function sendMessage(e) {
+            e.preventDefault();
+            const btn = document.getElementById('sendBtn');
+            btn.disabled = true;
+            btn.textContent = '...';
+
+            try {
+                const res = await fetch('/api/b2b/messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        conversation_id: 0,
+                        sender_type: 'buyer',
+                        text: `[${document.getElementById('formSubject').value}] ${document.getElementById('formMessage').value}\n\n{{supplier_detail.from}}: ${document.getElementById('formName').value} | ${document.getElementById('formPhone').value}`
+                    })
+                });
+
+                document.getElementById('contactForm').style.display = 'none';
+                document.getElementById('formSuccess').style.display = 'block';
+            } catch (err) {
+                btn.disabled = false;
+                btn.textContent = '{{supplier_detail.send_message}}';
+                alert('Error sending message. Please try again.');
+            }
+        }
+
+        loadSupplier();
+        loadReviews();
+    </script>
+    <script>
+        const _base = window.location.pathname.startsWith('/ar/') ? '/ar' : '';
+        (async () => {
+            try {
+                const res = await fetch('/api/b2b/categories');
+                const cats = await res.json();
+                const select = document.getElementById('navCatSelect');
+                if (select && Array.isArray(cats)) {
+                    cats.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.icon + ' ' + (_base ? (c.name_ar || c.name_en) : c.name_en);
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (e) { console.error('Categories load failed:', e); }
+        })();
+    </script>
+<!-- NAV_JS_INCLUDE -->
+</body>
+</html>

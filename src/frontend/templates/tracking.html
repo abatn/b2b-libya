@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{tracking.title}}</title>
+    <meta name="description" content="{{tracking.meta_description}}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; }
+        :root { --primary: #ff6a00; --primary-dark: #e55d00; --secondary: #1a1a2e; --accent: #00d2ff; --success: #28a745; --warning: #ffc107; --danger: #dc3545; --border: #e8e8e8; --radius: 12px; }
+        /* RTL SUPPORT */
+        .container { max-width: 800px; margin: 0 auto; padding: 60px 30px; }
+        .search-box { background: white; border-radius: 15px; padding: 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
+        .search-input { display: flex; gap: 10px; justify-content: center; margin-top: 30px; }
+        .search-input input { padding: 15px 25px; border: 2px solid #ddd; border-radius: 25px; width: 400px; font-size: 1.1rem; }
+        .search-input button { padding: 15px 30px; background: var(--accent); color: white; border: none; border-radius: 25px; font-weight: bold; }
+        .tracking-result { display: none; background: white; border-radius: 15px; padding: 30px; margin-top: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .tracking-step { display: flex; align-items: center; gap: 15px; padding: 15px 0; border-bottom: 1px solid #eee; }
+        .step-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .step-done { background: var(--success); color: white; }
+        .step-pending { background: #f0f0f0; color: #999; }
+        @media (max-width: 768px) {
+            .search-input { flex-direction: column; }
+            .search-input input { width: 100%; }
+        }
+        @media (max-width: 640px) {
+            .container { padding: 40px 15px; }
+            .search-box { padding: 20px; }
+            .search-input input { width: 100%; }
+        }
+    /* ═══════════════════════════════════════════════════════════════════
+           NAV — Alibaba 3-Layer Structure
+           Layer 1: Top Bar (Utility)
+           Layer 2: Main Bar (Search + Account)
+           Layer 3: Category Nav (Scrollable Tabs)
+           ═══════════════════════════════════════════════════════════════════ */
+
+        /* --- LAYER 1: Top Bar --- */
+
+        /* --- LAYER 2: Main Bar --- */
+
+        /* --- LAYER 3: Category Nav --- */
+
+        /* --- MOBILE BOTTOM NAV --- */
+        .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); z-index: 200; padding: 6px 0; }
+        .mobile-bottom-nav .bottom-nav-items { display: flex; justify-content: space-around; }
+        .mobile-bottom-nav .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: #888; font-size: 0.65rem; padding: 4px 8px; }
+        .mobile-bottom-nav .bottom-nav-item.active { color: var(--primary); }
+        .mobile-bottom-nav .bottom-nav-item svg { width: 22px; height: 22px; }
+        .mobile-bottom-nav .bottom-nav-item .bnav-badge { background: var(--primary); color: white; font-size: 0.55rem; padding: 1px 4px; border-radius: 6px; position: absolute; top: -2px; right: -4px; }
+        .mobile-bottom-nav .bottom-nav-item span { position: relative; }
+
+        /* --- RTL SUPPORT --- */
+        [dir="rtl"] .hero-search { direction: rtl; }
+        [dir="rtl"] .hero-search select { border-right: none; border-left: 1px solid #eee; }
+        [dir="rtl"] .breadcrumb { text-align: right; }
+        [dir="rtl"] .categories-grid { direction: rtl; }
+        [dir="rtl"] .category-nav { direction: rtl; }
+        [dir="rtl"] .category-dropdown { text-align: right; right: 0; left: auto; }
+        [dir="rtl"] .products-grid { direction: rtl; }
+        [dir="rtl"] .product-supplier { direction: ltr; }
+        [dir="rtl"] .trust-grid { direction: rtl; }
+        [dir="rtl"] .how-grid { direction: rtl; }
+        [dir="rtl"] .how-arrow { transform: scaleX(-1); }
+        [dir="rtl"] .why-grid { direction: rtl; }
+        [dir="rtl"] .footer-grid { direction: rtl; }
+        [dir="rtl"] .section-header { flex-direction: row-reverse; }
+        [dir="rtl"] .section-header a::before { content: '← '; }
+        [dir="rtl"] .section-header a::after { content: ''; }
+        [dir="rtl"] .floor-header { flex-direction: row-reverse; }
+        [dir="rtl"] .stats { direction: rtl; }
+
+        
+        <!-- NAV_CSS_INCLUDE -->
+    </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "/"},
+    {"@type": "ListItem", "position": 2, "name": "Track Order", "item": "/tracking"}
+  ]
+}
+</script>
+</head>
+<body>
+<!-- NAV_INCLUDE -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+      <symbol id="icon-tracking" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+      <symbol id="icon-b2b" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+    </svg>
+
+    <div class="container">
+        <div class="search-box">        <h1 style="font-size:1.8rem;color:var(--secondary);margin-bottom:0;">{{tracking.title}}</h1>
+
+            <h2>{{tracking.title}}</h2>
+            <p>{{tracking.subtitle}}</p>
+            <div class="search-input">
+                <input type="text" id="order-input" placeholder="{{tracking.placeholder}}">
+                <button onclick="trackOrder()">{{tracking.btn_track}}</button>
+                <button onclick="startQRScan()" style="background:var(--primary);padding:15px 30px;color:white;border:none;border-radius:25px;font-weight:bold;cursor:pointer;">  {{tracking.btn_scan_qr}}</button>
+            </div>
+            <div id="qr-scanner-area" style="display:none;margin-top:20px;">
+                <video id="qr-video" autoplay playsinline style="width:100%;max-width:400px;border-radius:12px;border:3px solid var(--primary);"></video>
+                <div style="margin-top:10px;">
+                    <button onclick="stopQRScan()" style="padding:8px 20px;background:#dc3545;color:white;border:none;border-radius:8px;cursor:pointer;">{{tracking.btn_stop_scan}}</button>
+                </div>
+                <p id="qr-status" style="margin-top:10px;color:#888;"></p>
+            </div>
+        </div>
+        <div class="tracking-result" id="tracking-result">
+            <h3>{{tracking.order_status}}: <span id="order-status"></span></h3>
+            <div id="tracking-steps"></div>
+            <div style="margin-top:20px;padding:15px;background:#f8f9fa;border-radius:10px;">
+                <strong>{{tracking.details}}</strong>
+                <p>{{tracking.number}} <span id="detail-number"></span></p>
+                <p>{{tracking.amount}} <span id="detail-amount"></span> LYD</p>
+                <p>{{tracking.payment}} <span id="detail-payment"></span></p>
+                <p>{{tracking.date}} <span id="detail-date"></span></p>
+            </div>
+        </div>
+    </div>
+    <script src="/static/auth.js"></script>
+    <script src="/static/toast.js"></script>
+    <script>
+        (async () => {
+            const user = await Auth.requireAuth();
+            if (!user) return;
+            Auth.updateNavAuth(user);
+        })();
+        function navSearch() {
+            const q = document.getElementById('navSearchInput').value.trim();
+            if (q) window.location.href = '/b2b/products?search=' + encodeURIComponent(q);
+        }
+        document.getElementById('navSearchInput').addEventListener('keypress', e => { if (e.key === 'Enter') navSearch(); });
+
+        async function trackOrder() {
+            const orderNumber = document.getElementById('order-input').value.trim();
+            const errDiv = document.getElementById('tracking-error');
+            if (errDiv) errDiv.style.display = 'none';
+            if (!orderNumber) { showToast('{{tracking.error_empty}}', 'warning'); return; }
+            try {
+                const response = await fetch('/api/orders');
+                const orders = await response.json();
+                const order = orders.find(o => o.order_number === orderNumber);
+                if (!order) { showToast('{{tracking.error_not_found}}', 'error'); return; }
+                document.getElementById('tracking-result').style.display = 'block';
+                document.getElementById('order-status').textContent = order.status.toUpperCase();
+                document.getElementById('detail-number').textContent = order.order_number;
+                document.getElementById('detail-amount').textContent = order.total_amount.toFixed(2);
+                document.getElementById('detail-payment').textContent = order.payment_method;
+                document.getElementById('detail-date').textContent = new Date(order.created_at).toLocaleDateString();
+                const steps = [
+                    { title: '{{tracking.step_placed}}', done: true, time: new Date(order.created_at).toLocaleString() },
+                    { title: '{{tracking.step_confirmed}}', done: order.status !== 'pending', time: order.status !== 'pending' ? 'Confirmed' : 'Pending' },
+                    { title: '{{tracking.step_delivery}}', done: order.status === 'delivered', time: order.status === 'delivered' ? 'Delivered' : 'Pending' },
+                    { title: '{{tracking.step_delivered}}', done: order.status === 'delivered', time: order.delivery_timestamp ? new Date(order.delivery_timestamp).toLocaleString() : 'Pending' }
+                ];
+                document.getElementById('tracking-steps').innerHTML = steps.map(step => `<div class="tracking-step"><div class="step-icon ${step.done ? 'step-done' : 'step-pending'}">${step.done ? '✓' : '○'}</div><div><strong>${step.title}</strong><br><small>${step.time}</small></div></div>`).join('');
+            } catch (error) { showToast('Error loading order', 'error'); }
+        }
+    </script>
+    <script src="/static/chatbot-widget.js"></script>
+    <script>
+        let qrStream = null;
+        let qrDetector = null;
+
+        async function startQRScan() {
+            const area = document.getElementById('qr-scanner-area');
+            const video = document.getElementById('qr-video');
+            const status = document.getElementById('qr-status');
+            area.style.display = 'block';
+            status.textContent = '{{tracking.qr_starting}}';
+            try {
+                qrStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }
+                });
+                video.srcObject = qrStream;
+                // Try BarcodeDetector API
+                if ('BarcodeDetector' in window) {
+                    qrDetector = new BarcodeDetector({ formats: ['qr_code'] });
+                    status.textContent = '{{tracking.qr_scanning}}';
+                    scanFrame(video);
+                } else {
+                    status.textContent = '{{tracking.qr_manual}}';
+                    // Fallback: manual input
+                }
+            } catch (err) {
+                status.textContent = '{{tracking.qr_camera_error}}: ' + err.message;
+            }
+        }
+
+        async function scanFrame(video) {
+            if (!qrStream) return;
+            try {
+                const barcodes = await qrDetector.detect(video);
+                if (barcodes.length > 0) {
+                    const qrData = barcodes[0].rawValue;
+                    stopQRScan();
+                    await processQRData(qrData);
+                    return;
+                }
+            } catch (e) { /* ignore detection errors */ }
+            requestAnimationFrame(() => scanFrame(video));
+        }
+
+        async function processQRData(qrData) {
+            const status = document.getElementById('qr-status');
+            status.textContent = '{{tracking.qr_processing}}';
+            try {
+                const response = await fetch('/api/qrcode/scan', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ qr_data: qrData })
+                });
+                const result = await response.json();
+                if (result.is_valid && result.parsed_data) {
+                    const orderNum = result.parsed_data.order_number;
+                    if (orderNum) {
+                        document.getElementById('order-input').value = orderNum;
+                        await trackOrder();
+                    } else {
+                        status.textContent = '{{tracking.qr_invalid}}';
+                    }
+                } else {
+                    status.textContent = '{{tracking.qr_invalid}}';
+                }
+            } catch (err) {
+                status.textContent = '{{tracking.qr_error}}';
+            }
+        }
+
+        function stopQRScan() {
+            if (qrStream) {
+                qrStream.getTracks().forEach(t => t.stop());
+                qrStream = null;
+            }
+            qrDetector = null;
+            document.getElementById('qr-scanner-area').style.display = 'none';
+        }
+    </script>
+    <script>
+        const _base = window.location.pathname.startsWith('/ar/') ? '/ar' : '';
+
+        
+        // Load categories for nav dropdown
+        (async () => {
+            try {
+                const res = await fetch('/api/b2b/categories');
+                const cats = await res.json();
+                const select = document.getElementById('navCatSelect');
+                if (select && Array.isArray(cats)) {
+                    cats.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.icon + ' ' + (_base ? (c.name_ar || c.name_en) : c.name_en);
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (e) { console.error('Categories load failed:', e); }
+        })();
+    </script>
+<!-- NAV_JS_INCLUDE -->
+<script>
+(async () => {
+    try {
+        const user = await Auth.me();
+        if (!user) { Auth.showLoginModal(); return; }
+    } catch(e) { Auth.showLoginModal(); }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{b2b.title}} | Libya B2B</title>
+    <meta name="description" content="{{b2b.meta_description}}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; }
+        :root { --primary: #ff6a00; --primary-dark: #e55d00; --secondary: #1a1a2e; --accent: #00d2ff; --success: #28a745; --warning: #ffc107; --danger: #dc3545; --border: #e8e8e8; --radius: 12px; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 30px; }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 30px; }
+        .section { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .section h3 { color: var(--secondary); margin-bottom: 20px; border-bottom: 2px solid var(--accent); padding-bottom: 10px; }
+        .stat-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-label { color: #8892b0; }
+        .stat-value { font-weight: bold; color: var(--accent); font-size: 1.1rem; }
+        .stat-value.large { font-size: 1.5rem; }
+        .stat-value.positive { color: var(--success); }
+        .stat-value.warning { color: var(--warning); }
+        .stat-value.danger { color: var(--danger); }
+        .chart-placeholder { background: #f8f9fa; border-radius: 10px; padding: 40px; text-align: center; color: #8892b0; margin-top: 20px; }
+        .product-list { max-height: 300px; overflow-y: auto; }
+        .product-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .product-item:last-child { border-bottom: none; }
+        .low-stock { color: var(--danger); font-weight: bold; }
+        .refresh-btn { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: var(--radius); cursor: pointer; font-weight: bold; margin-bottom: 20px; }
+        .lang-btn.active { background: var(--primary); color: white; }
+        .lang-btn:not(.active) { background: rgba(26,26,46,0.8); color: white; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; color: #555; font-weight: 600; }
+
+        /* RTL-Support fuer Navigation */
+
+        @media (max-width: 768px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .tabs { overflow-x: auto; }
+        }
+        @media (max-width: 640px) {
+            .container { padding: 15px; }
+        }
+    /* ═══════════════════════════════════════════════════════════════════
+           NAV — Alibaba 3-Layer Structure
+           Layer 1: Top Bar (Utility)
+           Layer 2: Main Bar (Search + Account)
+           Layer 3: Category Nav (Scrollable Tabs)
+           ═══════════════════════════════════════════════════════════════════ */
+
+        /* --- LAYER 1: Top Bar --- */
+
+        /* --- LAYER 2: Main Bar --- */
+
+        /* --- LAYER 3: Category Nav --- */
+
+        /* --- MOBILE BOTTOM NAV --- */
+        .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); z-index: 200; padding: 6px 0; }
+        .mobile-bottom-nav .bottom-nav-items { display: flex; justify-content: space-around; }
+        .mobile-bottom-nav .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: #888; font-size: 0.65rem; padding: 4px 8px; }
+        .mobile-bottom-nav .bottom-nav-item.active { color: var(--primary); }
+        .mobile-bottom-nav .bottom-nav-item svg { width: 22px; height: 22px; }
+        .mobile-bottom-nav .bottom-nav-item .bnav-badge { background: var(--primary); color: white; font-size: 0.55rem; padding: 1px 4px; border-radius: 6px; position: absolute; top: -2px; right: -4px; }
+        .mobile-bottom-nav .bottom-nav-item span { position: relative; }
+
+        /* --- RTL SUPPORT --- */
+        [dir="rtl"] .hero-search { direction: rtl; }
+        [dir="rtl"] .hero-search select { border-right: none; border-left: 1px solid #eee; }
+        [dir="rtl"] .breadcrumb { text-align: right; }
+        [dir="rtl"] .categories-grid { direction: rtl; }
+        [dir="rtl"] .category-nav { direction: rtl; }
+        [dir="rtl"] .category-dropdown { text-align: right; right: 0; left: auto; }
+        [dir="rtl"] .products-grid { direction: rtl; }
+        [dir="rtl"] .product-supplier { direction: ltr; }
+        [dir="rtl"] .trust-grid { direction: rtl; }
+        [dir="rtl"] .how-grid { direction: rtl; }
+        [dir="rtl"] .how-arrow { transform: scaleX(-1); }
+        [dir="rtl"] .why-grid { direction: rtl; }
+        [dir="rtl"] .footer-grid { direction: rtl; }
+        [dir="rtl"] .section-header { flex-direction: row-reverse; }
+        [dir="rtl"] .section-header a::before { content: '← '; }
+        [dir="rtl"] .section-header a::after { content: ''; }
+        [dir="rtl"] .floor-header { flex-direction: row-reverse; }
+        [dir="rtl"] .stats { direction: rtl; }
+
+        
+        <!-- NAV_CSS_INCLUDE -->
+    </style>
+</head>
+<body>
+<!-- NAV_INCLUDE -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+      <symbol id="icon-b2b" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+      <symbol id="icon-tracking" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+    </svg>
+
+    <div class="container">
+        <h1 style="font-size:1.8rem;color:var(--secondary);margin-bottom:0;">{{b2b.title}}</h1>
+        <button class="refresh-btn" onclick="loadDashboard()">Refresh Data</button>
+
+        <div class="dashboard-grid">
+            <!-- Umsatz-Uebersicht -->
+            <div class="section">
+                <h3>Sales Overview (Last 30 Days)</h3>
+                <div class="stat-row">
+                    <span class="stat-label">Total Revenue</span>
+                    <span class="stat-value large" id="total-revenue">0 LYD</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Total Orders</span>
+                    <span class="stat-value" id="total-orders">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Avg. Order Value</span>
+                    <span class="stat-value" id="avg-order">0 LYD</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Pending Orders</span>
+                    <span class="stat-value warning" id="pending-orders">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Delivered Orders</span>
+                    <span class="stat-value positive" id="delivered-orders">0</span>
+                </div>
+            </div>
+
+            <!-- Inventar -->
+            <div class="section">
+                <h3>Inventory Status</h3>
+                <div class="stat-row">
+                    <span class="stat-label">Total Products</span>
+                    <span class="stat-value" id="total-products">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Low Stock Items</span>
+                    <span class="stat-value danger" id="low-stock">0</span>
+                </div>
+                <div class="product-list" id="product-list"></div>
+            </div>
+
+            <!-- Analytics -->
+            <div class="section">
+                <h3>Product Categories</h3>
+                <div id="categories-list">
+                    <p style="color:#888;text-align:center;padding:20px;">No categories yet. Add products to see categories.</p>
+                </div>
+            </div>
+
+            <!-- Top Produkte -->
+            <div class="section">
+                <h3>Top Products</h3>
+                <table>
+                    <thead><tr><th>Product</th><th>Price</th><th>Stock</th></tr></thead>
+                    <tbody id="top-products">
+                        <tr><td colspan="3" style="text-align:center;color:#888;">No products yet. Add products to see top sellers.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Bulk Pricing -->
+            <div class="section" style="grid-column: 1 / -1;">
+                <h3>Bulk Pricing (Mengenrabatte)</h3>
+                <table>
+                    <thead><tr><th>Product</th><th>Base Price</th><th>10+</th><th>50+</th><th>100+</th></tr></thead>
+                    <tbody id="bulk-pricing">
+                        <tr><td colspan="5" style="text-align:center;color:#888;">No bulk pricing available. Add products first.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    <script src="/static/auth.js"></script>
+    <script>
+        (async () => {
+            const user = await Auth.requireAuth();
+            if (!user) return;
+            Auth.updateNavAuth(user);
+        })();
+        async function loadDashboard() {
+            try {
+            const [dashRes, analyticsRes, invRes] = await Promise.all([
+                fetch('/api/b2b/dashboard'),
+                fetch('/api/b2b/analytics'),
+                fetch('/api/b2b/inventory')
+            ]);
+
+            const dash = dashRes.ok ? await dashRes.json() : {};
+            const analytics = analyticsRes.ok ? await analyticsRes.json() : {categories: [], top_products: []};
+            const inv = invRes.ok ? await invRes.json() : {products: [], total_products: 0, low_stock: 0};
+
+            // Dashboard
+            document.getElementById('total-revenue').textContent = dash.total_revenue + ' LYD';
+            document.getElementById('total-orders').textContent = dash.total_orders;
+            document.getElementById('avg-order').textContent = dash.avg_order_value + ' LYD';
+            document.getElementById('pending-orders').textContent = dash.pending_orders;
+            document.getElementById('delivered-orders').textContent = dash.delivered_orders;
+
+            // Inventory
+            document.getElementById('total-products').textContent = inv.total_products;
+            document.getElementById('low-stock').textContent = inv.low_stock;
+            const invHtml = inv.products.map(p => `
+                <div class="product-item">
+                    <span>${p.name}</span>
+                    <span class="${p.stock < 10 ? 'low-stock' : ''}">${p.stock} in stock</span>
+                </div>
+            `).join('');
+            document.getElementById('product-list').innerHTML = invHtml || '<p style="color:#888;text-align:center;padding:20px;">No products in inventory.</p>';
+
+            // Categories
+            const catHtml = analytics.categories.map(c => `
+                <div class="stat-row">
+                    <span class="stat-label">${c.category}</span>
+                    <span class="stat-value">${c.count} products</span>
+                </div>
+            `).join('');
+            document.getElementById('categories-list').innerHTML = catHtml || '<p style="color:#888;text-align:center;padding:20px;">No categories yet. Add products to see categories.</p>';
+
+            // Top Products
+            const topHtml = analytics.top_products.map(p => `
+                <tr>
+                    <td>${p.name}</td>
+                    <td>${p.price} LYD</td>
+                    <td class="${p.stock < 10 ? 'low-stock' : ''}">${p.stock}</td>
+                </tr>
+            `).join('');
+            document.getElementById('top-products').innerHTML = topHtml || '<tr><td colspan="3" style="text-align:center;color:#888;">No products yet. Add products to see top sellers.</td></tr>';
+
+            // Bulk Pricing
+            const bulkRes = await fetch('/api/b2b/bulk-pricing');
+            const bulk = await bulkRes.json();
+            document.getElementById('bulk-pricing').innerHTML = bulk.products.map(p => `
+                <tr>
+                    <td>${p.name}</td>
+                    <td>${p.base_price} LYD</td>
+                    <td style="color:#28a745">${p.bulk_prices['10+']} LYD</td>
+                    <td style="color:#28a745">${p.bulk_prices['50+']} LYD</td>
+                    <td style="color:#28a745">${p.bulk_prices['100+']} LYD</td>
+                </tr>
+            `).join('') || '<tr><td colspan="5" style="text-align:center;color:#8892b0;">No bulk pricing available.</td></tr>';
+            } catch (e) { console.error('Dashboard load error:', e); }
+        }
+
+        loadDashboard();
+    </script>
+    <script src="/static/chatbot-widget.js"></script>
+    <script>
+        const _base = window.location.pathname.startsWith('/ar/') ? '/ar' : '';
+
+        // Load categories for nav dropdown
+        (async () => {
+            try {
+                const res = await fetch('/api/b2b/categories');
+                const cats = await res.json();
+                const select = document.getElementById('navCatSelect');
+                if (select && Array.isArray(cats)) {
+                    cats.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.icon + ' ' + (_base ? (c.name_ar || c.name_en) : c.name_en);
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (e) { console.error('Categories load failed:', e); }
+        })();
+
+            </script>
+<!-- NAV_JS_INCLUDE -->
+<script>
+(async () => {
+    try {
+        const user = await Auth.me();
+        if (!user) { Auth.showLoginModal(); return; }
+    } catch(e) { Auth.showLoginModal(); }
+})();
+</script>
+</body>
+</html>

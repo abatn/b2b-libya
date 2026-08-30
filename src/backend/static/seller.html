@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{seller.title}}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; }
+        .navbar { background: #1a1a2e; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar h1 { color: #00d2ff; }
+        .nav-links { display: flex; gap: 5px; }
+        .nav-links a { color: #8892b0; text-decoration: none; padding: 10px 18px; border-radius: 5px; }
+        .nav-links a:hover, .nav-links a.active { background: #00d2ff; color: #1a1a2e; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 30px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; border-radius: 15px; padding: 25px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .stat-value { font-size: 2rem; color: #00d2ff; font-weight: bold; }
+        .section { background: white; border-radius: 15px; padding: 25px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 8px; }
+        .btn { padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-primary { background: #00d2ff; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; }
+        .lang-switch { position: fixed; top: 20px; right: 20px; z-index: 1000; display: flex; border-radius: 25px; overflow: hidden; }
+        .lang-btn { padding: 8px 16px; border: none; cursor: pointer; font-weight: bold; }
+        .lang-btn.active { background: #00d2ff; color: #1a1a2e; }
+        .lang-btn:not(.active) { background: rgba(26,26,46,0.8); color: white; }
+    </style>
+</head>
+<body>
+    <div class="lang-switch"><a href="/seller" class="lang-btn active">{{nav.switch_lang}}</a></div>
+    <nav class="navbar"><a href="/" class="navbar-brand">Libya B2B</a><div class="nav-links"><a href="/">{{nav.home}}</a><a href="/products">{{nav.products}}</a><a href="/cart">{{nav.cart}}</a><a href="/seller" class="active">{{nav.seller}}</a><a href="/tracking">{{nav.tracking}}</a><a href="/admin">{{nav.admin}}</a></div></nav>
+    <div class="container">
+        <h2>{{seller.title}}</h2>
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-value" id="total-products">0</div><div>{{seller.total_products}}</div></div>
+            <div class="stat-card"><div class="stat-value" id="total-orders">0</div><div>{{seller.total_orders}}</div></div>
+            <div class="stat-card"><div class="stat-value" id="pending-orders">0</div><div>{{seller.pending_orders}}</div></div>
+            <div class="stat-card"><div class="stat-value" id="revenue">0 LYD</div><div>{{seller.revenue}}</div></div>
+        </div>
+        <div class="section">
+            <h3>{{seller.add_product}}</h3>
+            <form id="product-form">
+                <div class="form-row"><div class="form-group"><label>{{seller.name_en}}</label><input type="text" id="product-name" required></div><div class="form-group"><label>{{seller.name_ar}}</label><input type="text" id="product-name-ar"></div></div>
+                <div class="form-row"><div class="form-group"><label>{{seller.price}}</label><input type="number" id="product-price" step="0.01" required></div><div class="form-group"><label>{{seller.stock}}</label><input type="number" id="product-stock" required></div></div>
+                <div class="form-row"><div class="form-group"><label>{{seller.category}}</label><select id="product-category" required><option value="Bau">{{seller.cat_bau}}</option><option value="Elektro">{{seller.cat_elektro}}</option><option value="Hardware">{{seller.cat_hardware}}</option><option value="Office">{{seller.cat_office}}</option></select></div><div class="form-group"><label>{{seller.description}}</label><input type="text" id="product-description"></div></div>
+                <button type="submit" class="btn btn-primary">{{seller.btn_add}}</button>
+            </form>
+        </div>
+        <div class="section"><h3>{{seller.my_products}}</h3><table><thead><tr><th>ID</th><th>Name</th><th>Price</th><th>Stock</th><th>Actions</th></tr></thead><tbody id="products-table"></tbody></table></div>
+    </div>
+    <script>
+        let products = [];
+        async function loadData() {
+            const [productsRes, ordersRes] = await Promise.all([fetch('/api/products'), fetch('/api/orders')]);
+            products = await productsRes.json();
+            const orders = await ordersRes.json();
+            document.getElementById('total-products').textContent = products.length;
+            document.getElementById('total-orders').textContent = orders.length;
+            document.getElementById('pending-orders').textContent = orders.filter(o => o.status === 'pending').length;
+            document.getElementById('revenue').textContent = orders.reduce((sum, o) => sum + o.total_amount, 0).toFixed(0) + ' LYD';
+            document.getElementById('products-table').innerHTML = products.map(p => `<tr><td>${p.id}</td><td>${p.name}</td><td>${p.price.toFixed(2)} LYD</td><td>${p.stock_quantity}</td><td><button class="btn btn-danger" onclick="deleteProduct(${p.id})" style="padding:5px 10px;font-size:0.85rem;">Delete</button></td></tr>`).join('');
+        }
+        document.getElementById('product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await fetch('/api/products', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ name: document.getElementById('product-name').value, name_arabic: document.getElementById('product-name-ar').value || null, price: parseFloat(document.getElementById('product-price').value), stock_quantity: parseInt(document.getElementById('product-stock').value), category: document.getElementById('product-category').value, seller_id: 1 }) });
+            e.target.reset();
+            loadData();
+        });
+        async function deleteProduct(id) { if (confirm('Delete?')) { await fetch(`/api/products/${id}`, { method: 'DELETE' }); loadData(); } }
+        loadData();
+    </script>
+</body>
+</html>

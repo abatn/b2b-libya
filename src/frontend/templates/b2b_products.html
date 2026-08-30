@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{b2b_feed.title}}</title>
+    <meta name="description" content="{{b2b_feed.meta_description}}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; }
+        :root { --primary: #ff6a00; --primary-dark: #e55d00; --secondary: #1a1a2e; --accent: #00d2ff; --bg: #f5f7fa; --card-bg: #fff; --text: #333; --text-light: #888; --border: #e8e8e8; --success: #28a745; --warning: #ffc107; --danger: #dc3545; --radius: 12px; }
+
+        .search-bar { background: white; padding: 20px 30px; border-bottom: 1px solid var(--border); position: sticky; top: 128px; z-index: 90; }
+        .search-inner { max-width: 1400px; margin: 0 auto; display: flex; gap: 12px; align-items: center; }
+        .search-input { flex: 1; padding: 12px 20px; border: 2px solid var(--border); border-radius: var(--radius); font-size: 1rem; }
+        .search-input:focus { border-color: var(--primary); outline: none; }
+        .search-btn { padding: 12px 28px; background: var(--primary); color: white; border: none; border-radius: var(--radius); font-weight: bold; cursor: pointer; }
+        .search-btn:hover { background: var(--primary-dark); }
+        .category-select { padding: 12px 16px; border: 2px solid var(--border); border-radius: var(--radius); font-size: 0.9rem; min-width: 180px; }
+        .moq-select { padding: 12px 16px; border: 2px solid var(--border); border-radius: var(--radius); font-size: 0.9rem; min-width: 150px; }
+
+        .page-container { max-width: 1400px; margin: 0 auto; padding: 20px 30px; display: grid; grid-template-columns: 260px 1fr; gap: 25px; }
+        .sidebar { background: white; border-radius: var(--radius); padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); height: fit-content; position: sticky; top: 200px; }
+        .sidebar h3 { font-size: 1rem; color: var(--secondary); margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--primary); }
+        .filter-group { margin-bottom: 20px; }
+        .filter-group label { display: block; font-weight: 600; margin-bottom: 8px; color: #555; font-size: 0.85rem; }
+        .filter-group input[type="range"] { width: 100%; accent-color: var(--primary); }
+        .filter-group select { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; }
+        .price-labels { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-light); margin-top: 4px; }
+        .filter-checkbox { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 0.9rem; }
+        .filter-checkbox input { accent-color: var(--primary); }
+
+        .categories-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 25px; }
+        .cat-card { background: white; border-radius: var(--radius); padding: 18px 12px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+        .cat-card:hover, .cat-card.active { border-color: var(--primary); transform: translateY(-2px); }
+        .cat-icon { font-size: 2rem; margin-bottom: 6px; }
+        .cat-name { font-size: 0.8rem; font-weight: 600; color: var(--text); }
+        .cat-name-ar { font-size: 0.75rem; color: var(--text-light); }
+
+        .products-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .results-count { color: var(--text-light); font-size: 0.9rem; }
+        .sort-select { padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; }
+
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+        .product-card { background: white; border-radius: var(--radius); overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: 0.3s; }
+        .product-card:hover { transform: translateY(-4px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+        .product-image { height: 180px; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; }
+        .product-image.bg-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .product-image.bg-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .product-image.bg-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .product-image.bg-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .product-image.bg-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .product-body { padding: 16px; }
+        .product-name { font-size: 1rem; font-weight: 600; color: var(--secondary); margin-bottom: 4px; }
+        .product-name-ar { font-size: 0.85rem; color: var(--text-light); margin-bottom: 10px; }
+        .product-price { font-size: 1.3rem; font-weight: bold; color: var(--primary); }
+        .product-moq { font-size: 0.8rem; color: var(--text-light); margin-top: 4px; }
+        .product-supplier { font-size: 0.8rem; color: var(--accent); margin-top: 8px; }
+        .product-actions { display: flex; gap: 8px; margin-top: 12px; }
+        .btn-contact { flex: 1; padding: 10px; background: white; color: var(--primary); border: 2px solid var(--primary); border-radius: var(--radius); font-weight: 600; cursor: pointer; font-size: 0.8rem; }
+        .btn-cart { flex: 1; padding: 10px; background: var(--primary); color: white; border: none; border-radius: var(--radius); font-weight: 600; cursor: pointer; font-size: 0.8rem; }
+        .btn-contact:hover { background: #fff5f0; }
+        .btn-cart:hover { background: var(--primary-dark); }
+
+        .no-products { text-align: center; padding: 60px 20px; color: var(--text-light); }
+        .no-products .icon { font-size: 3rem; margin-bottom: 15px; }
+
+        footer { background: var(--secondary); color: #8892b0; padding: 30px; text-align: center; margin-top: 40px; }
+        footer a { color: var(--primary); text-decoration: none; }
+
+        @media (max-width: 1024px) {
+            .page-container { grid-template-columns: 1fr; }
+            .sidebar { position: static; }
+        }
+        @media (max-width: 640px) {
+            .search-inner { flex-wrap: wrap; }
+            .search-input { width: 100%; }
+            .categories-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+            .products-grid { grid-template-columns: 1fr; }
+        }
+    /* ═══════════════════════════════════════════════════════════════════
+           NAV — Alibaba 3-Layer Structure
+           Layer 1: Top Bar (Utility)
+           Layer 2: Main Bar (Search + Account)
+           Layer 3: Category Nav (Scrollable Tabs)
+           ═══════════════════════════════════════════════════════════════════ */
+
+        /* --- LAYER 1: Top Bar --- */
+
+        /* --- LAYER 2: Main Bar --- */
+
+        /* --- LAYER 3: Category Nav --- */
+
+        /* --- MOBILE BOTTOM NAV --- */
+        .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); z-index: 200; padding: 6px 0; }
+        .mobile-bottom-nav .bottom-nav-items { display: flex; justify-content: space-around; }
+        .mobile-bottom-nav .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: #888; font-size: 0.65rem; padding: 4px 8px; }
+        .mobile-bottom-nav .bottom-nav-item.active { color: var(--primary); }
+        .mobile-bottom-nav .bottom-nav-item svg { width: 22px; height: 22px; }
+        .mobile-bottom-nav .bottom-nav-item .bnav-badge { background: var(--primary); color: white; font-size: 0.55rem; padding: 1px 4px; border-radius: 6px; position: absolute; top: -2px; right: -4px; }
+        .mobile-bottom-nav .bottom-nav-item span { position: relative; }
+
+        /* --- RTL SUPPORT --- */
+        [dir="rtl"] .hero-search { direction: rtl; }
+        [dir="rtl"] .hero-search select { border-right: none; border-left: 1px solid #eee; }
+        [dir="rtl"] .breadcrumb { text-align: right; }
+        [dir="rtl"] .categories-grid { direction: rtl; }
+        [dir="rtl"] .category-nav { direction: rtl; }
+        [dir="rtl"] .category-dropdown { text-align: right; right: 0; left: auto; }
+        [dir="rtl"] .products-grid { direction: rtl; }
+        [dir="rtl"] .product-supplier { direction: ltr; }
+        [dir="rtl"] .trust-grid { direction: rtl; }
+        [dir="rtl"] .how-grid { direction: rtl; }
+        [dir="rtl"] .how-arrow { transform: scaleX(-1); }
+        [dir="rtl"] .why-grid { direction: rtl; }
+        [dir="rtl"] .footer-grid { direction: rtl; }
+        [dir="rtl"] .section-header { flex-direction: row-reverse; }
+        [dir="rtl"] .section-header a::before { content: '← '; }
+        [dir="rtl"] .section-header a::after { content: ''; }
+        [dir="rtl"] .floor-header { flex-direction: row-reverse; }
+        [dir="rtl"] .stats { direction: rtl; }
+
+        
+        <!-- NAV_CSS_INCLUDE -->
+    </style>
+</head>
+<body>
+<!-- NAV_INCLUDE -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+      <symbol id="icon-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+      <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+      <symbol id="icon-cart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></symbol>
+      <symbol id="icon-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+      <symbol id="icon-truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></symbol>
+      <symbol id="icon-message" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+    </svg>
+
+    <div class="search-bar">
+        <div class="search-inner">
+            <div style="position:relative;flex:1;">
+                <input type="text" class="search-input" id="searchInput" placeholder="{{b2b_feed.search_placeholder}}" autocomplete="off">
+                <div id="autocompleteDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:white;border:1px solid var(--border);border-radius:0 0 var(--radius) var(--radius);box-shadow:0 4px 12px rgba(0,0,0,0.15);z-index:100;max-height:300px;overflow-y:auto;"></div>
+            </div>
+            <select class="category-select" id="categoryFilter">
+                <option value="all">{{b2b_feed.all_products}}</option>
+            </select>
+            <select class="moq-select" id="moqFilter">
+                <option value="">{{b2b_feed.filter_moq}}</option>
+                <option value="1">1+</option>
+                <option value="10">10+</option>
+                <option value="50">50+</option>
+                <option value="100">100+</option>
+                <option value="500">500+</option>
+            </select>
+            <button class="search-btn" onclick="loadProducts()">{{common.search}}</button>
+        </div><!-- /search-inner -->
+    </div><!-- /search-bar -->
+
+    <div class="page-container">
+        <aside class="sidebar">
+            <h3>{{b2b_feed.filter_price}}</h3>
+            <div class="filter-group">
+                <input type="range" id="priceMin" min="0" max="10000" value="0" oninput="updatePriceLabel()">
+                <input type="range" id="priceMax" min="0" max="10000" value="10000" oninput="updatePriceLabel()">
+                <div class="price-labels"><span id="priceMinLabel">0 LYD</span><span id="priceMaxLabel">10000 LYD</span></div>
+            </div>
+
+            <h3>{{b2b_feed.filter_category}}</h3>
+            <div class="filter-group" id="categoryChecks">
+                <p style="color:#888;font-size:0.85rem;" id="loadingCategories">Loading categories...</p>
+            </div>
+
+            <h3>{{b2b_feed.filter_delivery}}</h3>
+            <div class="filter-group">
+                <select id="deliveryFilter">
+                    <option value="">Any</option>
+                    <option value="3">Within 3 days</option>
+                    <option value="7">Within 7 days</option>
+                    <option value="14">Within 14 days</option>
+                    <option value="30">Within 30 days</option>
+                </select>
+            </div>
+        </aside>
+
+        <main>
+            <h1 style="font-size:1.8rem;color:var(--secondary);margin-bottom:0;">{{b2b_feed.title}}</h1>
+            <div class="categories-grid" id="categoriesGrid"></div>
+            <div class="products-header">
+                <span class="results-count" id="resultsCount"></span>
+                <select class="sort-select" id="sortSelect" onchange="loadProducts()">
+                    <option value="name">{{b2b_feed.sort_name}}</option>
+                    <option value="price_asc">{{b2b_feed.sort_price_low}}</option>
+                    <option value="price_desc">{{b2b_feed.sort_price_high}}</option>
+                </select>
+            </div>
+            <div class="products-grid" id="productsGrid"></div>
+            <div class="no-products" id="noProducts" style="display:none;">
+                <div class="icon"> </div>
+                <p>{{b2b_feed.no_products}}</p>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>Libya B2B Platform | {{landing.footer_built}}</p>
+    </footer>
+
+    <script src="/static/auth.js"></script>
+    <script>
+        (async () => {
+            const user = await Auth.requireAuth();
+            if (!user) return;
+            Auth.updateNavAuth(user);
+        })();
+        let categoryIcons = {};
+        const bgClasses = ['bg-1','bg-2','bg-3','bg-4','bg-5'];
+        let allProducts = [];
+        let allCategories = [];
+
+        // Read category from URL: /b2b/products?category=hardware
+        const urlCategory = new URLSearchParams(window.location.search).get('category');
+
+        async function loadCategories() {
+            const loadingEl = document.getElementById('loadingCategories');
+            try {
+                const res = await fetch('/api/b2b/categories');
+                const data = await res.json();
+                allCategories = data.categories;
+                const select = document.getElementById('categoryFilter');
+                const checksDiv = document.getElementById('categoryChecks');
+                // Hide loading text
+                if (loadingEl) loadingEl.style.display = 'none';
+                // Build icon map and populate select
+                allCategories.forEach(c => {
+                    categoryIcons[c.id] = c.icon;
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.textContent = c.icon + ' ' + c.name_en + ' (' + c.count + ')';
+                    select.appendChild(opt);
+                });
+                // Set select to URL category if present
+                if (urlCategory) select.value = urlCategory;
+                // Build sidebar checkboxes with counts
+                checksDiv.innerHTML = allCategories.map(c => `
+                    <label class="filter-checkbox"><input type="checkbox" value="${c.id}" ${urlCategory === c.id ? 'checked' : ''} onchange="filterByChecks()"> ${c.icon} ${c.name_en} (${c.count})</label>
+                `).join('');
+            } catch (e) {
+                console.error(e);
+                if (loadingEl) loadingEl.textContent = 'Categories unavailable';
+            }
+        }
+
+        async function loadProducts() {
+            const search = document.getElementById('searchInput').value;
+            const category = document.getElementById('categoryFilter').value;
+            const minMoq = document.getElementById('moqFilter').value;
+            const sort = document.getElementById('sortSelect').value;
+            const priceMin = document.getElementById('priceMin').value;
+            const priceMax = document.getElementById('priceMax').value;
+
+            // Use fuzzy search API when there's a search query
+            if (search && search.length >= 2) {
+                try {
+                    const searchRes = await fetch(`/api/search?q=${encodeURIComponent(search)}&type=products&limit=50`);
+                    const searchData = await searchRes.json();
+                    const fuzzyProducts = searchData.results.map(r => ({
+                        id: r.id, name: r.name, name_arabic: r.name_arabic,
+                        price: r.price, currency: r.currency || 'LYD',
+                        category: r.category, stock_quantity: 0,
+                        moq: 1, image_url: r.image_url,
+                        supplier_name: 'Libya Supplier', is_active: true
+                    }));
+                    allProducts = fuzzyProducts;
+                    renderProducts(fuzzyProducts);
+                    document.getElementById('resultsCount').textContent = fuzzyProducts.length + ' ' + '{{b2b_feed.results}} (fuzzy)';
+                    return;
+                } catch (e) { console.error('Fuzzy search failed, falling back:', e); }
+            }
+
+            let url = `/api/b2b/products?sort_by=${sort}`;
+            if (search) url += `&search=${encodeURIComponent(search)}`;
+            if (category && category !== 'all') url += `&category=${category}`;
+            if (minMoq) url += `&min_moq=${minMoq}`;
+            if (priceMin > 0) url += `&min_price=${priceMin}`;
+            if (priceMax < 10000) url += `&max_price=${priceMax}`;
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                allProducts = data.products;
+                renderProducts(data.products);
+                document.getElementById('resultsCount').textContent = data.total + ' ' + '{{b2b_feed.results}}';
+            } catch (e) { console.error(e); }
+        }
+
+        function renderProducts(items) {
+            const grid = document.getElementById('productsGrid');
+            const noProducts = document.getElementById('noProducts');
+            if (!items.length) { grid.innerHTML = ''; noProducts.style.display = 'block'; return; }
+            noProducts.style.display = 'none';
+            grid.innerHTML = items.map((p, i) => `
+                <div class="product-card">
+                    <div class="product-image ${bgClasses[i % bgClasses.length]}">${p.image_url ? '<img src="' + p.image_url + '" alt="' + p.name + '" loading="lazy" style="width:100%;height:100%;object-fit:cover;">' : '<span style="font-size:3.5rem;">' + (categoryIcons[p.category] || ' ') + '</span>'}</div>
+                    <div class="product-body">
+                        <div class="product-name"><a href="/b2b/products/${p.id}" style="color:inherit;text-decoration:none;">${p.name}</a></div>
+                        <div class="product-name-ar">${p.name_arabic || ''}</div>
+                        <div class="product-price">${p.price.toFixed(2)} ${p.currency}</div>
+                        <div class="product-moq">${'{{b2b_feed.moq_label}}'} ${p.moq} pcs</div>
+                        <div class="product-supplier">  ${p.supplier_name}</div>
+                        <div class="product-rating" data-product-id="${p.id}" style="margin-top:6px;font-size:0.85rem;color:#888;">★★★★★ (0)</div>
+                        <div class="product-variants" id="variants-${p.id}" style="margin-top:6px;display:none;">
+                            <select id="variant-select-${p.id}" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:0.8rem;">
+                                <option value="">Standard</option>
+                            </select>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn-contact" onclick="event.preventDefault(); window.location.href='/b2b/messages?new_supplier=' + ${p.seller_name}"> {{b2b_feed.contact_supplier}}</button>
+                            <button class="btn-cart" onclick="addToCart(${p.id}, ${p.seller_name ? parseInt(p.seller_name.replace('Libya Supplier ','')) || null : null})">{{b2b_feed.add_to_cart}}</button>
+                        </div>
+                        <button onclick="showReviewForm(${p.id})" style="width:100%;margin-top:8px;padding:8px;background:none;border:1px solid var(--border);border-radius:8px;cursor:pointer;font-size:0.75rem;color:#888;"> Write Review</button>
+                    </div>
+                </div>
+            `).join('');
+            // Load variants for each product
+            items.forEach(p => { loadVariants(p.id); });
+            // JSON-LD Product Schema for first 10 products (SEO)
+            const existingSchema = document.getElementById('product-jsonld');
+            if (existingSchema) existingSchema.remove();
+            if (items.length > 0) {
+                const schemaItems = items.slice(0, 10).map(p => ({
+                    '@type': 'Product',
+                    'name': p.name,
+                    'description': p.description || p.name,
+                    'image': p.image_url || '',
+                    'category': p.category || 'General',
+                    'offers': {
+                        '@type': 'Offer',
+                        'price': p.price,
+                        'priceCurrency': p.currency || 'LYD',
+                        'availability': 'https://schema.org/InStock',
+                        'seller': {'@type': 'Organization', 'name': p.supplier_name || 'Libya B2B'}
+                    }
+                }));
+                const ldScript = document.createElement('script');
+                ldScript.type = 'application/ld+json';
+                ldScript.id = 'product-jsonld';
+                ldScript.textContent = JSON.stringify({'@context': 'https://schema.org', '@type': 'ItemList', 'itemListElement': schemaItems});
+                document.head.appendChild(ldScript);
+            }
+        }
+
+        async function loadVariants(productId) {
+            try {
+                const res = await fetch(`/api/products/${productId}/variants`);
+                if (!res.ok) return;
+                const variants = await res.json();
+                if (!variants.length) return;
+                const container = document.getElementById(`variants-${productId}`);
+                if (!container) return;
+                container.style.display = 'block';
+                const select = document.getElementById(`variant-select-${productId}`);
+                variants.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v.id;
+                    opt.textContent = `${v.name} (${v.price.toFixed(2)} LYD)`;
+                    opt.dataset.price = v.price;
+                    opt.dataset.stock = v.stock_quantity;
+                    select.appendChild(opt);
+                });
+            } catch (e) { /* no variants */ }
+        }
+
+        async function addToCart(productId, supplierId) {
+            const variantSelect = document.getElementById(`variant-select-${productId}`);
+            const variantId = variantSelect && variantSelect.value ? parseInt(variantSelect.value) : null;
+            const result = await Cart.add(productId, 1, supplierId);
+            if (result && result.moq_met === false) {
+                showToast('Warning: Below minimum order quantity (' + result.moq + ' pcs)', 'warning');
+            }
+        }
+
+        function updatePriceLabel() {
+            document.getElementById('priceMinLabel').textContent = document.getElementById('priceMin').value + ' LYD';
+            document.getElementById('priceMaxLabel').textContent = document.getElementById('priceMax').value + ' LYD';
+        }
+
+        function filterByChecks() { loadProducts(); }
+
+        function showReviewForm(productId) {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+            modal.innerHTML = `
+                <div style="background:white;border-radius:12px;padding:30px;max-width:400px;width:90%;box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+                    <h3 style="margin-bottom:15px;">Write a Review</h3>
+                    <div style="margin-bottom:15px;">
+                        <label style="display:block;margin-bottom:6px;font-weight:600;">Rating *</label>
+                        <select id="review-rating" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;">
+                            <option value="5">★★★★★ Excellent</option>
+                            <option value="4">★★★★☆ Good</option>
+                            <option value="3">★★★☆☆ Average</option>
+                            <option value="2">★★☆☆☆ Poor</option>
+                            <option value="1">★☆☆☆☆ Terrible</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom:15px;">
+                        <label style="display:block;margin-bottom:6px;font-weight:600;">Comment</label>
+                        <textarea id="review-comment" rows="3" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-family:inherit;"></textarea>
+                    </div>
+                    <div style="display:flex;gap:10px;">
+                        <button onclick="submitReview(${productId})" style="flex:1;padding:12px;background:var(--primary,#ff6a00);color:white;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">Submit</button>
+                        <button onclick="this.closest('div[style]').remove()" style="flex:1;padding:12px;background:#f0f0f0;border:none;border-radius:8px;cursor:pointer;">Cancel</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(modal);
+        }
+
+        async function submitReview(productId) {
+            const rating = parseInt(document.getElementById('review-rating').value);
+            const comment = document.getElementById('review-comment').value;
+            try {
+                await fetch('/api/reviews?user_id=1', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: productId, rating, comment: comment || null })
+                });
+                document.querySelector('div[style*="fixed"]').remove();
+                showToast('Review submitted!', 'success');
+                loadProducts().then(() => setTimeout(loadRatings, 500));
+            } catch (e) { showToast('Error submitting review', 'error'); }
+        }
+
+        // Search on Enter
+        document.getElementById('searchInput').addEventListener('keypress', e => { if (e.key === 'Enter') loadProducts(); });
+
+        // Autocomplete
+        let autocompleteTimer = null;
+        document.getElementById('searchInput').addEventListener('input', function() {
+            clearTimeout(autocompleteTimer);
+            const q = this.value.trim();
+            const dd = document.getElementById('autocompleteDropdown');
+            if (q.length < 2) { dd.style.display = 'none'; return; }
+            autocompleteTimer = setTimeout(async () => {
+                try {
+                    const res = await fetch('/api/search/autocomplete?q=' + encodeURIComponent(q) + '&limit=8');
+                    const data = await res.json();
+                    if (!data.suggestions || data.suggestions.length === 0) { dd.style.display = 'none'; return; }
+                    dd.innerHTML = data.suggestions.map(s => `
+                        <div style="padding:10px 15px;cursor:pointer;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'" onclick="document.getElementById('searchInput').value='${s.name.replace(/'/g, "\\'")}';document.getElementById('autocompleteDropdown').style.display='none';loadProducts();">
+                            <div>
+                                <span style="font-weight:600;">${s.name}</span>
+                                ${s.name_arabic ? '<span style="color:#888;margin-left:8px;">' + s.name_arabic + '</span>' : ''}
+                            </div>
+                            <span style="font-size:0.75rem;color:#888;">${s.type === 'product' ? (s.price ? s.price + ' LYD' : '') : s.category || ''}</span>
+                        </div>
+                    `).join('');
+                    dd.style.display = 'block';
+                } catch (e) { console.error('Autocomplete error:', e); }
+            }, 300);
+        });
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#searchInput') && !e.target.closest('#autocompleteDropdown')) {
+                document.getElementById('autocompleteDropdown').style.display = 'none';
+            }
+        });
+
+        async function loadRatings() {
+            document.querySelectorAll('.product-rating').forEach(async (el) => {
+                const pid = el.dataset.productId;
+                try {
+                    const res = await fetch('/api/reviews/product/' + pid);
+                    const data = await res.json();
+                    if (data.summary.count > 0) {
+                        const avg = data.summary.average;
+                        const full = Math.floor(avg);
+                        const half = avg % 1 >= 0.5 ? 1 : 0;
+                        let stars = '';
+                        for (let i = 0; i < full; i++) stars += '★';
+                        if (half) stars += '½';
+                        for (let i = full + half; i < 5; i++) stars += '☆';
+                        el.innerHTML = stars + ' (' + data.summary.count + ')';
+                    }
+                } catch (e) {}
+            });
+        }
+
+        loadCategories().then(() => loadProducts().then(() => setTimeout(loadRatings, 500)));
+    </script>
+    <script src="/static/toast.js"></script>
+    <script>
+        const _base = window.location.pathname.startsWith('/ar/') ? '/ar' : '';
+
+        // Load categories for nav dropdown
+        (async () => {
+            try {
+                const res = await fetch('/api/b2b/categories');
+                const cats = await res.json();
+                const select = document.getElementById('navCatSelect');
+                if (select && Array.isArray(cats)) {
+                    cats.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.icon + ' ' + (_base ? (c.name_ar || c.name_en) : c.name_en);
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (e) { console.error('Categories load failed:', e); }
+        })();
+
+            </script>
+<!-- NAV_JS_INCLUDE -->
+</body>
+</html>

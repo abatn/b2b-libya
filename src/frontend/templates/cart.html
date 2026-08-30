@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{cart.title}}</title>
+    <meta name="description" content="{{cart.meta_description}}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; }
+        :root { --primary: #ff6a00; --primary-dark: #e55d00; --secondary: #1a1a2e; --accent: #00d2ff; --success: #28a745; --warning: #ffc107; --danger: #dc3545; --border: #e8e8e8; --radius: 12px; }
+        /* RTL SUPPORT */
+        [dir="rtl"] .breadcrumb { text-align: right; }
+        .container { max-width: 900px; margin: 0 auto; padding: 30px; }
+        .cart-item { background: white; border-radius: 15px; padding: 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .cart-item-name { font-weight: bold; }
+        .cart-item-price { color: var(--accent); font-weight: bold; }
+        .quantity-controls { display: flex; align-items: center; gap: 10px; }
+        .qty-btn { width: 35px; height: 35px; border: 2px solid #ddd; border-radius: 50%; background: white; cursor: pointer; font-size: 1.2rem; }
+        .qty-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
+        .remove-btn { background: var(--danger); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        .cart-summary { background: white; border-radius: 15px; padding: 25px; margin-top: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .summary-total { font-size: 1.4rem; font-weight: bold; color: var(--accent); border-top: 2px solid #eee; padding-top: 15px; margin-top: 15px; }
+        .checkout-btn { width: 100%; padding: 15px; background: var(--success); color: white; border: none; border-radius: var(--radius); font-size: 1.2rem; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        .empty-cart { text-align: center; padding: 60px; color: #8892b0; }
+        @media (max-width: 640px) {
+            .container { padding: 15px; }
+            .cart-item { flex-direction: column; gap: 10px; text-align: center; }
+            .cart-item-name { font-size: 1rem; }
+        }
+    /* ═══════════════════════════════════════════════════════════════════
+           NAV — Alibaba 3-Layer Structure
+           Layer 1: Top Bar (Utility)
+           Layer 2: Main Bar (Search + Account)
+           Layer 3: Category Nav (Scrollable Tabs)
+           ═══════════════════════════════════════════════════════════════════ */
+
+        /* --- LAYER 1: Top Bar --- */
+
+        /* --- LAYER 2: Main Bar --- */
+
+        /* --- LAYER 3: Category Nav --- */
+
+        /* --- MOBILE BOTTOM NAV --- */
+        .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); z-index: 200; padding: 6px 0; }
+        .mobile-bottom-nav .bottom-nav-items { display: flex; justify-content: space-around; }
+        .mobile-bottom-nav .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: #888; font-size: 0.65rem; padding: 4px 8px; }
+        .mobile-bottom-nav .bottom-nav-item.active { color: var(--primary); }
+        .mobile-bottom-nav .bottom-nav-item svg { width: 22px; height: 22px; }
+        .mobile-bottom-nav .bottom-nav-item .bnav-badge { background: var(--primary); color: white; font-size: 0.55rem; padding: 1px 4px; border-radius: 6px; position: absolute; top: -2px; right: -4px; }
+        .mobile-bottom-nav .bottom-nav-item span { position: relative; }
+
+        /* --- RTL SUPPORT --- */
+        [dir="rtl"] .hero-search { direction: rtl; }
+        [dir="rtl"] .hero-search select { border-right: none; border-left: 1px solid #eee; }
+        [dir="rtl"] .breadcrumb { text-align: right; }
+        [dir="rtl"] .categories-grid { direction: rtl; }
+        [dir="rtl"] .category-nav { direction: rtl; }
+        [dir="rtl"] .category-dropdown { text-align: right; right: 0; left: auto; }
+        [dir="rtl"] .products-grid { direction: rtl; }
+        [dir="rtl"] .product-supplier { direction: ltr; }
+        [dir="rtl"] .trust-grid { direction: rtl; }
+        [dir="rtl"] .how-grid { direction: rtl; }
+        [dir="rtl"] .how-arrow { transform: scaleX(-1); }
+        [dir="rtl"] .why-grid { direction: rtl; }
+        [dir="rtl"] .footer-grid { direction: rtl; }
+        [dir="rtl"] .section-header { flex-direction: row-reverse; }
+        [dir="rtl"] .section-header a::before { content: '← '; }
+        [dir="rtl"] .section-header a::after { content: ''; }
+        [dir="rtl"] .floor-header { flex-direction: row-reverse; }
+        [dir="rtl"] .stats { direction: rtl; }
+
+        
+        <!-- NAV_CSS_INCLUDE -->
+    </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "/"},
+    {"@type": "ListItem", "position": 2, "name": "Shopping Cart", "item": "/cart"}
+  ]
+}
+</script>
+</head>
+<body>
+<!-- NAV_INCLUDE -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+      <symbol id="icon-catalog" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></symbol>
+      <symbol id="icon-cart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></symbol>
+      <symbol id="icon-checkout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></symbol>
+      <symbol id="icon-seller" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></symbol>
+      <symbol id="icon-tracking" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+      <symbol id="icon-b2b" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+    </svg>
+
+    <!-- BREADCRUMB -->
+    <div class="breadcrumb">
+        <a href="/">{{landing.breadcrumb_home}}</a>
+        <span>›</span>
+        <a href="/b2b">B2B</a>
+        <span>›</span>
+        <span>{{cart.title}}</span>
+    </div>
+
+    <div class="container">        <h1 style="font-size:1.8rem;color:var(--secondary);margin-bottom:0;">{{cart.title}}</h1>
+
+        <h2>{{cart.title}}</h2>
+        <div id="cart-content"></div>
+    </div>
+
+    <script src="/static/auth.js"></script>
+    <script>
+        (async () => {
+            const user = await Auth.requireAuth('buyer');
+            if (!user) return;
+            Auth.updateNavAuth(user);
+        })();
+        let serverCart = [];
+        async function renderCart() {
+            const content = document.getElementById('cart-content');
+            serverCart = await Cart.getAll();
+            if (serverCart.length === 0) {
+                content.innerHTML = `<div class="empty-cart"><h3>${getTranslation('cart.empty')}</h3><p>${getTranslation('cart.empty_desc')}</p><br><a href="/b2b/products" style="color: #00d2ff;">${getTranslation('cart.browse')}</a></div>`;
+                return;
+            }
+            const subtotal = serverCart.reduce((sum, item) => sum + (item.product_price || 0) * item.quantity, 0);
+            // Calculate shipping cost
+            let shippingCost = 0;
+            try {
+                const shipRes = await fetch(`/api/shipping/calculate?origin=Tripoli&destination=Tripoli&weight_kg=${Math.max(1, serverCart.length * 0.5)}`);
+                if (shipRes.ok) { const shipData = await shipRes.json(); if (shipData.options && shipData.options.length) shippingCost = shipData.options[0].cost; }
+            } catch(e) { shippingCost = 15; }
+            const total = subtotal + shippingCost;
+            content.innerHTML = serverCart.map(item => `
+                <div class="cart-item">
+                    <div>
+                        <div class="cart-item-name">${item.product_name || 'Product'}</div>
+                        ${item.supplier_name ? '<div style="font-size:0.8rem;color:#888;">by ' + item.supplier_name + '</div>' : ''}
+                        <div class="cart-item-price">${(item.product_price || 0).toFixed(2)} LYD</div>
+                        ${!item.moq_met ? '<div style="color:var(--danger);font-size:0.8rem;">⚠️ Below MOQ (' + item.moq + ' min)</div>' : ''}
+                    </div>
+                    <div class="quantity-controls">
+                        <button class="qty-btn" onclick="updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
+                        <span>${item.quantity}</span>
+                        <button class="qty-btn" onclick="updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
+                    </div>
+                    <button class="remove-btn" onclick="removeItem(${item.id})">${getTranslation('cart.remove')}</button>
+                </div>
+            `).join('') + `
+                <div class="cart-summary">
+                    <div class="summary-row"><span>${getTranslation('cart.subtotal')}</span><span>${subtotal.toFixed(2)} LYD</span></div>
+                    <div class="summary-row"><span>${getTranslation('cart.shipping')}</span><span>${shippingCost > 0 ? shippingCost.toFixed(2) + ' LYD' : getTranslation('cart.free_cod')}</span></div>
+                    <div class="summary-row summary-total"><span>${getTranslation('cart.total')}</span><span>${total.toFixed(2)} LYD</span></div>
+                    <div class="payment-methods" id="paymentMethods" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                        <h4 style="margin-bottom: 10px; color: #333;">${getTranslation('cart.payment_method')}</h4>
+                        <div id="paymentOptions"></div>
+                    </div>
+                    <button class="checkout-btn" onclick="proceedToCheckout()">${getTranslation('cart.checkout')}</button>
+                </div>`;
+        }
+        async function updateQuantity(itemId, newQty) {
+            if (newQty <= 0) { await Cart.remove(itemId); } else { await Cart.updateQuantity(itemId, newQty); }
+            await renderCart();
+        }
+        async function removeItem(itemId) { await Cart.remove(itemId); await renderCart(); }
+        function getTranslation(key) { const keys = key.split('.'); let val = window.__locale || {}; for (const k of keys) val = val[k] || key; return val; }
+        window.__locale = { cart: { empty: "Your cart is empty", empty_desc: "Add some products to get started!", remove: "Remove", subtotal: "Subtotal:", shipping: "Shipping:", free_cod: "Free (COD)", total: "Total:", checkout: "Proceed to Checkout", browse: "Browse Products" } };
+        // Load payment methods from API
+        let selectedPaymentMethod = 'cod';
+        async function loadPaymentMethods() {
+            try {
+                const res = await fetch('/api/payments/methods');
+                const data = await res.json();
+                const options = document.getElementById('paymentOptions');
+                if (!options) return;
+                const isAr = window.location.pathname.startsWith('/ar/');
+                options.innerHTML = data.methods.map(m => `
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 10px; margin: 5px 0; background: white; border-radius: 8px; cursor: pointer; border: 2px solid ${m.id === selectedPaymentMethod ? 'var(--primary)' : '#e8e8e8'}; transition: 0.2s;" onclick="selectPaymentMethod('${m.id}')">
+                        <input type="radio" name="payment_method" value="${m.id}" ${m.id === selectedPaymentMethod ? 'checked' : ''} ${!m.available ? 'disabled' : ''}>
+                        <div>
+                            <div style="font-weight: 600; color: #333;">${isAr ? (m.name_ar || m.name) : m.name}</div>
+                            <div style="font-size: 0.8rem; color: #888;">${isAr ? (m.description_ar || m.description) : m.description}</div>
+                        </div>
+                        ${!m.available ? '<span style="margin-left: auto; color: #888; font-size: 0.75rem;">' + (isAr ? 'غير متاح' : 'Not available') + '</span>' : ''}
+                    </label>
+                `).join('');
+            } catch (e) {
+                console.error('Failed to load payment methods:', e);
+            }
+        }
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            document.querySelectorAll('#paymentOptions label').forEach(el => {
+                el.style.borderColor = el.querySelector('input').value === method ? 'var(--primary)' : '#e8e8e8';
+            });
+        }
+        function proceedToCheckout() {
+            window.location.href = '/checkout?payment=' + encodeURIComponent(selectedPaymentMethod);
+        }
+        function navSearch() {
+            const q = document.getElementById('navSearchInput').value.trim();
+            if (q) window.location.href = '/b2b/products?search=' + encodeURIComponent(q);
+        }
+        document.getElementById('navSearchInput').addEventListener('keypress', e => { if (e.key === 'Enter') navSearch(); });
+        renderCart();
+        loadPaymentMethods();
+        Cart.updateBadge();
+    </script>
+    <script src="/static/chatbot-widget.js"></script>
+    <script>
+        const _base = window.location.pathname.startsWith('/ar/') ? '/ar' : '';
+
+        
+        // Load categories for nav dropdown
+        (async () => {
+            try {
+                const res = await fetch('/api/b2b/categories');
+                const cats = await res.json();
+                const select = document.getElementById('navCatSelect');
+                if (select && Array.isArray(cats)) {
+                    cats.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.icon + ' ' + (_base ? (c.name_ar || c.name_en) : c.name_en);
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (e) { console.error('Categories load failed:', e); }
+        })();
+    </script>
+<!-- NAV_JS_INCLUDE -->
+<script>
+(async () => {
+    try {
+        const user = await Auth.me();
+        if (!user) { Auth.showLoginModal(); return; }
+    } catch(e) { Auth.showLoginModal(); }
+})();
+</script>
+</body>
+</html>

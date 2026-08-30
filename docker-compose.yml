@@ -1,0 +1,88 @@
+# Libya B2B Platform - Docker Compose
+# Backend: Port 8000 | Frontend: Port 3000
+# Quelle: Sprint 8 - Professionelle Trennung
+
+services:
+  # ============================================================
+  # BACKEND (FastAPI) - Port 8000
+  # ============================================================
+  backend:
+    build:
+      context: ./src/backend
+      dockerfile: Dockerfile
+    container_name: libya-b2b-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite:///./libya_b2b.db
+      - DEBUG=true
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - libya-b2b-network
+
+  # ============================================================
+  # FRONTEND (Static Server) - Port 3000
+  # ============================================================
+  frontend:
+    build:
+      context: ./src/frontend
+      dockerfile: Dockerfile
+    container_name: libya-b2b-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - BACKEND_URL=http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - libya-b2b-network
+
+  # ============================================================
+  # MONITORING (optional) - Port 9090
+  # ============================================================
+  healthcheck-monitor:
+    image: curlimages/curl:latest
+    container_name: libya-b2b-monitor
+    command: >
+      sh -c 'while true; do
+        echo "=== Health Check $(date) ===";
+        curl -sf http://backend:8000/health && echo "Backend: OK" || echo "Backend: FAIL";
+        curl -sf http://frontend:3000/health && echo "Frontend: OK" || echo "Frontend: FAIL";
+        sleep 60;
+      done'
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - libya-b2b-network
+
+networks:
+  libya-b2b-network:
+    driver: bridge

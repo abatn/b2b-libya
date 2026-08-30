@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="{{lang}}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{product_detail.title}} — Libya B2B</title>
+    <!-- NAV_CSS_INCLUDE -->
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --primary: #ff6a00; --secondary: #1a1a2e; --accent: #e94560; --success: #22c55e; --border: #e5e7eb; --bg: #f8f9fa; --radius: 12px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .breadcrumb { font-size: 0.85rem; color: #888; margin-bottom: 16px; }
+        .breadcrumb a { color: var(--primary); text-decoration: none; }
+        .product-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
+        @media (max-width: 768px) { .product-layout { grid-template-columns: 1fr; } }
+        .product-gallery { background: white; border-radius: var(--radius); overflow: hidden; }
+        .product-main-image { width: 100%; height: 400px; object-fit: cover; }
+        .product-info { background: white; border-radius: var(--radius); padding: 24px; }
+        .product-title { font-size: 1.5rem; font-weight: 700; color: var(--secondary); margin-bottom: 4px; }
+        .product-title-ar { font-size: 1.2rem; color: #666; margin-bottom: 12px; direction: rtl; }
+        .product-price-box { background: #fff7ed; border: 1px solid #fed7aa; border-radius: var(--radius); padding: 16px; margin: 16px 0; }
+        .price-main { font-size: 2rem; font-weight: 700; color: var(--accent); }
+        .price-currency { font-size: 1rem; color: #888; }
+        .bulk-pricing { margin-top: 12px; }
+        .bulk-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
+        .bulk-row:last-child { border: none; }
+        .bulk-qty { font-weight: 600; }
+        .bulk-discount { color: var(--success); font-weight: 600; }
+        .variant-selector { margin: 16px 0; }
+        .variant-label { font-size: 0.85rem; font-weight: 600; color: #555; margin-bottom: 6px; }
+        .variant-options { display: flex; gap: 8px; flex-wrap: wrap; }
+        .variant-btn { padding: 8px 16px; border: 2px solid var(--border); border-radius: 8px; background: white; cursor: pointer; font-size: 0.85rem; transition: 0.2s; }
+        .variant-btn.active { border-color: var(--primary); background: #fff7ed; color: var(--primary); font-weight: 600; }
+        .variant-btn:hover { border-color: var(--primary); }
+        .moq-info { background: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; padding: 10px 14px; font-size: 0.85rem; margin: 12px 0; }
+        .quantity-row { display: flex; align-items: center; gap: 12px; margin: 16px 0; }
+        .qty-input { width: 80px; padding: 10px; border: 2px solid var(--border); border-radius: 8px; text-align: center; font-size: 1rem; }
+        .action-buttons { display: flex; gap: 12px; margin-top: 20px; }
+        .btn-primary { flex: 1; padding: 14px; background: var(--primary); color: white; border: none; border-radius: var(--radius); font-size: 1.1rem; font-weight: 700; cursor: pointer; }
+        .btn-secondary { padding: 14px 24px; background: white; color: var(--primary); border: 2px solid var(--primary); border-radius: var(--radius); font-size: 1rem; font-weight: 600; cursor: pointer; }
+        .supplier-card { background: white; border-radius: var(--radius); padding: 20px; margin-top: 20px; display: flex; gap: 16px; align-items: center; }
+        .supplier-logo { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; background: #f0f0f0; }
+        .supplier-name { font-weight: 700; font-size: 1rem; }
+        .supplier-meta { font-size: 0.85rem; color: #888; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+        .badge-verified { background: #dcfce7; color: #16a34a; }
+        .badge-trade { background: #fef3c7; color: #d97706; }
+        .section-title { font-size: 1.2rem; font-weight: 700; margin: 24px 0 12px; color: var(--secondary); }
+        .description { background: white; border-radius: var(--radius); padding: 20px; line-height: 1.7; color: #555; }
+        .reviews-section { background: white; border-radius: var(--radius); padding: 20px; margin-top: 20px; }
+        .review-item { border-bottom: 1px solid #f0f0f0; padding: 12px 0; }
+        .review-item:last-child { border: none; }
+        .review-stars { color: #f59e0b; }
+        .review-text { font-size: 0.9rem; color: #555; margin-top: 4px; }
+        .review-meta { font-size: 0.8rem; color: #888; }
+        .trust-badges { display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
+        .trust-badge { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: #f0fdf4; border-radius: 8px; font-size: 0.8rem; color: #16a34a; }
+    </style>
+</head>
+<body>
+    <!-- NAV_INCLUDE -->
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{_base}}/">{{landing.home}}</a> ›
+            <a href="{{_base}}/b2b/products">{{b2b_feed.products}}</a> ›
+            <span id="breadcrumbProduct">...</span>
+        </div>
+
+        <div class="product-layout">
+            <div class="product-gallery">
+                <img id="productImage" class="product-main-image" src="" alt="" loading="lazy">
+            </div>
+            <div class="product-info">
+                <div class="product-title" id="productName"></div>
+                <div class="product-title-ar" id="productNameAr"></div>
+
+                <div class="product-price-box">
+                    <div>
+                        <span class="price-main" id="productPrice"></span>
+                        <span class="price-currency">LYD</span>
+                    </div>
+                    <div class="bulk-pricing" id="bulkPricing">
+                        <div class="bulk-row"><span class="bulk-qty">1-9 pcs</span><span>Standard Price</span></div>
+                        <div class="bulk-row"><span class="bulk-qty">10-49 pcs</span><span class="bulk-discount">-5%</span></div>
+                        <div class="bulk-row"><span class="bulk-qty">50-99 pcs</span><span class="bulk-discount">-10%</span></div>
+                        <div class="bulk-row"><span class="bulk-qty">100+ pcs</span><span class="bulk-discount">-15%</span></div>
+                    </div>
+                </div>
+
+                <div class="moq-info" id="moqInfo">
+                    ⚡ {{b2b_feed.moq_label}}: <strong id="moqValue"></strong> pcs
+                </div>
+
+                <div class="variant-selector" id="variantSection" style="display:none;">
+                    <div class="variant-label">{{product_detail.select_variant}}</div>
+                    <div class="variant-options" id="variantOptions"></div>
+                </div>
+
+                <div class="quantity-row">
+                    <span style="font-weight:600;">{{product_detail.quantity}}:</span>
+                    <input type="number" class="qty-input" id="quantityInput" value="1" min="1">
+                    <span id="stockInfo" style="font-size:0.85rem;color:#888;"></span>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn-primary" onclick="addToCart()">{{b2b_feed.add_to_cart}}</button>
+                    <button class="btn-secondary" onclick="sendInquiry()">✉️ {{product_detail.send_inquiry}}</button>
+                </div>
+
+                <div class="trust-badges">
+                    <div class="trust-badge">✓ {{product_detail.trade_assurance}}</div>
+                    <div class="trust-badge">✓ {{product_detail.verified_supplier}}</div>
+                    <div class="trust-badge">✓ {{product_detail.on_time_delivery}}</div>
+                </div>
+
+                <div class="supplier-card" id="supplierCard">
+                    <img class="supplier-logo" id="supplierLogo" src="" alt="">
+                    <div>
+                        <div class="supplier-name" id="supplierName"></div>
+                        <div class="supplier-meta" id="supplierMeta"></div>
+                        <div id="supplierBadges" style="margin-top:4px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">{{product_detail.description}}</div>
+        <div class="description" id="productDescription"></div>
+
+        <div class="section-title">{{product_detail.reviews}}</div>
+        <div class="reviews-section" id="reviewsSection">
+            <p style="color:#888;">Loading reviews...</p>
+        </div>
+    </div>
+
+    <script>
+        const productId = window.location.pathname.split('/').pop();
+        let currentProduct = null;
+        let selectedVariant = null;
+
+        async function loadProduct() {
+            try {
+                const res = await fetch(`/api/products/${productId}`);
+                if (!res.ok) { document.querySelector('.container').innerHTML = '<h2>Product not found</h2>'; return; }
+                currentProduct = await res.json();
+                document.getElementById('productName').textContent = currentProduct.name;
+                document.getElementById('productNameAr').textContent = currentProduct.name_arabic || '';
+                document.getElementById('productPrice').textContent = currentProduct.price.toFixed(2);
+                document.getElementById('moqValue').textContent = currentProduct.moq;
+                document.getElementById('stockInfo').textContent = `${currentProduct.stock_quantity} in stock`;
+                document.getElementById('breadcrumbProduct').textContent = currentProduct.name;
+                document.title = `${currentProduct.name} — Libya B2B`;
+
+                const img = document.getElementById('productImage');
+                img.src = currentProduct.image_url || '';
+                img.alt = currentProduct.name;
+                if (!currentProduct.image_url) img.style.display = 'none';
+
+                document.getElementById('productDescription').textContent = currentProduct.description || 'No description available.';
+
+                // Load variants
+                loadVariants(productId);
+                // Load supplier info
+                if (currentProduct.seller_id) loadSupplier(currentProduct.seller_id);
+                // Load reviews
+                loadReviews(productId);
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadVariants(pid) {
+            try {
+                const res = await fetch(`/api/products/${pid}/variants`);
+                if (!res.ok) return;
+                const variants = await res.json();
+                if (!variants.length) return;
+                const section = document.getElementById('variantSection');
+                section.style.display = 'block';
+                const container = document.getElementById('variantOptions');
+                container.innerHTML = variants.map(v => `
+                    <button class="variant-btn" onclick="selectVariant(${v.id}, ${v.price}, ${v.stock_quantity}, this)" data-price="${v.price}">
+                        ${v.name} (${v.price.toFixed(2)} LYD)
+                    </button>
+                `).join('');
+            } catch (e) {}
+        }
+
+        function selectVariant(id, price, stock, btn) {
+            document.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedVariant = id;
+            document.getElementById('productPrice').textContent = price.toFixed(2);
+            document.getElementById('stockInfo').textContent = `${stock} in stock`;
+        }
+
+        async function loadSupplier(uid) {
+            try {
+                const res = await fetch(`/api/b2b/suppliers?search=&limit=50`);
+                const data = await res.json();
+                const supplier = (data.suppliers || []).find(s => s.user_id === uid);
+                if (!supplier) return;
+                document.getElementById('supplierName').textContent = supplier.name;
+                document.getElementById('supplierMeta').textContent = `${supplier.city || supplier.location || 'Libya'} · ${supplier.product_count || 0} products`;
+                const logo = document.getElementById('supplierLogo');
+                if (supplier.logo_url) { logo.src = supplier.logo_url; } else { logo.style.display = 'none'; }
+                const badges = document.getElementById('supplierBadges');
+                if (supplier.is_verified) badges.innerHTML = '<span class="badge badge-verified">✓ Verified</span>';
+                if (supplier.years_on_platform > 3) badges.innerHTML += ` <span class="badge badge-trade">${supplier.years_on_platform}+ Years</span>`;
+            } catch (e) {}
+        }
+
+        async function loadReviews(pid) {
+            try {
+                const res = await fetch(`/api/reviews?product_id=${pid}`);
+                if (!res.ok) return;
+                const reviews = await res.json();
+                const section = document.getElementById('reviewsSection');
+                if (!reviews.length) { section.innerHTML = '<p style="color:#888;">No reviews yet</p>'; return; }
+                section.innerHTML = reviews.map(r => `
+                    <div class="review-item">
+                        <div class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+                        <div class="review-text">${r.comment || ''}</div>
+                        <div class="review-meta">User #${r.user_id} · ${new Date(r.created_at).toLocaleDateString()}</div>
+                    </div>
+                `).join('');
+            } catch (e) { document.getElementById('reviewsSection').innerHTML = '<p style="color:#888;">No reviews yet</p>'; }
+        }
+
+        async function addToCart() {
+            const qty = parseInt(document.getElementById('quantityInput').value) || 1;
+            const result = await Cart.add(productId, qty, currentProduct?.seller_id);
+            if (result && result.moq_met === false) {
+                showToast('Warning: Below minimum order quantity (' + result.moq + ' pcs)', 'warning');
+            } else {
+                showToast('Added to cart!', 'success');
+            }
+        }
+
+        function sendInquiry() {
+            window.location.href = `/b2b/messages?new_supplier=${currentProduct?.seller_id}`;
+        }
+
+        loadProduct();
+    </script>
+    <script src="/static/toast.js"></script>
+    <script src="/static/cart.js"></script>
+</body>
+</html>

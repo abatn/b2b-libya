@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{rfq.title}}</title>
+    <meta name="description" content="{{rfq.meta_description}}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; }
+        :root { --primary: #ff6a00; --primary-dark: #e55d00; --secondary: #1a1a2e; --accent: #00d2ff; --success: #28a745; --warning: #ffc107; --danger: #dc3545; --border: #e8e8e8; --radius: 12px; }
+        /* RTL SUPPORT */
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 30px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .page-header h2 { font-size: 1.5rem; }
+        .btn-new { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: var(--radius); font-weight: bold; cursor: pointer; text-decoration: none; }
+        .btn-new:hover { background: var(--primary-dark); }
+
+        .table-card { background: white; border-radius: var(--radius); overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8f9fa; color: #555; font-weight: 600; padding: 14px 16px; text-align: left; font-size: 0.85rem; text-transform: uppercase; }
+        td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        tr:hover { background: #fafafa; }
+        .status { padding: 4px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+        .status-pending { background: #fff3e0; color: #e67e22; }
+        .status-quoted { background: #e8f4fd; color: var(--accent); }
+        .status-accepted { background: #e6f9ee; color: var(--success); }
+        .status-rejected { background: #fde8e8; color: var(--danger); }
+        .btn-view { padding: 6px 14px; background: var(--accent); color: white; border: none; border-radius: var(--radius); cursor: pointer; text-decoration: none; font-size: 0.8rem; }
+        .no-data { text-align: center; padding: 60px; color: #888; }
+        footer { background: var(--secondary); color: #8892b0; padding: 30px; text-align: center; margin-top: 40px; }
+
+        @media (max-width: 640px) {
+            .page-header { flex-direction: column; gap: 10px; }
+            .table-card { overflow-x: auto; }
+        }
+    /* ═══════════════════════════════════════════════════════════════════
+           NAV — Alibaba 3-Layer Structure
+           Layer 1: Top Bar (Utility)
+           Layer 2: Main Bar (Search + Account)
+           Layer 3: Category Nav (Scrollable Tabs)
+           ═══════════════════════════════════════════════════════════════════ */
+
+        /* --- LAYER 1: Top Bar --- */
+
+        /* --- LAYER 2: Main Bar --- */
+
+        /* --- LAYER 3: Category Nav --- */
+
+        /* --- MOBILE BOTTOM NAV --- */
+        .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); z-index: 200; padding: 6px 0; }
+        .mobile-bottom-nav .bottom-nav-items { display: flex; justify-content: space-around; }
+        .mobile-bottom-nav .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: #888; font-size: 0.65rem; padding: 4px 8px; }
+        .mobile-bottom-nav .bottom-nav-item.active { color: var(--primary); }
+        .mobile-bottom-nav .bottom-nav-item svg { width: 22px; height: 22px; }
+        .mobile-bottom-nav .bottom-nav-item .bnav-badge { background: var(--primary); color: white; font-size: 0.55rem; padding: 1px 4px; border-radius: 6px; position: absolute; top: -2px; right: -4px; }
+        .mobile-bottom-nav .bottom-nav-item span { position: relative; }
+
+        /* --- RTL SUPPORT --- */
+        [dir="rtl"] .hero-search { direction: rtl; }
+        [dir="rtl"] .hero-search select { border-right: none; border-left: 1px solid #eee; }
+        [dir="rtl"] .breadcrumb { text-align: right; }
+        [dir="rtl"] .categories-grid { direction: rtl; }
+        [dir="rtl"] .category-nav { direction: rtl; }
+        [dir="rtl"] .category-dropdown { text-align: right; right: 0; left: auto; }
+        [dir="rtl"] .products-grid { direction: rtl; }
+        [dir="rtl"] .product-supplier { direction: ltr; }
+        [dir="rtl"] .trust-grid { direction: rtl; }
+        [dir="rtl"] .how-grid { direction: rtl; }
+        [dir="rtl"] .how-arrow { transform: scaleX(-1); }
+        [dir="rtl"] .why-grid { direction: rtl; }
+        [dir="rtl"] .footer-grid { direction: rtl; }
+        [dir="rtl"] .section-header { flex-direction: row-reverse; }
+        [dir="rtl"] .section-header a::before { content: '← '; }
+        [dir="rtl"] .section-header a::after { content: ''; }
+        [dir="rtl"] .floor-header { flex-direction: row-reverse; }
+        [dir="rtl"] .stats { direction: rtl; }
+
+        
+        <!-- NAV_CSS_INCLUDE -->
+    </style>
+</head>
+<body>
+<!-- NAV_INCLUDE -->
+    <div class="container">
+        <div class="page-header">        <h1 style="font-size:1.8rem;color:var(--secondary);margin-bottom:0;">{{rfq.title}}</h1>
+
+            <h2>{{rfq.title}}</h2>
+            <a href="/b2b/rfq/new" class="btn-new">+ {{rfq.new_rfq}}</a>
+        </div>
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>{{rfq.th_id}}</th>
+                        <th>{{rfq.th_product}}</th>
+                        <th>{{rfq.th_quantity}}</th>
+                        <th>{{rfq.th_status}}</th>
+                        <th>{{rfq.th_date}}</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="rfqTable"></tbody>
+            </table>
+            <div class="no-data" id="noData" style="display:none;">
+                <p>  {{rfq.no_rfqs}}</p>
+                <p style="margin-top:10px;"><a href="/b2b/rfq/new" style="color:var(--primary)">{{rfq.create_first}}</a></p>
+            </div>
+
+    <footer>
+        <p>Libya B2B Platform | {{landing.footer_built}}</p>
+    </footer>
+
+    <script src="/static/auth.js"></script>
+    <script>
+        (async () => {
+            const user = await Auth.requireAuth('buyer');
+            if (!user) return;
+            Auth.updateNavAuth(user);
+        })();
+        async function loadRFQs() {
+            try {
+                const res = await fetch('/api/b2b/rfq');
+                const data = await res.json();
+                const tbody = document.getElementById('rfqTable');
+                const noData = document.getElementById('noData');
+
+                if (!data.rfqs.length) { tbody.innerHTML = ''; noData.style.display = 'block'; return; }
+                noData.style.display = 'none';
+
+                const statusClass = { pending: 'status-pending', quoted: 'status-quoted', accepted: 'status-accepted', rejected: 'status-rejected' };
+                const statusLabel = { pending: '{{rfq.status_pending}}', quoted: '{{rfq.status_quoted}}', accepted: '{{rfq.status_accepted}}', rejected: '{{rfq.status_rejected}}' };
+
+                tbody.innerHTML = data.rfqs.map(r => `
+                    <tr>
+                        <td><strong>{{rfq.rfq_id}}-${r.id}</strong></td>
+                        <td>${r.product_name}</td>
+                        <td>${r.quantity}</td>
+                        <td><span class="status ${statusClass[r.status] || 'status-pending'}">${statusLabel[r.status] || r.status}</span></td>
+                        <td>${new Date(r.created_at).toLocaleDateString()}</td>
+                        <td><a href="/b2b/rfq/${r.id}" class="btn-view">{{rfq.view_details}}</a></td>
+                    </tr>
+                `).join('');
+            } catch (e) { console.error(e); }
+        }
+        loadRFQs();
+    </script>
+    <script>
+        const _base = window.location.pathname.startsWith('/ar/') ? '/ar' : '';
+
+        // Load categories for nav dropdown
+        (async () => {
+            try {
+                const res = await fetch('/api/b2b/categories');
+                const cats = await res.json();
+                const select = document.getElementById('navCatSelect');
+                if (select && Array.isArray(cats)) {
+                    cats.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.icon + ' ' + (_base ? (c.name_ar || c.name_en) : c.name_en);
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (e) { console.error('Categories load failed:', e); }
+        })();
+
+            </script>
+<!-- NAV_JS_INCLUDE -->
+<script>
+(async () => {
+    try {
+        const user = await Auth.me();
+        if (!user) { Auth.showLoginModal(); return; }
+    } catch(e) { Auth.showLoginModal(); }
+})();
+</script>
+</body>
+</html>

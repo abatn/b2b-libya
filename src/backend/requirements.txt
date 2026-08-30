@@ -1,0 +1,115 @@
+# Libya B2B Platform - Backend Dependencies
+# Projektversion: v1.5 | Stand: 15.08.2026
+# Alle Open-Source Lizenzen (MIT, Apache 2.0, BSD)
+
+# ============================================================
+# WEB FRAMEWORK
+# ============================================================
+
+# FastAPI 0.115.0 - CPU-effizient, async-support, automatische API-Doku
+# Quelle: MENA_B2B_LIBYEN_PHASE1_OPENSOURCE.md
+fastapi==0.115.0
+
+# Uvicorn 0.30.0 - ASGI-Server fuer FastAPI
+# Quelle: FastAPI Dokumentation
+uvicorn[standard]==0.30.0
+
+# Python-multipart 0.0.9 - File-Upload-Support
+# Quelle: FastAPI Dependencies
+python-multipart==0.0.9
+
+# ============================================================
+# DATABASE
+# ============================================================
+
+# SQLAlchemy 2.0.35 - ORM fuer SQLite (Offline-first)
+# Quelle: MENA_B2B_LIBYEN_PHASE1_OPENSOURCE.md
+sqlalchemy==2.0.35
+
+# ============================================================
+# VALIDATION
+# ============================================================
+
+# Pydantic 2.9.0 - Request/Response Validation
+# Quelle: FastAPI Dependencies
+pydantic==2.9.0
+
+# ============================================================
+# KI/ML (CPU-only)
+# ============================================================
+
+# scikit-learn 1.5.2 - Dynamische Preisgestaltung, Betrugserkennung
+# Quelle: MENA_B2B_LIBYEN_PHASE1_OPENSOURCE.md
+scikit-learn==1.5.2
+
+# NumPy 1.26.4 - Numerical Computing (Dependency von scikit-learn)
+# Quelle: scikit-learn Requirements
+numpy==1.26.4
+
+# ============================================================
+# QR-CODE GENERATION
+# ============================================================
+
+# qrcode 7.4.2 - QR-Code-Generierung fuer COD-Tracking
+# Quelle: MENA_B2B_LIBYEN_PHASE1_OPENSOURCE.md
+qrcode[pil]==7.4.2
+
+# Pillow 11.3.0 - Bildverarbeitung fuer QR-Codes
+# Quelle: qrcode Dependencies
+Pillow==11.3.0
+
+# ============================================================
+# TESTING
+# ============================================================
+
+# Pytest 8.3.3 - Test-Framework
+# Quelle: Projekt-X-Standard
+pytest==8.3.3
+
+# Httpx 0.27.2 - HTTP-Client fuer API-Tests
+# Quelle: FastAPI Testing
+httpx==0.27.2
+
+# ============================================================
+# LINTING
+# ============================================================
+
+# Ruff 0.6.9 - Code-Qualitaet und Linting
+# Quelle: Projekt-X-Standard
+ruff==0.6.9
+
+# ============================================================
+# UTILITIES
+# ============================================================
+
+# Python-dateutil 2.9.0 - Datum/Zeit-Behandlung
+# Quelle: Standard-Library-Ergaenzung
+python-dateutil==2.9.0
+
+# Typing-Extensions 4.12.2 - Type-Hints fuer aeltere Python-Versionen
+# Quelle: Kompatibilitaet
+typing-extensions==4.12.2
+
+# psutil 6.0.0 - System-Monitoring fuer CPU/RAM
+# Quelle: Sprint 8 Monitoring-Endpoint
+psutil==6.0.0
+
+# ============================================================
+# PUSH NOTIFICATIONS
+# ============================================================
+
+# pywebpush 2.0.3 - Web Push API fuer Push-Benachrichtigungen
+# Quelle: W3C Push API Standard
+pywebpush==2.0.3
+
+# py-vapid 1.9.1 - VAPID-Schluessel fuer Push-Authentifizierung
+# Quelle: RFC 8292 (VAPID)
+py-vapid==1.9.1
+
+# ============================================================
+# SECURITY
+# ============================================================
+
+# bcrypt 4.2.0 - Passwort-Hashing (Industry Standard)
+# Quelle: OWASP Password Storage Cheat Sheet
+bcrypt==4.2.0

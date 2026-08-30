@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{seller_dashboard.title}}</title>
+    <meta name="description" content="{{seller.meta_description}}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; }
+        :root { --primary: #ff6a00; --primary-dark: #e55d00; --secondary: #1a1a2e; --accent: #00d2ff; --success: #28a745; --warning: #ffc107; --danger: #dc3545; --border: #e8e8e8; --radius: 12px; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px 30px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .page-header h2 { font-size: 1.5rem; }
+
+        .tabs { display: flex; gap: 0; border-bottom: 3px solid var(--border); margin-bottom: 25px; overflow-x: auto; }
+        .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 25px; }
+        .stat-card { background: white; border-radius: var(--radius); padding: 22px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .stat-icon { font-size: 2rem; margin-bottom: 8px; }
+        .stat-value { font-size: 1.8rem; color: var(--primary); font-weight: bold; }
+        .stat-label { color: #888; font-size: 0.85rem; margin-top: 4px; }
+
+        .section { background: white; border-radius: var(--radius); padding: 22px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; }
+        .section h3 { font-size: 1.1rem; color: var(--secondary); margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--primary); }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 6px; color: #555; font-size: 0.9rem; }
+        .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 2px solid var(--border); border-radius: 8px; font-size: 0.9rem; font-family: inherit; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--primary); outline: none; }
+
+        .btn { padding: 10px 20px; border: none; border-radius: var(--radius); font-weight: 600; cursor: pointer; font-size: 0.9rem; }
+        .btn-danger { background: white; color: var(--danger); border: 2px solid var(--danger); }
+        .btn-danger:hover { background: #fde8e8; }
+        .btn-sm { padding: 6px 14px; font-size: 0.8rem; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8f9fa; color: #555; font-weight: 600; padding: 12px 14px; text-align: left; font-size: 0.8rem; text-transform: uppercase; }
+        td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        tr:hover { background: #fafafa; }
+        .status { padding: 4px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }
+        .status-pending { background: #fff3e0; color: #e67e22; }
+        .status-shipped { background: #e8f4fd; color: var(--accent); }
+        .status-delivered { background: #e6f9ee; color: var(--success); }
+        .no-data { text-align: center; padding: 40px; color: #888; }
+        .actions { display: flex; gap: 6px; }
+
+        footer { background: var(--secondary); color: #8892b0; padding: 30px; text-align: center; margin-top: 40px; }
+
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .form-row { grid-template-columns: 1fr; }
+            .tabs { gap: 0; }
+        }
+        @media (max-width: 640px) {
+            .container { padding: 15px; }
+        }
+    /* ═══════════════════════════════════════════════════════════════════
+           NAV — Alibaba 3-Layer Structure
+           Layer 1: Top Bar (Utility)
+           Layer 2: Main Bar (Search + Account)
+           Layer 3: Category Nav (Scrollable Tabs)
+           ═══════════════════════════════════════════════════════════════════ */
+
+        /* --- LAYER 1: Top Bar --- */
+
+        /* --- LAYER 2: Main Bar --- */
+
+        /* --- LAYER 3: Category Nav --- */
+
+        /* --- MOBILE BOTTOM NAV --- */
+        .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); z-index: 200; padding: 6px 0; }
+        .mobile-bottom-nav .bottom-nav-items { display: flex; justify-content: space-around; }
+        .mobile-bottom-nav .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: #888; font-size: 0.65rem; padding: 4px 8px; }
+        .mobile-bottom-nav .bottom-nav-item.active { color: var(--primary); }
+        .mobile-bottom-nav .bottom-nav-item svg { width: 22px; height: 22px; }
+        .mobile-bottom-nav .bottom-nav-item .bnav-badge { background: var(--primary); color: white; font-size: 0.55rem; padding: 1px 4px; border-radius: 6px; position: absolute; top: -2px; right: -4px; }
+        .mobile-bottom-nav .bottom-nav-item span { position: relative; }
+
+        /* --- RTL SUPPORT --- */
+        [dir="rtl"] .hero-search { direction: rtl; }
+        [dir="rtl"] .hero-search select { border-right: none; border-left: 1px solid #eee; }
+        [dir="rtl"] .breadcrumb { text-align: right; }
+        [dir="rtl"] .categories-grid { direction: rtl; }
+        [dir="rtl"] .category-nav { direction: rtl; }
+        [dir="rtl"] .category-dropdown { text-align: right; right: 0; left: auto; }
+        [dir="rtl"] .products-grid { direction: rtl; }
+        [dir="rtl"] .product-supplier { direction: ltr; }
+        [dir="rtl"] .trust-grid { direction: rtl; }
+        [dir="rtl"] .how-grid { direction: rtl; }
+        [dir="rtl"] .how-arrow { transform: scaleX(-1); }
+        [dir="rtl"] .why-grid { direction: rtl; }
+        [dir="rtl"] .footer-grid { direction: rtl; }
+        [dir="rtl"] .section-header { flex-direction: row-reverse; }
+        [dir="rtl"] .section-header a::before { content: '← '; }
+        [dir="rtl"] .section-header a::after { content: ''; }
+        [dir="rtl"] .floor-header { flex-direction: row-reverse; }
+        [dir="rtl"] .stats { direction: rtl; }
+
+        
+        <!-- NAV_CSS_INCLUDE -->
+    </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "/"},
+    {"@type": "ListItem", "position": 2, "name": "Seller Dashboard", "item": "/seller"}
+  ]
+}
+</script>
+</head>
+<body>
+<!-- NAV_INCLUDE -->
+    <div class="container">
+        <div class="page-header">        <h1 style="font-size:1.8rem;color:var(--secondary);margin-bottom:0;">{{seller_dashboard.title}}</h1>
+
+            <h2>{{seller_dashboard.title}}</h2>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="dashboard">{{seller_dashboard.tab_dashboard}}</div>
+            <div class="tab" data-tab="products">{{seller_dashboard.tab_products}}</div>
+            <div class="tab" data-tab="orders">{{seller_dashboard.tab_orders}}</div>
+            <div class="tab" data-tab="messages">{{seller_dashboard.tab_messages}}</div>
+            <div class="tab" data-tab="analytics">{{seller_dashboard.tab_analytics}}</div>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div class="tab-content active" id="tab-dashboard">
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-icon"> </div><div class="stat-value" id="revenue">0 LYD</div><div class="stat-label">{{seller_dashboard.revenue}}</div></div>
+                <div class="stat-card"><div class="stat-icon"> </div><div class="stat-value" id="totalOrders">0</div><div class="stat-label">{{seller_dashboard.total_orders}}</div></div>
+                <div class="stat-card"><div class="stat-icon"> </div><div class="stat-value" id="totalProducts">0</div><div class="stat-label">{{seller_dashboard.total_products}}</div></div>
+                <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-value" id="rating">0.0</div><div class="stat-label">{{seller_dashboard.rating}}</div></div>
+            </div>
+            <div class="section">
+                <h3>{{seller_dashboard.recent_orders}}</h3>
+                <table>
+                    <thead><tr><th>{{seller_dashboard.order_id}}</th><th>{{seller_dashboard.buyer}}</th><th>{{seller_dashboard.amount}}</th><th>{{seller_dashboard.status}}</th><th>{{seller_dashboard.date}}</th></tr></thead>
+                    <tbody id="recentOrders"></tbody>
+                </table>
+                <div class="no-data" id="noOrders" style="display:none;">{{seller_dashboard.no_orders}}</div>
+
+        <!-- Products Tab -->
+        <div class="tab-content" id="tab-products">
+            <div class="section">
+                <h3>{{seller_dashboard.add_product}}</h3>
+                <form id="productForm">
+                    <div class="form-row">
+                        <div class="form-group"><label>{{seller.name_en}} *</label><input type="text" id="pName" required></div>
+                        <div class="form-group"><label>{{seller.name_ar}}</label><input type="text" id="pNameAr"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>{{seller.price}} *</label><input type="number" id="pPrice" step="0.01" required></div>
+                        <div class="form-group"><label>{{seller.stock}} *</label><input type="number" id="pStock" required></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>{{seller.category}} *</label><select id="pCategory"><option value="Building Materials">{{seller.cat_bau}}</option><option value="Electrical">{{seller.cat_elektro}}</option><option value="Hardware">{{seller.cat_hardware}}</option><option value="Office">{{seller.cat_office}}</option></select></div>
+                        <div class="form-group"><label>{{seller.description}}</label><input type="text" id="pDesc"></div>
+                    </div>
+                    <div class="form-group"><label>Product Image</label><input type="file" id="pImage" accept="image/*" style="width:100%;padding:10px;border:2px solid var(--border);border-radius:8px;"></div>
+                    <button type="submit" class="btn btn-primary">{{seller.btn_add}}</button>
+                </form>
+            </div>
+            <div class="section">
+                <h3>{{seller.my_products}}</h3>
+                <table>
+                    <thead><tr><th>ID</th><th>Name</th><th>Price</th><th>Stock</th><th>{{common.edit}}</th><th>{{common.delete}}</th></tr></thead>
+                    <tbody id="productsTable"></tbody>
+                </table>
+                <div class="no-data" id="noProducts" style="display:none;">{{seller_dashboard.no_products}}</div>
+
+        <!-- Orders Tab -->
+        <div class="tab-content" id="tab-orders">
+            <div class="section">
+                <h3>{{seller_dashboard.tab_orders}}</h3>
+                <div style="display:flex;gap:8px;margin-bottom:15px;">
+                    <button class="btn btn-sm" style="background:#eee;" onclick="filterOrders('all')">{{b2b_feed.all_products}}</button>
+                    <button class="btn btn-sm" style="background:#fff3e0;" onclick="filterOrders('pending')">{{rfq.status_pending}}</button>
+                    <button class="btn btn-sm" style="background:#e8f4fd;" onclick="filterOrders('shipped')">{{rfq.status_quoted}}</button>
+                    <button class="btn btn-sm" style="background:#e6f9ee;" onclick="filterOrders('delivered')">{{rfq.status_accepted}}</button>
+                </div>
+                <table>
+                    <thead><tr><th>{{seller_dashboard.order_id}}</th><th>{{seller_dashboard.buyer}}</th><th>{{seller_dashboard.amount}}</th><th>{{seller_dashboard.status}}</th><th>{{seller_dashboard.date}}</th><th></th></tr></thead>
+                    <tbody id="ordersTable"></tbody>
+                </table>
+
+        <!-- Messages Tab -->
+        <div class="tab-content" id="tab-messages">
+            <div class="section">
+                <h3>{{messages.title}}</h3>
+                <p style="color:#888;">{{messages.start_chat}}</p>
+                <a href="/b2b/messages" class="btn btn-primary" style="margin-top:15px;display:inline-block;text-decoration:none;">{{messages.title}}</a>
+
+        <!-- Analytics Tab -->
+        <div class="tab-content" id="tab-analytics">
+            <div class="section">
+                <h3>{{seller_dashboard.tab_analytics}}</h3>
+                <p style="color:#888;margin-bottom:15px;">Sales overview and trends</p>
+                <div id="analyticsContent"></div>
+            </div>
+
+    <footer>
+        <p>Libya B2B Platform | {{landing.footer_built}}</p>
+    </footer>
+
+    <script src="/static/auth.js"></script>
+    <script src="/static/tabs.js"></script>
+    <script>
+        (async () => {
+            const user = await Auth.requireAuth('seller');
+            if (!user) return;
+            Auth.updateNavAuth(user);
+        })();
+        let allOrders = [];
+        initTabs();
+        // Tab switching handled by tabs.js
+
+        document.getElementById('productForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const res = await fetch('/api/products', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    name: document.getElementById('pName').value,
+                    name_arabic: document.getElementById('pNameAr').value || null,
+                    price: parseFloat(document.getElementById('pPrice').value),
+                    stock_quantity: parseInt(document.getElementById('pStock').value),
+                    category: document.getElementById('pCategory').value,
+                    seller_id: 1
+                })
+            });
+            const product = await res.json();
+            // Upload image if provided
+            const fileInput = document.getElementById('pImage');
+            if (fileInput.files.length > 0) {
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                await fetch(`/api/products/${product.id}/images?is_primary=true`, {
+                    method: 'POST',
+                    body: formData
+                });
+            }
+            e.target.reset();
+            loadDashboard();
+        });
+
+        async function loadDashboard() {
+            try {
+                const [prodRes, orderRes] = await Promise.all([fetch('/api/products'), fetch('/api/orders')]);
+                const products = await prodRes.json();
+                const orders = await orderRes.json();
+                allOrders = orders;
+
+                document.getElementById('totalProducts').textContent = products.length;
+                document.getElementById('totalOrders').textContent = orders.length;
+                const rev = orders.reduce((s, o) => s + o.total_amount, 0);
+                document.getElementById('revenue').textContent = rev.toFixed(0) + ' LYD';
+                document.getElementById('rating').textContent = '4.5';
+
+                // Products table
+                const ptBody = document.getElementById('productsTable');
+                const noProd = document.getElementById('noProducts');
+                if (!products.length) { ptBody.innerHTML = ''; noProd.style.display = 'block'; }
+                else {
+                    noProd.style.display = 'none';
+                    ptBody.innerHTML = products.map(p => `<tr><td>${p.id}</td><td>${p.image_url ? '<img src="' + p.image_url + '" alt="' + p.name + '" style="width:40px;height:40px;object-fit:cover;border-radius:4px;"> ' : ''}${p.name}</td><td>${p.price.toFixed(2)} LYD</td><td>${p.stock_quantity}</td><td><button class="btn btn-primary btn-sm" onclick="editProduct(${p.id}, '${p.name.replace(/'/g,"\\'")}', ${p.price}, ${p.stock_quantity})">{{seller_dashboard.edit_product}}</button></td><td><button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">{{seller_dashboard.delete_product}}</button></td></tr>`).join('');
+                }
+
+                // Recent orders
+                renderOrderTable('recentOrders', orders.slice(-5));
+                renderOrderTable('ordersTable', orders);
+
+                // Analytics
+                document.getElementById('analyticsContent').innerHTML = `<div class="stats-grid"><div class="stat-card"><div class="stat-value">${products.length}</div><div class="stat-label">Products</div></div><div class="stat-card"><div class="stat-value">${orders.length}</div><div class="stat-label">Orders</div></div><div class="stat-card"><div class="stat-value">${rev.toFixed(0)} LYD</div><div class="stat-label">Revenue</div></div><div class="stat-card"><div class="stat-value">${orders.filter(o => o.status === 'pending').length}</div><div class="stat-label">Pending</div></div></div>`;
+            } catch (e) { console.error(e); }
+        }
+
+        function renderOrderTable(tbodyId, orders) {
+            const tbody = document.getElementById(tbodyId);
+            if (!orders.length) { tbody.innerHTML = `<tr><td colspan="5" class="no-data">{{seller_dashboard.no_orders}}</td></tr>`; return; }
+            const statusClass = { pending: 'status-pending', shipped: 'status-shipped', delivered: 'status-delivered' };
+            tbody.innerHTML = orders.map(o => `<tr><td><strong>${o.order_number}</strong></td><td>Buyer #${o.buyer_id || 1}</td><td>${o.total_amount.toFixed(2)} LYD</td><td><span class="status ${statusClass[o.status] || ''}">${o.status}</span></td><td>${new Date(o.created_at).toLocaleDateString()}</td></tr>`).join('');
+        }
+
+        function filterOrders(status) {
+            const filtered = status === 'all' ? allOrders : allOrders.filter(o => o.status === status);
+            renderOrderTable('ordersTable', filtered);
+        }
+
+        function editProduct(id, name, price, stock) {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+            modal.innerHTML = `
+                <div style="background:white;border-radius:12px;padding:30px;max-width:400px;width:90%;box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+                    <h3 style="margin-bottom:20px;">{{seller_dashboard.edit_product}}</h3>
+                    <div class="form-group"><label>{{seller.name_en}}</label><input type="text" id="edit-name" value="${name}" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;"></div>
+                    <div class="form-group"><label>{{seller.price}}</label><input type="number" id="edit-price" value="${price}" step="0.01" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;"></div>
+                    <div class="form-group"><label>{{seller.stock}}</label><input type="number" id="edit-stock" value="${stock}" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;"></div>
+                    <div style="display:flex;gap:10px;margin-top:20px;">
+                        <button class="btn btn-primary" onclick="saveEdit(${id})">{{common.save}}</button>
+                        <button class="btn btn-danger" onclick="this.closest('div[style]').remove()">{{common.cancel}}</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(modal);
+        }
+
+        async function saveEdit(id) {
+            const name = document.getElementById('edit-name').value;
+            const price = parseFloat(document.getElementById('edit-price').value);
+            const stock = parseInt(document.getElementById('edit-stock').value);
+            await fetch(`/api/products/${id}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ name, price, stock_quantity: stock, currency: 'LYD' })
+            });
+            document.querySelector('div[style*="fixed"]').remove();
+            loadDashboard();
+        }
+
+        async function deleteProduct(id) {
+            if (confirm('Delete product?')) {
+                await fetch(`/api/products/${id}`, { method: 'DELETE' });
+                loadDashboard();
+            }
+        }
+
+        loadDashboard();
+    </script>
+    <script>
+        const _base = window.location.pathname.startsWith('/ar/') ? '/ar' : '';
+
+        
+        // Load categories for nav dropdown
+        (async () => {
+            try {
+                const res = await fetch('/api/b2b/categories');
+                const cats = await res.json();
+                const select = document.getElementById('navCatSelect');
+                if (select && Array.isArray(cats)) {
+                    cats.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.icon + ' ' + (_base ? (c.name_ar || c.name_en) : c.name_en);
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (e) { console.error('Categories load failed:', e); }
+        })();
+
+            </script>
+<!-- NAV_JS_INCLUDE -->
+<script>
+(async () => {
+    try {
+        const user = await Auth.me();
+        if (!user) { Auth.showLoginModal(); return; }
+    } catch(e) { Auth.showLoginModal(); }
+})();
+</script>
+</body>
+</html>

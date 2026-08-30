@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{messages.title}}</title>
+    <meta name="description" content="{{messages.meta_description}}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; }
+        :root { --primary: #ff6a00; --primary-dark: #e55d00; --secondary: #1a1a2e; --accent: #00d2ff; --success: #28a745; --warning: #ffc107; --danger: #dc3545; --border: #e8e8e8; --radius: 12px; }
+        .lang-btn.active { background: var(--primary); color: white; }
+        .lang-btn:not(.active) { background: rgba(26,26,46,0.8); color: white; }
+
+        .container { max-width: 800px; margin: 0 auto; padding: 30px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-new { padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: var(--radius); font-weight: bold; cursor: pointer; }
+        .conv-list { background: white; border-radius: var(--radius); box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden; }
+        .conv-item { display: flex; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); text-decoration: none; color: inherit; transition: 0.2s; cursor: pointer; }
+        .conv-item:hover { background: #fafafa; }
+        .conv-avatar { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: bold; color: white; flex-shrink: 0; margin-right: 15px; }
+        .conv-avatar.bg-1 { background: #667eea; }
+        .conv-avatar.bg-2 { background: #4facfe; }
+        .conv-avatar.bg-3 { background: #43e97b; }
+        .conv-avatar.bg-4 { background: #fa709a; }
+        .conv-info { flex: 1; min-width: 0; }
+        .conv-name { font-weight: 600; color: var(--secondary); margin-bottom: 2px; }
+        .conv-preview { color: #888; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .conv-meta { text-align: right; flex-shrink: 0; margin-left: 12px; }
+        .conv-time { font-size: 0.75rem; color: #aaa; margin-bottom: 4px; }
+        .conv-unread { display: inline-block; background: var(--primary); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: bold; }
+        .no-data { text-align: center; padding: 60px; color: #888; }
+        footer { background: var(--secondary); color: #8892b0; padding: 30px; text-align: center; margin-top: 40px; }
+
+        @media (max-width: 640px) {
+            .container { padding: 15px; }
+            .page-header { flex-direction: column; gap: 10px; }
+            .conv-item { padding: 12px 15px; }
+        }
+    /* ═══════════════════════════════════════════════════════════════════
+           NAV — Alibaba 3-Layer Structure
+           Layer 1: Top Bar (Utility)
+           Layer 2: Main Bar (Search + Account)
+           Layer 3: Category Nav (Scrollable Tabs)
+           ═══════════════════════════════════════════════════════════════════ */
+
+        /* --- LAYER 1: Top Bar --- */
+
+        /* --- LAYER 2: Main Bar --- */
+
+        /* --- LAYER 3: Category Nav --- */
+
+        /* --- MOBILE BOTTOM NAV --- */
+        .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); z-index: 200; padding: 6px 0; }
+        .mobile-bottom-nav .bottom-nav-items { display: flex; justify-content: space-around; }
+        .mobile-bottom-nav .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: #888; font-size: 0.65rem; padding: 4px 8px; }
+        .mobile-bottom-nav .bottom-nav-item.active { color: var(--primary); }
+        .mobile-bottom-nav .bottom-nav-item svg { width: 22px; height: 22px; }
+        .mobile-bottom-nav .bottom-nav-item .bnav-badge { background: var(--primary); color: white; font-size: 0.55rem; padding: 1px 4px; border-radius: 6px; position: absolute; top: -2px; right: -4px; }
+        .mobile-bottom-nav .bottom-nav-item span { position: relative; }
+
+        /* --- RTL SUPPORT --- */
+        [dir="rtl"] .hero-search { direction: rtl; }
+        [dir="rtl"] .hero-search select { border-right: none; border-left: 1px solid #eee; }
+        [dir="rtl"] .breadcrumb { text-align: right; }
+        [dir="rtl"] .categories-grid { direction: rtl; }
+        [dir="rtl"] .category-nav { direction: rtl; }
+        [dir="rtl"] .category-dropdown { text-align: right; right: 0; left: auto; }
+        [dir="rtl"] .products-grid { direction: rtl; }
+        [dir="rtl"] .product-supplier { direction: ltr; }
+        [dir="rtl"] .trust-grid { direction: rtl; }
+        [dir="rtl"] .how-grid { direction: rtl; }
+        [dir="rtl"] .how-arrow { transform: scaleX(-1); }
+        [dir="rtl"] .why-grid { direction: rtl; }
+        [dir="rtl"] .footer-grid { direction: rtl; }
+        [dir="rtl"] .section-header { flex-direction: row-reverse; }
+        [dir="rtl"] .section-header a::before { content: '← '; }
+        [dir="rtl"] .section-header a::after { content: ''; }
+        [dir="rtl"] .floor-header { flex-direction: row-reverse; }
+        [dir="rtl"] .stats { direction: rtl; }
+
+        
+        <!-- NAV_CSS_INCLUDE -->
+    </style>
+</head>
+<body>
+<!-- NAV_INCLUDE -->
+    <div class="container">
+        <div class="page-header">        <h1 style="font-size:1.8rem;color:var(--secondary);margin-bottom:0;">{{messages.title}}</h1>
+
+            <h2>{{messages.title}}</h2>
+            <button class="btn-new" onclick="createConversation()">+ {{messages.new_conversation}}</button>
+        </div>
+        <div class="conv-list" id="convList"></div>
+        <div class="no-data" id="noData" style="display:none;">
+            <p>  {{messages.no_conversations}}</p>
+            <p style="margin-top:10px;color:var(--primary);">{{messages.start_chat}}</p>
+
+    <footer>
+        <p>Libya B2B Platform | {{landing.footer_built}}</p>
+    </footer>
+
+    <script src="/static/auth.js"></script>
+    <script src="/static/toast.js"></script>
+    <script src="/static/ws.js"></script>
+    <script>
+        const avatars = ['bg-1','bg-2','bg-3','bg-4'];
+        const supplierNames = { 1: 'Libya Building Materials Co.', 2: 'Al-Fateh Electrical', 3: 'Tripoli Hardware', 4: 'Mediterranean Textiles' };
+        let currentUser = null;
+
+        (async () => {
+            currentUser = await Auth.requireAuth();
+            if (!currentUser) return;
+            Auth.updateNavAuth(currentUser);
+            await loadConversations();
+        })();
+
+        async function loadConversations() {
+            try {
+                const res = await fetch('/api/b2b/messages');
+                const data = await res.json();
+                const list = document.getElementById('convList');
+                const noData = document.getElementById('noData');
+
+                // Show demo conversations if none exist
+                const convs = data.conversations.length ? data.conversations : [
+                    { id: 1, supplier_id: 1, last_message_at: new Date().toISOString(), last_message_text: 'We can offer bulk pricing for cement...', unread_count: 2 },
+                    { id: 2, supplier_id: 2, last_message_at: new Date(Date.now() - 3600000).toISOString(), last_message_text: 'Your order has been shipped!', unread_count: 0 },
+                    { id: 3, supplier_id: 3, last_message_at: new Date(Date.now() - 86400000).toISOString(), last_message_text: 'Thank you for your inquiry.', unread_count: 1 }
+                ];
+
+                if (!convs.length) { list.innerHTML = ''; noData.style.display = 'block'; return; }
+                noData.style.display = 'none';
+
+                list.innerHTML = convs.map((c, i) => `
+                    <a href="/b2b/messages/${c.id}" class="conv-item">
+                        <div class="conv-avatar ${avatars[i % avatars.length]}">${(supplierNames[c.supplier_id] || 'Supplier').charAt(0)}</div>
+                        <div class="conv-info">
+                            <div class="conv-name">${supplierNames[c.supplier_id] || 'Supplier #' + c.supplier_id}</div>
+                            <div class="conv-preview">${c.last_message_text || '{{messages.no_messages}}'}</div>
+                        </div>
+                        <div class="conv-meta">
+                            <div class="conv-time">${c.last_message_at ? new Date(c.last_message_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : ''}</div>
+                            ${c.unread_count > 0 ? `<span class="conv-unread">${c.unread_count} {{messages.unread}}</span>` : ''}
+                        </div>
+                    </a>
+                `).join('');
+            } catch (e) { console.error(e); }
+        }
+
+        async function createConversation() {
+            try {
+                const res = await fetch('/api/b2b/messages?buyer_id=1&supplier_id=1', { method: 'POST' });
+                const data = await res.json();
+                window.location.href = `/b2b/messages/${data.id}`;
+            } catch (e) { showToast('Error creating conversation', 'error'); }
+        }
+    </script>
+    <script>
+        const _base = window.location.pathname.startsWith('/ar/') ? '/ar' : '';
+
+        // Load categories for nav dropdown
+        (async () => {
+            try {
+                const res = await fetch('/api/b2b/categories');
+                const cats = await res.json();
+                const select = document.getElementById('navCatSelect');
+                if (select && Array.isArray(cats)) {
+                    cats.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.icon + ' ' + (_base ? (c.name_ar || c.name_en) : c.name_en);
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (e) { console.error('Categories load failed:', e); }
+        })();
+
+            </script>
+<!-- NAV_JS_INCLUDE -->
+<script>
+(async () => {
+    try {
+        const user = await Auth.me();
+        if (!user) { Auth.showLoginModal(); return; }
+    } catch(e) { Auth.showLoginModal(); }
+})();
+</script>
+</body>
+</html>

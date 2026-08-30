@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{rfq_new.title}}</title>
+    <meta name="description" content="{{rfq_new.meta_description}}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; }
+        :root { --primary: #ff6a00; --primary-dark: #e55d00; --secondary: #1a1a2e; --accent: #00d2ff; --success: #28a745; --warning: #ffc107; --danger: #dc3545; --border: #e8e8e8; --radius: 12px; }
+        .lang-btn.active { background: var(--primary); color: white; }
+        .lang-btn:not(.active) { background: rgba(26,26,46,0.8); color: white; }
+
+        .container { max-width: 700px; margin: 0 auto; padding: 30px; }
+        .form-card { background: white; border-radius: var(--radius); padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .form-card h2 { margin-bottom: 25px; color: var(--secondary); }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 6px; color: #555; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 1rem; font-family: inherit; }
+        .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); outline: none; }
+        .form-group textarea { min-height: 100px; resize: vertical; }
+        .btn-submit { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: var(--radius); font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+        .btn-submit:hover { background: var(--primary-dark); }
+        .btn-back { display: inline-block; margin-top: 15px; color: var(--primary); text-decoration: none; font-weight: 600; }
+        .success-msg { display: none; text-align: center; padding: 40px; color: var(--success); }
+        .success-msg .icon { font-size: 3rem; margin-bottom: 15px; }
+        footer { background: var(--secondary); color: #8892b0; padding: 30px; text-align: center; margin-top: 40px; }
+
+        @media (max-width: 640px) {
+            .container { padding: 15px; }
+            .form-card { padding: 20px; }
+        }
+    /* ═══════════════════════════════════════════════════════════════════
+           NAV — Alibaba 3-Layer Structure
+           Layer 1: Top Bar (Utility)
+           Layer 2: Main Bar (Search + Account)
+           Layer 3: Category Nav (Scrollable Tabs)
+           ═══════════════════════════════════════════════════════════════════ */
+
+        /* --- LAYER 1: Top Bar --- */
+
+        /* --- LAYER 2: Main Bar --- */
+
+        /* --- LAYER 3: Category Nav --- */
+
+        /* --- MOBILE BOTTOM NAV --- */
+        .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); z-index: 200; padding: 6px 0; }
+        .mobile-bottom-nav .bottom-nav-items { display: flex; justify-content: space-around; }
+        .mobile-bottom-nav .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: #888; font-size: 0.65rem; padding: 4px 8px; }
+        .mobile-bottom-nav .bottom-nav-item.active { color: var(--primary); }
+        .mobile-bottom-nav .bottom-nav-item svg { width: 22px; height: 22px; }
+        .mobile-bottom-nav .bottom-nav-item .bnav-badge { background: var(--primary); color: white; font-size: 0.55rem; padding: 1px 4px; border-radius: 6px; position: absolute; top: -2px; right: -4px; }
+        .mobile-bottom-nav .bottom-nav-item span { position: relative; }
+
+        /* --- RTL SUPPORT --- */
+        [dir="rtl"] .hero-search { direction: rtl; }
+        [dir="rtl"] .hero-search select { border-right: none; border-left: 1px solid #eee; }
+        [dir="rtl"] .breadcrumb { text-align: right; }
+        [dir="rtl"] .categories-grid { direction: rtl; }
+        [dir="rtl"] .category-nav { direction: rtl; }
+        [dir="rtl"] .category-dropdown { text-align: right; right: 0; left: auto; }
+        [dir="rtl"] .products-grid { direction: rtl; }
+        [dir="rtl"] .product-supplier { direction: ltr; }
+        [dir="rtl"] .trust-grid { direction: rtl; }
+        [dir="rtl"] .how-grid { direction: rtl; }
+        [dir="rtl"] .how-arrow { transform: scaleX(-1); }
+        [dir="rtl"] .why-grid { direction: rtl; }
+        [dir="rtl"] .footer-grid { direction: rtl; }
+        [dir="rtl"] .section-header { flex-direction: row-reverse; }
+        [dir="rtl"] .section-header a::before { content: '← '; }
+        [dir="rtl"] .section-header a::after { content: ''; }
+        [dir="rtl"] .floor-header { flex-direction: row-reverse; }
+        [dir="rtl"] .stats { direction: rtl; }
+
+        
+        <!-- NAV_CSS_INCLUDE -->
+    </style>
+</head>
+<body>
+<!-- NAV_INCLUDE -->
+    <div class="container">
+        <div class="form-card" id="formCard">        <h1 style="font-size:1.8rem;color:var(--secondary);margin-bottom:0;">{{rfq_new.title}}</h1>
+
+            <h2>{{rfq_new.title}}</h2>
+            <form id="rfqForm">
+                <div class="form-group">
+                    <label>{{rfq_new.product_name}}</label>
+                    <input type="text" id="productName" required placeholder="e.g., Cement, Steel Bars...">
+                </div>
+                <div class="form-group">
+                    <label>{{rfq_new.quantity}}</label>
+                    <input type="number" id="quantity" min="1" required placeholder="e.g., 500">
+                </div>
+                <div class="form-group">
+                    <label>{{rfq_new.delivery_address}}</label>
+                    <input type="text" id="deliveryAddress" placeholder="e.g., Tripoli, Gergaresch">
+                </div>
+                <div class="form-group">
+                    <label>{{rfq_new.message}}</label>
+                    <textarea id="message" placeholder="Additional details, specifications, delivery requirements..."></textarea>
+                </div>
+                <button type="submit" class="btn-submit">{{rfq_new.send_to_suppliers}}</button>
+            </form>
+            <a href="/b2b/rfq" class="btn-back">← {{rfq_new.back_to_list}}</a>
+        </div>
+        <div class="success-msg" id="successMsg">
+            <div class="icon">✅</div>
+            <h2>{{rfq_new.success}}</h2>
+            <a href="/b2b/rfq" class="btn-back">{{rfq_new.back_to_list}}</a>
+
+    <footer>
+        <p>Libya B2B Platform | {{landing.footer_built}}</p>
+    </footer>
+
+    <script src="/static/auth.js"></script>
+    <script src="/static/toast.js"></script>
+    <script>
+        (async () => {
+            const user = await Auth.requireAuth('buyer');
+            if (!user) return;
+            Auth.updateNavAuth(user);
+        })();
+        document.getElementById('rfqForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await fetch('/api/b2b/rfq', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        product_name: document.getElementById('productName').value,
+                        quantity: parseInt(document.getElementById('quantity').value),
+                        delivery_address: document.getElementById('deliveryAddress').value,
+                        message: document.getElementById('message').value,
+                        buyer_id: 1
+                    })
+                });
+                document.getElementById('formCard').style.display = 'none';
+                document.getElementById('successMsg').style.display = 'block';
+            } catch (e) { showToast('Error creating RFQ', 'error'); }
+        });
+    </script>
+    <script>
+        const _base = window.location.pathname.startsWith('/ar/') ? '/ar' : '';
+
+        // Load categories for nav dropdown
+        (async () => {
+            try {
+                const res = await fetch('/api/b2b/categories');
+                const cats = await res.json();
+                const select = document.getElementById('navCatSelect');
+                if (select && Array.isArray(cats)) {
+                    cats.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.icon + ' ' + (_base ? (c.name_ar || c.name_en) : c.name_en);
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (e) { console.error('Categories load failed:', e); }
+        })();
+
+            </script>
+<!-- NAV_JS_INCLUDE -->
+<script>
+(async () => {
+    try {
+        const user = await Auth.me();
+        if (!user) { Auth.showLoginModal(); return; }
+    } catch(e) { Auth.showLoginModal(); }
+})();
+</script>
+</body>
+</html>

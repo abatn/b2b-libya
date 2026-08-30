@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{supplier_detail.title}}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; }
+        :root { --primary: #ff6a00; --secondary: #1a1a2e; --accent: #00d2ff; --success: #28a745; --border: #e8e8e8; --radius: 12px; }
+        .navbar { background: var(--secondary); padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .navbar-brand { color: var(--primary); font-size: 1.4rem; font-weight: bold; text-decoration: none; }
+        .nav-links { display: flex; gap: 4px; align-items: center; }
+        .nav-links a { color: #8892b0; text-decoration: none; padding: 8px 14px; border-radius: 5px; transition: 0.3s; font-size: 0.9rem; }
+        .nav-links a:hover, .nav-links a.active { background: var(--primary); color: white; }
+        .lang-switch { position: fixed; top: 15px; right: 15px; z-index: 1000; display: flex; border-radius: 25px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .lang-btn { padding: 8px 16px; border: none; cursor: pointer; font-weight: bold; text-decoration: none; }
+        .lang-btn.active { background: var(--primary); color: white; }
+        .lang-btn:not(.active) { background: rgba(26,26,46,0.8); color: white; }
+        [dir="rtl"] .navbar { flex-direction: row-reverse; }
+        [dir="rtl"] .lang-btn { margin-inline-start: auto; margin-inline-end: 0; }
+
+        .breadcrumb { max-width: 1200px; margin: 0 auto; padding: 15px 30px 0; font-size: 0.85rem; color: #888; }
+        .breadcrumb a { color: var(--primary); text-decoration: none; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 15px 30px 30px; }
+        .profile-card { background: white; border-radius: var(--radius); padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 25px; display: grid; grid-template-columns: 1fr 300px; gap: 30px; }
+        .profile-main h2 { font-size: 1.5rem; color: var(--secondary); margin-bottom: 5px; }
+        .profile-main .location { color: #888; margin-bottom: 15px; }
+        .profile-main .description { color: #555; line-height: 1.7; margin-bottom: 15px; }
+        .badges { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+        .badge { padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+        .badge-verified { background: #e6f9ee; color: var(--success); }
+        .badge-trade { background: #fff3e0; color: #e67e22; }
+        .badge-years { background: #e8f4fd; color: var(--accent); }
+        .rating-box { text-align: center; background: var(--secondary); color: white; border-radius: var(--radius); padding: 25px; }
+        .rating-box .big-rating { font-size: 3rem; font-weight: bold; }
+        .rating-box .stars { color: #ffc107; font-size: 1.2rem; margin: 5px 0; }
+        .rating-box .count { color: #8892b0; font-size: 0.9rem; }
+        .btn-msg { display: block; width: 100%; margin-top: 15px; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; text-align: center; text-decoration: none; }
+        .btn-msg:hover { background: #e55d00; }
+
+        .section-title { font-size: 1.2rem; color: var(--secondary); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--primary); }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
+        .product-card { background: white; border-radius: var(--radius); overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+        .product-image { height: 140px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; }
+        .product-image.bg-1 { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .product-image.bg-2 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .product-image.bg-3 { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+        .product-body { padding: 14px; }
+        .product-name { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
+        .product-price { font-size: 1.1rem; color: var(--primary); font-weight: bold; }
+
+        .no-products { text-align: center; padding: 40px; color: #888; }
+        footer { background: var(--secondary); color: #8892b0; padding: 30px; text-align: center; margin-top: 40px; }
+        footer a { color: var(--primary); text-decoration: none; }
+
+        @media (max-width: 768px) {
+            .profile-card { grid-template-columns: 1fr; }
+            .products-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+    <div class="lang-switch"><a href="#" class="lang-btn active">EN</a></div>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">Libya B2B</a>
+        <div class="nav-links">
+            <a href="/">{{nav.home}}</a>
+            <a href="/products">{{nav.products}}</a>
+            <a href="/b2b/products">{{nav.b2b}}</a>
+            <a href="/b2b/suppliers" class="active">{{suppliers.title}}</a>
+            <a href="/b2b/rfq">{{rfq.title}}</a>
+            <a href="/b2b/messages">{{messages.title}}</a>
+            <a href="/seller">{{nav.seller}}</a>
+            <a href="/buyer">{{nav.buyer}}</a>
+        </div>
+        <a href="#" class="lang-btn" data-lang-switch>{{nav.switch_lang}}</a>
+    </nav>
+
+    <div class="breadcrumb">
+        <a href="/b2b/suppliers">B2B</a> &gt; <a href="/b2b/suppliers">{{suppliers.title}}</a> &gt; <span id="breadcrumb-name">...</span>
+    </div>
+
+    <div class="container">
+        <div class="profile-card">
+            <div class="profile-main">
+                <h2 id="supplierName">Loading...</h2>
+                <div class="location" id="supplierLocation">  Loading...</div>
+                <div class="badges" id="badges"></div>
+                <div class="description" id="supplierDesc"></div>
+            </div>
+            <div class="rating-box">
+                <div class="big-rating" id="bigRating">0.0</div>
+                <div class="stars" id="bigStars">☆☆☆☆☆</div>
+                <div class="count" id="ratingCount">0 {{suppliers.reviews_label}}</div>
+                <a href="/b2b/messages" class="btn-msg">{{supplier_detail.send_message}}</a>
+            </div>
+        </div>
+
+        <h3 class="section-title">{{supplier_detail.our_products}}</h3>
+        <div class="products-grid" id="productsGrid"></div>
+        <div class="no-products" id="noProducts" style="display:none;">{{supplier_detail.no_products}}</div>
+    </div>
+
+    <footer>
+        <p>Libya B2B Platform | {{landing.footer_built}}</p>
+    </footer>
+
+    <script>
+        const bgClasses = ['bg-1','bg-2','bg-3'];
+
+        function renderStars(rating) {
+            const full = Math.floor(rating); const half = rating % 1 >= 0.5 ? 1 : 0;
+            let s = '';
+            for (let i = 0; i < full; i++) s += '★';
+            if (half) s += '½';
+            for (let i = full + half; i < 5; i++) s += '☆';
+            return s;
+        }
+
+        async function loadSupplier() {
+            const id = window.location.pathname.split('/').pop();
+            try {
+                const res = await fetch(`/api/b2b/suppliers/${id}`);
+                if (!res.ok) { document.getElementById('supplierName').textContent = 'Supplier not found'; return; }
+                const s = await res.json();
+                document.getElementById('supplierName').textContent = s.name;
+                document.getElementById('breadcrumb-name').textContent = s.name;
+                document.getElementById('supplierLocation').textContent = '  ' + (s.location || 'Libya');
+                document.getElementById('supplierDesc').textContent = s.description || 'No description available.';
+                document.getElementById('bigRating').textContent = s.rating.toFixed(1);
+                document.getElementById('bigStars').textContent = renderStars(s.rating);
+                document.getElementById('ratingCount').textContent = s.rating_count + ' {{suppliers.reviews_label}}';
+
+                let badgesHtml = '';
+                if (s.is_verified) badgesHtml += '<span class="badge badge-verified">✓ {{supplier_detail.verified}}</span>';
+                badgesHtml += '<span class="badge badge-trade">  {{supplier_detail.trade_assurance}}</span>';
+                badgesHtml += `<span class="badge badge-years">  ${s.years_on_platform} {{supplier_detail.years_platform}}</span>`;
+                document.getElementById('badges').innerHTML = badgesHtml;
+
+                const grid = document.getElementById('productsGrid');
+                const noProducts = document.getElementById('noProducts');
+                if (s.products && s.products.length) {
+                    noProducts.style.display = 'none';
+                    grid.innerHTML = s.products.map((p, i) => `
+                        <div class="product-card">
+                            <div class="product-image ${bgClasses[i % bgClasses.length]}"> </div>
+                            <div class="product-body">
+                                <div class="product-name">${p.name}</div>
+                                <div class="product-price">${p.price.toFixed(2)} ${p.currency}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    grid.innerHTML = '';
+                    noProducts.style.display = 'block';
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        loadSupplier();
+    </script>
+</body>
+</html>

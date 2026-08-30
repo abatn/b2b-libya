@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{suppliers.title}}</title>
+    <meta name="description" content="{{suppliers.meta_description}}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; }
+        :root { --primary: #ff6a00; --primary-dark: #e55d00; --secondary: #1a1a2e; --accent: #00d2ff; --success: #28a745; --warning: #ffc107; --danger: #dc3545; --border: #e8e8e8; --radius: 12px; }
+        /* RTL SUPPORT */
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 30px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .page-header h2 { font-size: 1.5rem; color: var(--secondary); }
+        .sort-bar { display: flex; gap: 8px; }
+        .sort-btn { padding: 8px 16px; border: 2px solid var(--border); border-radius: 20px; background: white; cursor: pointer; font-size: 0.85rem; transition: 0.2s; }
+        .sort-btn:hover, .sort-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .suppliers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+        .supplier-card { background: white; border-radius: var(--radius); padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: 0.3s; cursor: pointer; text-decoration: none; color: inherit; display: block; }
+        .supplier-card:hover { transform: translateY(-4px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+        .supplier-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+        .supplier-logo { width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; flex-shrink: 0; }
+        .supplier-info h3 { font-size: 1.1rem; color: var(--secondary); margin-bottom: 2px; }
+        .supplier-info .location { font-size: 0.8rem; color: #888; }
+        .badges { display: flex; gap: 8px; margin: 12px 0; flex-wrap: wrap; }
+        .badge { padding: 4px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; }
+        .badge-verified { background: #e6f9ee; color: var(--success); border: 1px solid #28a745; }
+        .badge-trade { background: #fff3e0; color: #e67e22; }
+        .badge-years { background: #e8f4fd; color: var(--accent); }
+        .badge-top { background: linear-gradient(135deg, #ff6a00, #ff9a56); color: white; }
+        .badge-new { background: #f0e6ff; color: #7c3aed; }
+        .badge-unverified { background: #f8f9fa; color: #999; border: 1px dashed #ddd; }
+        .rating { display: flex; align-items: center; gap: 6px; margin: 10px 0; }
+        .stars { color: #ffc107; font-size: 1rem; }
+        .rating-text { font-size: 0.85rem; color: #888; }
+        .supplier-stats { display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px solid var(--border); }
+        .stat { text-align: center; }
+        .stat-value { font-size: 1.1rem; font-weight: bold; color: var(--primary); }
+        .stat-label { font-size: 0.75rem; color: #888; }
+        .btn-message { width: 100%; margin-top: 12px; padding: 10px; background: white; color: var(--primary); border: 2px solid var(--primary); border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .btn-message:hover { background: #fff5f0; }
+
+        .no-suppliers { text-align: center; padding: 60px; color: #888; }
+        footer { background: var(--secondary); color: #8892b0; padding: 30px; text-align: center; margin-top: 40px; }
+        footer a { color: var(--primary); text-decoration: none; }
+
+        @media (max-width: 640px) {
+            .suppliers-grid { grid-template-columns: 1fr; }
+            .page-header { flex-direction: column; gap: 10px; }
+        }
+    /* ═══════════════════════════════════════════════════════════════════
+           NAV — Alibaba 3-Layer Structure
+           Layer 1: Top Bar (Utility)
+           Layer 2: Main Bar (Search + Account)
+           Layer 3: Category Nav (Scrollable Tabs)
+           ═══════════════════════════════════════════════════════════════════ */
+
+        /* --- LAYER 1: Top Bar --- */
+
+        /* --- LAYER 2: Main Bar --- */
+
+        /* --- LAYER 3: Category Nav --- */
+
+        /* --- MOBILE BOTTOM NAV --- */
+        .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); z-index: 200; padding: 6px 0; }
+        .mobile-bottom-nav .bottom-nav-items { display: flex; justify-content: space-around; }
+        .mobile-bottom-nav .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: #888; font-size: 0.65rem; padding: 4px 8px; }
+        .mobile-bottom-nav .bottom-nav-item.active { color: var(--primary); }
+        .mobile-bottom-nav .bottom-nav-item svg { width: 22px; height: 22px; }
+        .mobile-bottom-nav .bottom-nav-item .bnav-badge { background: var(--primary); color: white; font-size: 0.55rem; padding: 1px 4px; border-radius: 6px; position: absolute; top: -2px; right: -4px; }
+        .mobile-bottom-nav .bottom-nav-item span { position: relative; }
+
+        /* --- RTL SUPPORT --- */
+        [dir="rtl"] .hero-search { direction: rtl; }
+        [dir="rtl"] .hero-search select { border-right: none; border-left: 1px solid #eee; }
+        [dir="rtl"] .breadcrumb { text-align: right; }
+        [dir="rtl"] .categories-grid { direction: rtl; }
+        [dir="rtl"] .category-nav { direction: rtl; }
+        [dir="rtl"] .category-dropdown { text-align: right; right: 0; left: auto; }
+        [dir="rtl"] .products-grid { direction: rtl; }
+        [dir="rtl"] .product-supplier { direction: ltr; }
+        [dir="rtl"] .trust-grid { direction: rtl; }
+        [dir="rtl"] .how-grid { direction: rtl; }
+        [dir="rtl"] .how-arrow { transform: scaleX(-1); }
+        [dir="rtl"] .why-grid { direction: rtl; }
+        [dir="rtl"] .footer-grid { direction: rtl; }
+        [dir="rtl"] .section-header { flex-direction: row-reverse; }
+        [dir="rtl"] .section-header a::before { content: '← '; }
+        [dir="rtl"] .section-header a::after { content: ''; }
+        [dir="rtl"] .floor-header { flex-direction: row-reverse; }
+        [dir="rtl"] .stats { direction: rtl; }
+
+        
+        <!-- NAV_CSS_INCLUDE -->
+    </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "/"},
+    {"@type": "ListItem", "position": 2, "name": "Suppliers", "item": "/suppliers"}
+  ]
+}
+</script>
+</head>
+<body>
+<!-- NAV_INCLUDE -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+      <symbol id="icon-star" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
+      <symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+      <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></symbol>
+    </svg>
+
+    <div class="container">
+        <div class="page-header">
+            <h1 style="font-size:1.8rem;color:var(--secondary);margin-bottom:0;">{{suppliers.title}}</h1>
+            <div class="filter-bar" style="display:flex;gap:12px;flex-wrap:wrap;margin:12px 0;align-items:center;">
+                <input type="text" id="supplierSearch" placeholder="{{suppliers.search_placeholder}}" style="padding:8px 12px;border:1px solid #e8e8e8;border-radius:8px;font-size:0.9rem;min-width:200px;">
+                <div id="categoryFilter" style="position:relative;">
+                    <button onclick="toggleCategoryDropdown()" id="categoryBtn" style="padding:8px 12px;border:1px solid #e8e8e8;border-radius:8px;font-size:0.9rem;background:white;cursor:pointer;display:flex;align-items:center;gap:6px;">
+                        <span id="categoryBtnText">{{suppliers.all_categories}}</span>
+                        <span style="font-size:0.7rem;">▼</span>
+                    </button>
+                    <div id="categoryDropdown" style="display:none;position:absolute;top:100%;left:0;background:white;border:1px solid #e8e8e8;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1);padding:8px;z-index:100;min-width:220px;max-height:300px;overflow-y:auto;margin-top:4px;"></div>
+                </div>
+                <select id="supplierCity" style="padding:8px 12px;border:1px solid #e8e8e8;border-radius:8px;font-size:0.9rem;">
+                    <option value="">{{suppliers.all_cities}}</option>
+                </select>
+                <label style="display:flex;align-items:center;gap:4px;font-size:0.85rem;cursor:pointer;">
+                    <input type="checkbox" id="verifiedOnly"> {{suppliers.verified_only}}
+                </label>
+            </div>
+            <div class="sort-bar">
+                <button class="sort-btn active" onclick="sortSuppliers('rating', this)">{{suppliers.sort_rating}}</button>
+                <button class="sort-btn" onclick="sortSuppliers('products', this)">{{suppliers.sort_products}}</button>
+                <button class="sort-btn" onclick="sortSuppliers('name', this)">{{suppliers.sort_name}}</button>
+            </div>
+        </div>
+        <div class="suppliers-grid" id="suppliersGrid"></div>
+        <div class="no-suppliers" id="noSuppliers" style="display:none;">
+            <p>  {{suppliers.no_suppliers}}</p>
+        </div>
+        <div id="pagination" style="text-align:center;margin:20px 0;">
+            <button id="loadMoreBtn" onclick="loadMoreSuppliers()" style="padding:10px 24px;background:var(--primary);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;display:none;">{{suppliers.load_more}}</button>
+            <span id="supplierCount" style="margin-left:12px;color:#888;font-size:0.85rem;"></span>
+
+    <footer>
+        <p>Libya B2B Platform | {{landing.footer_built}}</p>
+    </footer>
+
+    <script src="/static/auth.js"></script>
+    <script>
+        (async () => {
+            const user = await Auth.requireAuth();
+            if (!user) return;
+            Auth.updateNavAuth(user);
+        })();
+        const logoColors = ['#667eea','#764ba2','#f093fb','#f5576c','#4facfe','#43e97b','#fa709a'];
+
+        function renderStars(rating) {
+            const full = Math.floor(rating);
+            const half = rating % 1 >= 0.5 ? 1 : 0;
+            let s = '';
+            for (let i = 0; i < full; i++) s += '★';
+            if (half) s += '½';
+            for (let i = full + half; i < 5; i++) s += '☆';
+            return s;
+        }
+
+        let currentSort = 'rating';
+        let allSuppliers = [];
+        const PAGE_SIZE = 12;
+
+        async function loadSuppliers(sort = 'rating', append = false) {
+            currentSort = sort;
+            try {
+                const search = document.getElementById('supplierSearch')?.value || '';
+                const category = selectedCategories.length ? selectedCategories.join(',') : '';
+                const city = document.getElementById('supplierCity')?.value || '';
+                const verified = document.getElementById('verifiedOnly')?.checked || false;
+                const params = new URLSearchParams({sort_by: sort, limit: '50'});
+                if (search) params.set('search', search);
+                if (category) params.set('category', category);
+                if (city) params.set('city', city);
+                if (verified) params.set('verified_only', 'true');
+                const res = await fetch(`/api/b2b/suppliers?${params}`);
+                const data = await res.json();
+                const grid = document.getElementById('suppliersGrid');
+                const noSuppliers = document.getElementById('noSuppliers');
+
+                if (!data.suppliers.length && !append) {
+                    grid.innerHTML = '';
+                    noSuppliers.style.display = 'block';
+                    document.getElementById('loadMoreBtn').style.display = 'none';
+                    document.getElementById('supplierCount').textContent = '';
+                    return;
+                }
+                noSuppliers.style.display = 'none';
+                allSuppliers = data.suppliers;
+                const visible = allSuppliers.slice(0, PAGE_SIZE);
+                renderSuppliers(visible);
+                // Show/hide load more button
+                const loadMoreBtn = document.getElementById('loadMoreBtn');
+                const countEl = document.getElementById('supplierCount');
+                if (allSuppliers.length > PAGE_SIZE) {
+                    loadMoreBtn.style.display = 'inline-block';
+                    countEl.textContent = `${visible.length} / ${allSuppliers.length} suppliers`;
+                } else {
+                    loadMoreBtn.style.display = 'none';
+                    countEl.textContent = `${allSuppliers.length} suppliers`;
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function loadMoreSuppliers() {
+            const grid = document.getElementById('suppliersGrid');
+            const currentCount = grid.children.length;
+            const nextBatch = allSuppliers.slice(currentCount, currentCount + PAGE_SIZE);
+            if (nextBatch.length) {
+                renderSuppliers(nextBatch, true);
+                const visible = grid.children.length;
+                document.getElementById('supplierCount').textContent = `${visible} / ${allSuppliers.length} suppliers`;
+                if (visible >= allSuppliers.length) {
+                    document.getElementById('loadMoreBtn').style.display = 'none';
+                }
+            }
+        }
+
+        function renderSuppliers(suppliers, append = false) {
+            const grid = document.getElementById('suppliersGrid');
+            const noSuppliers = document.getElementById('noSuppliers');
+            if (!suppliers.length && !append) { grid.innerHTML = ''; noSuppliers.style.display = 'block'; return; }
+            noSuppliers.style.display = 'none';
+            const html = suppliers.map((s, i) => `
+                <a href="/b2b/suppliers/${s.id}" class="supplier-card">
+                    <div class="supplier-header">
+                        <div class="supplier-logo" style="background:${logoColors[i % logoColors.length]}">${s.name.charAt(0)}</div>
+                        <div class="supplier-info">
+                            <h3>${s.name}</h3>
+                            ${s.name_arabic ? '<div style="font-size:0.85rem;color:#666;">' + s.name_arabic + '</div>' : ''}
+                            <div class="location">  ${s.city || 'Libya'}${s.category ? ' · ' + s.category : ''}</div>
+                        </div>
+                    </div>
+                                        <div class="badges">
+                        ${s.is_verified ? '<span class="badge badge-verified">✓ {{suppliers.verified_badge}}</span>' : '<span class="badge badge-unverified">○ {{suppliers.unverified_badge}}</span>'}
+                        ${s.rating >= 4.7 ? '<span class="badge badge-top">⭐ {{suppliers.top_supplier}}</span>' : ''}
+                        ${s.years_on_platform <= 1 ? '<span class="badge badge-new">  {{suppliers.new_badge}}</span>' : ''}
+                        ${s.is_verified ? '<span class="badge badge-trade">  {{suppliers.trade_assurance}}</span>' : ''}
+                        <span class="badge badge-years">  ${s.years_on_platform} {{suppliers.years_badge}}</span>
+                    </div>
+                    <div class="rating">
+                        <span class="stars">${renderStars(s.rating)}</span>
+                        <span class="rating-text">${s.rating.toFixed(1)} (${s.rating_count} {{suppliers.reviews_label}})</span>
+                    </div>
+                    <div class="supplier-stats">
+                        <div class="stat"><div class="stat-value">${s.product_count}</div><div class="stat-label">{{suppliers.products_label}}</div></div>
+                        <div class="stat"><div class="stat-value">${s.rating.toFixed(1)}</div><div class="stat-label">{{suppliers.sort_rating}}</div></div>
+                        <div class="stat"><div class="stat-value">${s.years_on_platform}y</div><div class="stat-label">{{suppliers.years_badge}}</div></div>
+                    </div>
+                    <button class="btn-message" onclick="event.preventDefault(); window.location.href='/b2b/messages?new_supplier=' + ${s.id}"> {{suppliers.contact_supplier}}</button>
+                </a>
+            `).join('');
+            if (append) { grid.innerHTML += html; } else { grid.innerHTML = html; }
+        }
+
+        function sortSuppliers(sort, btn) {
+            document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            loadSuppliers(sort);
+        }
+
+        // Multi-Select Category State
+        let selectedCategories = [];
+        let allCategories = [];
+
+        function toggleCategoryDropdown() {
+            const dd = document.getElementById('categoryDropdown');
+            dd.style.display = dd.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function toggleCategory(cat) {
+            const idx = selectedCategories.indexOf(cat);
+            if (idx >= 0) selectedCategories.splice(idx, 1);
+            else selectedCategories.push(cat);
+            document.getElementById('categoryBtnText').textContent =
+                selectedCategories.length ? selectedCategories.join(', ') : '{{suppliers.all_categories}}';
+            loadSuppliers();
+        }
+
+        // Load filter options
+        (async () => {
+            try {
+                const [catRes, cityRes] = await Promise.all([
+                    fetch('/api/b2b/suppliers/categories'),
+                    fetch('/api/b2b/suppliers/cities')
+                ]);
+                const catData = await catRes.json();
+                const cityData = await cityRes.json();
+                const dd = document.getElementById('categoryDropdown');
+                if (catData.categories) {
+                    allCategories = catData.categories;
+                    dd.innerHTML = catData.categories.map(c =>
+                        `<label style="display:flex;align-items:center;gap:8px;padding:6px 10px;cursor:pointer;border-radius:4px;font-size:0.85rem;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='transparent'"><input type="checkbox" value="${c}" onchange="toggleCategory('${c}')"> ${c}</label>`
+                    ).join('');
+                }
+                const citySelect = document.getElementById('supplierCity');
+                if (citySelect && cityData.cities) {
+                    cityData.cities.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c; opt.textContent = c;
+                        citySelect.appendChild(opt);
+                    });
+                }
+            } catch(e) { console.error('Filter options load failed:', e); }
+        })();
+
+        // Close dropdown on outside click
+        document.addEventListener('click', (e) => {
+            const cf = document.getElementById('categoryFilter');
+            if (cf && !cf.contains(e.target)) {
+                document.getElementById('categoryDropdown').style.display = 'none';
+            }
+        });
+
+        // Filter event listeners
+        document.getElementById('supplierCity')?.addEventListener('change', () => loadSuppliers());
+        document.getElementById('verifiedOnly')?.addEventListener('change', () => loadSuppliers());
+        document.getElementById('supplierSearch')?.addEventListener('input', () => loadSuppliers());
+
+        loadSuppliers();
+    </script>
+    <script>
+        const _base = window.location.pathname.startsWith('/ar/') ? '/ar' : '';
+
+        // Load categories for nav dropdown
+        (async () => {
+            try {
+                const res = await fetch('/api/b2b/categories');
+                const cats = await res.json();
+                const select = document.getElementById('navCatSelect');
+                if (select && Array.isArray(cats)) {
+                    cats.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.icon + ' ' + (_base ? (c.name_ar || c.name_en) : c.name_en);
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (e) { console.error('Categories load failed:', e); }
+        })();
+
+            </script>
+<!-- NAV_JS_INCLUDE -->
+</body>
+</html>

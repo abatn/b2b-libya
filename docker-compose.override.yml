@@ -1,0 +1,26 @@
+# Libya B2B Platform - Docker Compose Override (Entwicklung)
+# Hot-Reload, Volume-Mounts, Debug-Modus
+# Quelle: Projekt-X-Anforderung
+
+services:
+  backend:
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload --log-level debug
+    environment:
+      - DEBUG=true
+      - LOG_LEVEL=debug
+    volumes:
+      - ./src/backend:/app
+      - ./data:/app/data
+      - ./tests:/app/tests
+    ports:
+      - "8000:8000"
+      - "5678:5678"  # Debugpy (optional)
+
+  frontend:
+    command: python server.py
+    environment:
+      - BACKEND_URL=http://backend:8000
+    volumes:
+      - ./src/frontend:/app
+    ports:
+      - "3000:3000"

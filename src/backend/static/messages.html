@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{messages.title}}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; }
+        :root { --primary: #ff6a00; --secondary: #1a1a2e; --accent: #00d2ff; --success: #28a745; --border: #e8e8e8; --radius: 12px; }
+        .navbar { background: var(--secondary); padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .navbar-brand { color: var(--primary); font-size: 1.4rem; font-weight: bold; text-decoration: none; }
+        .nav-links { display: flex; gap: 4px; align-items: center; }
+        .nav-links a { color: #8892b0; text-decoration: none; padding: 8px 14px; border-radius: 5px; transition: 0.3s; font-size: 0.9rem; }
+        .nav-links a:hover, .nav-links a.active { background: var(--primary); color: white; }
+        .lang-switch { position: fixed; top: 15px; right: 15px; z-index: 1000; display: flex; border-radius: 25px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .lang-btn { padding: 8px 16px; border: none; cursor: pointer; font-weight: bold; text-decoration: none; }
+        .lang-btn.active { background: var(--primary); color: white; }
+        .lang-btn:not(.active) { background: rgba(26,26,46,0.8); color: white; }
+        [dir="rtl"] .navbar { flex-direction: row-reverse; }
+        [dir="rtl"] .lang-btn { margin-inline-start: auto; margin-inline-end: 0; }
+
+        .container { max-width: 800px; margin: 0 auto; padding: 30px; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-new { padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .conv-list { background: white; border-radius: var(--radius); box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden; }
+        .conv-item { display: flex; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border); text-decoration: none; color: inherit; transition: 0.2s; cursor: pointer; }
+        .conv-item:hover { background: #fafafa; }
+        .conv-avatar { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: bold; color: white; flex-shrink: 0; margin-right: 15px; }
+        .conv-avatar.bg-1 { background: #667eea; }
+        .conv-avatar.bg-2 { background: #4facfe; }
+        .conv-avatar.bg-3 { background: #43e97b; }
+        .conv-avatar.bg-4 { background: #fa709a; }
+        .conv-info { flex: 1; min-width: 0; }
+        .conv-name { font-weight: 600; color: var(--secondary); margin-bottom: 2px; }
+        .conv-preview { color: #888; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .conv-meta { text-align: right; flex-shrink: 0; margin-left: 12px; }
+        .conv-time { font-size: 0.75rem; color: #aaa; margin-bottom: 4px; }
+        .conv-unread { display: inline-block; background: var(--primary); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: bold; }
+        .no-data { text-align: center; padding: 60px; color: #888; }
+        footer { background: var(--secondary); color: #8892b0; padding: 30px; text-align: center; margin-top: 40px; }
+    </style>
+</head>
+<body>
+    <div class="lang-switch"><a href="/b2b/messages" class="lang-btn active">EN</a></div>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">Libya B2B</a>
+        <div class="nav-links">
+            <a href="/">{{nav.home}}</a>
+            <a href="/products">{{nav.products}}</a>
+            <a href="/b2b/products">{{nav.b2b}}</a>
+            <a href="/b2b/suppliers">{{suppliers.title}}</a>
+            <a href="/b2b/rfq">{{rfq.title}}</a>
+            <a href="/b2b/messages" class="active">{{messages.title}}</a>
+            <a href="/seller">{{nav.seller}}</a>
+            <a href="/buyer">{{nav.buyer}}</a>
+        </div>
+        <a href="/ar/b2b/messages" class="lang-btn" data-lang-switch>{{nav.switch_lang}}</a>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h2>{{messages.title}}</h2>
+            <button class="btn-new" onclick="createConversation()">+ {{messages.new_conversation}}</button>
+        </div>
+        <div class="conv-list" id="convList"></div>
+        <div class="no-data" id="noData" style="display:none;">
+            <p>  {{messages.no_conversations}}</p>
+            <p style="margin-top:10px;color:var(--primary);">{{messages.start_chat}}</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>Libya B2B Platform | {{landing.footer_built}}</p>
+    </footer>
+
+    <script>
+        const avatars = ['bg-1','bg-2','bg-3','bg-4'];
+        const supplierNames = { 1: 'Libya Building Materials Co.', 2: 'Al-Fateh Electrical', 3: 'Tripoli Hardware', 4: 'Mediterranean Textiles' };
+
+        async function loadConversations() {
+            try {
+                const res = await fetch('/api/b2b/messages');
+                const data = await res.json();
+                const list = document.getElementById('convList');
+                const noData = document.getElementById('noData');
+
+                // Show demo conversations if none exist
+                const convs = data.conversations.length ? data.conversations : [
+                    { id: 1, supplier_id: 1, last_message_at: new Date().toISOString(), last_message_text: 'We can offer bulk pricing for cement...', unread_count: 2 },
+                    { id: 2, supplier_id: 2, last_message_at: new Date(Date.now() - 3600000).toISOString(), last_message_text: 'Your order has been shipped!', unread_count: 0 },
+                    { id: 3, supplier_id: 3, last_message_at: new Date(Date.now() - 86400000).toISOString(), last_message_text: 'Thank you for your inquiry.', unread_count: 1 }
+                ];
+
+                if (!convs.length) { list.innerHTML = ''; noData.style.display = 'block'; return; }
+                noData.style.display = 'none';
+
+                list.innerHTML = convs.map((c, i) => `
+                    <a href="/b2b/messages/${c.id}" class="conv-item">
+                        <div class="conv-avatar ${avatars[i % avatars.length]}">${(supplierNames[c.supplier_id] || 'Supplier').charAt(0)}</div>
+                        <div class="conv-info">
+                            <div class="conv-name">${supplierNames[c.supplier_id] || 'Supplier #' + c.supplier_id}</div>
+                            <div class="conv-preview">${c.last_message_text || 'No messages yet'}</div>
+                        </div>
+                        <div class="conv-meta">
+                            <div class="conv-time">${c.last_message_at ? new Date(c.last_message_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : ''}</div>
+                            ${c.unread_count > 0 ? `<span class="conv-unread">${c.unread_count} {{messages.unread}}</span>` : ''}
+                        </div>
+                    </a>
+                `).join('');
+            } catch (e) { console.error(e); }
+        }
+
+        async function createConversation() {
+            try {
+                const res = await fetch('/api/b2b/messages?buyer_id=1&supplier_id=1', { method: 'POST' });
+                const data = await res.json();
+                window.location.href = `/b2b/messages/${data.id}`;
+            } catch (e) { alert('Error creating conversation'); }
+        }
+
+        loadConversations();
+    </script>
+</body>
+</html>

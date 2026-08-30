@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{conversation.title}}</title>
+    <meta name="description" content="{{conversation.meta_description}}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; }
+        :root { --primary: #ff6a00; --primary-dark: #e55d00; --secondary: #1a1a2e; --accent: #00d2ff; --success: #28a745; --warning: #ffc107; --danger: #dc3545; --border: #e8e8e8; --radius: 12px; }
+        .lang-btn.active { background: var(--primary); color: white; }
+        .lang-btn:not(.active) { background: rgba(26,26,46,0.8); color: white; }
+
+        .breadcrumb { max-width: 800px; margin: 0 auto; padding: 15px 30px 0; font-size: 0.85rem; color: #888; }
+        .breadcrumb a { color: var(--primary); text-decoration: none; }
+        .chat-container { max-width: 800px; margin: 0 auto; padding: 15px 30px 30px; display: flex; flex-direction: column; height: calc(100vh - 150px); }
+        .chat-header { background: white; border-radius: var(--radius) var(--radius) 0 0; padding: 16px 20px; border-bottom: 2px solid var(--primary); display: flex; align-items: center; gap: 12px; }
+        .chat-avatar { width: 40px; height: 40px; border-radius: 50%; background: #667eea; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+        .chat-name { font-weight: 600; color: var(--secondary); }
+        .chat-status { font-size: 0.8rem; color: var(--success); }
+        .messages-area { flex: 1; background: white; padding: 20px; overflow-y: auto; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+        .message { margin-bottom: 16px; display: flex; }
+        .message.sent { justify-content: flex-end; }
+        .message.received { justify-content: flex-start; }
+        .msg-bubble { max-width: 70%; padding: 12px 16px; border-radius: 16px; font-size: 0.9rem; line-height: 1.5; }
+        .message.sent .msg-bubble { background: var(--primary); color: white; border-bottom-right-radius: 4px; }
+        .message.received .msg-bubble { background: #f0f0f0; color: #333; border-bottom-left-radius: 4px; }
+        .msg-time { font-size: 0.7rem; color: #aaa; margin-top: 4px; }
+        .message.sent .msg-time { text-align: right; color: rgba(255,255,255,0.7); }
+        .input-area { background: white; border-radius: 0 0 var(--radius) var(--radius); padding: 16px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; }
+        .input-area input { flex: 1; padding: 12px 16px; border: 2px solid var(--border); border-radius: 25px; font-size: 0.95rem; font-family: inherit; }
+        .input-area input:focus { border-color: var(--primary); outline: none; }
+        .btn-send { padding: 12px 24px; background: var(--primary); color: white; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; }
+        .btn-send:hover { background: var(--primary-dark); }
+        .no-messages { text-align: center; padding: 60px 20px; color: #888; }
+        .no-messages .icon { font-size: 3rem; margin-bottom: 10px; }
+        footer { background: var(--secondary); color: #8892b0; padding: 30px; text-align: center; }
+
+        @media (max-width: 768px) {
+            .chat-container { padding: 10px 15px 15px; height: calc(100vh - 130px); }
+            .messages-area { padding: 15px; }
+            .msg-bubble { max-width: 85%; }
+        }
+        @media (max-width: 640px) {
+            .input-area { padding: 10px 15px; }
+            .btn-send { padding: 10px 18px; }
+        }
+    /* ═══════════════════════════════════════════════════════════════════
+           NAV — Alibaba 3-Layer Structure
+           Layer 1: Top Bar (Utility)
+           Layer 2: Main Bar (Search + Account)
+           Layer 3: Category Nav (Scrollable Tabs)
+           ═══════════════════════════════════════════════════════════════════ */
+
+        /* --- LAYER 1: Top Bar --- */
+
+        /* --- LAYER 2: Main Bar --- */
+
+        /* --- LAYER 3: Category Nav --- */
+
+        /* --- MOBILE BOTTOM NAV --- */
+        .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); z-index: 200; padding: 6px 0; }
+        .mobile-bottom-nav .bottom-nav-items { display: flex; justify-content: space-around; }
+        .mobile-bottom-nav .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: #888; font-size: 0.65rem; padding: 4px 8px; }
+        .mobile-bottom-nav .bottom-nav-item.active { color: var(--primary); }
+        .mobile-bottom-nav .bottom-nav-item svg { width: 22px; height: 22px; }
+        .mobile-bottom-nav .bottom-nav-item .bnav-badge { background: var(--primary); color: white; font-size: 0.55rem; padding: 1px 4px; border-radius: 6px; position: absolute; top: -2px; right: -4px; }
+        .mobile-bottom-nav .bottom-nav-item span { position: relative; }
+
+        /* --- RTL SUPPORT --- */
+        [dir="rtl"] .hero-search { direction: rtl; }
+        [dir="rtl"] .hero-search select { border-right: none; border-left: 1px solid #eee; }
+        [dir="rtl"] .breadcrumb { text-align: right; }
+        [dir="rtl"] .categories-grid { direction: rtl; }
+        [dir="rtl"] .category-nav { direction: rtl; }
+        [dir="rtl"] .category-dropdown { text-align: right; right: 0; left: auto; }
+        [dir="rtl"] .products-grid { direction: rtl; }
+        [dir="rtl"] .product-supplier { direction: ltr; }
+        [dir="rtl"] .trust-grid { direction: rtl; }
+        [dir="rtl"] .how-grid { direction: rtl; }
+        [dir="rtl"] .how-arrow { transform: scaleX(-1); }
+        [dir="rtl"] .why-grid { direction: rtl; }
+        [dir="rtl"] .footer-grid { direction: rtl; }
+        [dir="rtl"] .section-header { flex-direction: row-reverse; }
+        [dir="rtl"] .section-header a::before { content: '← '; }
+        [dir="rtl"] .section-header a::after { content: ''; }
+        [dir="rtl"] .floor-header { flex-direction: row-reverse; }
+        [dir="rtl"] .stats { direction: rtl; }
+
+        
+        <!-- NAV_CSS_INCLUDE -->
+    </style>
+</head>
+<body>
+<!-- NAV_INCLUDE -->
+        <h1 style="font-size:1.8rem;color:var(--secondary);margin-bottom:0;">{{conversation.title}}</h1>
+    <div class="breadcrumb">
+        <a href="/b2b/messages">{{messages.title}}</a> &gt; <span>{{conversation.title}}</span>
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="chat-avatar">L</div>
+            <div>
+                <div class="chat-name" id="chatName">Supplier</div>
+                <div class="chat-status">● Online</div>
+            </div>
+        </div>
+        <div class="messages-area" id="messagesArea">
+            <div class="no-messages" id="noMessages">
+                <div class="icon"> </div>
+                <p>{{conversation.no_messages}}</p>
+            </div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="{{conversation.type_placeholder}}" onkeypress="if(event.key==='Enter')sendMessage()">
+            <button class="btn-send" onclick="sendMessage()">{{conversation.send}}</button>
+
+    <footer>
+        <p>Libya B2B Platform</p>
+    </footer>
+
+    <script src="/static/auth.js"></script>
+    <script src="/static/ws.js"></script>
+    <script>
+        let convId = null;
+        let ws = null;
+        let currentUser = null;
+        const supplierNames = { 1: 'Libya Building Materials Co.', 2: 'Al-Fateh Electrical' };
+
+        (async () => {
+            currentUser = await Auth.requireAuth();
+            if (!currentUser) return;
+            Auth.updateNavAuth(currentUser);
+            await loadMessages();
+            connectWebSocket();
+        })();
+
+        async function loadMessages() {
+            convId = window.location.pathname.split('/').pop();
+            try {
+                const res = await fetch(`/api/b2b/messages/${convId}`);
+                if (!res.ok) return;
+                const data = await res.json();
+                const area = document.getElementById('messagesArea');
+                const noMessages = document.getElementById('noMessages');
+
+                document.getElementById('chatName').textContent = supplierNames[data.conversation.supplier_id] || 'Supplier #' + data.conversation.supplier_id;
+
+                if (!data.messages.length) { noMessages.style.display = 'block'; return; }
+                noMessages.style.display = 'none';
+
+                area.innerHTML = data.messages.map(m => `
+                    <div class="message ${m.sender_type === 'buyer' ? 'sent' : 'received'}">
+                        <div>
+                            <div class="msg-bubble">${m.text}</div>
+                            <div class="msg-time">${new Date(m.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+                        </div>
+                    </div>
+                `).join('');
+                area.scrollTop = area.scrollHeight;
+            } catch (e) { console.error(e); }
+        }
+
+        function connectWebSocket() {
+            if (!convId || !currentUser) return;
+
+            ws = new MessageWS(convId, currentUser.id, currentUser.role || 'buyer');
+
+            ws.onMessage = (msg) => {
+                // Append new message to chat
+                const area = document.getElementById('messagesArea');
+                const noMessages = document.getElementById('noMessages');
+                noMessages.style.display = 'none';
+
+                const div = document.createElement('div');
+                div.className = `message ${msg.sender_type === 'buyer' ? 'sent' : 'received'}`;
+                div.innerHTML = `
+                    <div>
+                        <div class="msg-bubble">${msg.text}</div>
+                        <div class="msg-time">${new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+                    </div>
+                `;
+                area.appendChild(div);
+                area.scrollTop = area.scrollHeight;
+
+                // Mark as read
+                ws.sendRead();
+            };
+
+            ws.onTyping = (sender) => {
+                if (sender !== (currentUser.role || 'buyer')) {
+                    showTypingIndicator();
+                }
+            };
+
+            ws.onConnect = () => {
+                const status = document.querySelector('.chat-status');
+                if (status) status.textContent = '\u25cf Online';
+            };
+
+            ws.onDisconnect = () => {
+                const status = document.querySelector('.chat-status');
+                if (status) status.textContent = '\u25cf Verbinden...';
+            };
+        }
+
+        function showTypingIndicator() {
+            const area = document.getElementById('messagesArea');
+            let indicator = document.getElementById('typingIndicator');
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.id = 'typingIndicator';
+                indicator.className = 'message received';
+                indicator.innerHTML = '<div><div class="msg-bubble" style="color:#888;font-style:italic;">typing...</div></div>';
+                area.appendChild(indicator);
+            }
+            area.scrollTop = area.scrollHeight;
+            clearTimeout(indicator._timeout);
+            indicator._timeout = setTimeout(() => { indicator.remove(); }, 2000);
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            // Send via REST (for persistence) + WebSocket (for realtime)
+            try {
+                await fetch(`/api/b2b/messages/${convId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sender_type: 'buyer', sender_id: currentUser.id, text: text })
+                });
+                input.value = '';
+            } catch (e) { console.error(e); }
+        }
+
+        // Typing indicator on input
+        let typingTimeout = null;
+        document.getElementById('messageInput').addEventListener('input', () => {
+            if (ws && ws.isConnected) {
+                clearTimeout(typingTimeout);
+                ws.sendTyping();
+                typingTimeout = setTimeout(() => {}, 2000);
+            }
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (ws) ws.disconnect();
+        });
+    </script>
+    <script>
+        const _base = window.location.pathname.startsWith('/ar/') ? '/ar' : '';
+
+        // Load categories for nav dropdown
+        (async () => {
+            try {
+                const res = await fetch('/api/b2b/categories');
+                const cats = await res.json();
+                const select = document.getElementById('navCatSelect');
+                if (select && Array.isArray(cats)) {
+                    cats.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.icon + ' ' + (_base ? (c.name_ar || c.name_en) : c.name_en);
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (e) { console.error('Categories load failed:', e); }
+        })();
+
+            </script>
+<!-- NAV_JS_INCLUDE -->
+<script>
+(async () => {
+    try {
+        const user = await Auth.me();
+        if (!user) { Auth.showLoginModal(); return; }
+    } catch(e) { Auth.showLoginModal(); }
+})();
+</script>
+</body>
+</html>

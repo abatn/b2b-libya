@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{verify_email.title}}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; }
+        :root { --primary: #ff6a00; --primary-dark: #e55d00; --secondary: #1a1a2e; --accent: #00d2ff; --border: #e8e8e8; --radius: 12px; }
+        .navbar { background: var(--secondary); padding: 0 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; height: 60px; }
+        .navbar-brand { color: var(--primary); font-size: 1.4rem; font-weight: bold; text-decoration: none; }
+        .nav-links { display: flex; gap: 4px; align-items: center; }
+        .nav-links a { color: #8892b0; text-decoration: none; padding: 8px 14px; border-radius: 5px; transition: 0.3s; font-size: 0.85rem; }
+        .nav-links a:hover { background: var(--primary); color: white; }
+        .lang-btn { background: rgba(255,106,0,0.15) !important; color: var(--primary) !important; font-weight: bold !important; }
+        .hamburger { display: none; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+        .nav-dropdown { position: relative; }
+        .nav-dropdown-menu { display: none; position: absolute; top: 100%; right: 0; background: var(--secondary); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); min-width: 180px; z-index: 200; padding: 8px 0; }
+        .nav-dropdown-menu.show { display: block; }
+        .nav-dropdown.authenticated:hover .nav-dropdown-menu { display: block; }
+        .nav-dropdown-menu a { display: block; padding: 10px 16px; color: #8892b0; text-decoration: none; font-size: 0.85rem; }
+        .nav-dropdown-menu a:hover { background: var(--primary); color: white; }
+        .nav-dropdown-toggle { color: #8892b0; text-decoration: none; padding: 8px 14px; border-radius: 5px; transition: 0.3s; font-size: 0.85rem; white-space: nowrap; cursor: pointer; }
+        .nav-dropdown-toggle:hover { background: var(--primary); color: white; }
+        [dir="rtl"] .nav-dropdown-menu { right: auto; left: 0; }
+        .page-header { background: linear-gradient(135deg, var(--secondary) 0%, #16213e 100%); padding: 60px 30px; text-align: center; color: white; }
+        .page-header h1 { font-size: 2.2rem; margin-bottom: 10px; }
+        .page-header p { color: #8892b0; font-size: 1.1rem; }
+        .container { max-width: 500px; margin: 40px auto; padding: 0 30px; }
+        .card { background: white; border-radius: var(--radius); padding: 40px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); text-align: center; }
+        .card h2 { font-size: 1.4rem; color: var(--secondary); margin-bottom: 15px; }
+        .card p { color: #888; margin-bottom: 25px; line-height: 1.6; }
+        .code-input { width: 100%; padding: 16px; border: 2px solid var(--border); border-radius: 8px; font-size: 1.5rem; text-align: center; letter-spacing: 12px; font-weight: bold; color: var(--secondary); margin-bottom: 20px; }
+        .code-input:focus { border-color: var(--primary); outline: none; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { background: #f0f2f5; color: var(--secondary); margin-top: 10px; }
+        .btn-secondary:hover { background: #e0e2e5; }
+        .success-msg { color: #28a745; font-weight: 600; margin-top: 15px; }
+        .error-msg { color: var(--primary); font-weight: 600; margin-top: 15px; }
+        .footer { background: var(--secondary); color: #8892b0; padding: 40px 30px 20px; margin-top: 60px; }
+        .footer-bottom { text-align: center; font-size: 0.8rem; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+        @media (max-width: 768px) { .nav-links { display: none; } .hamburger { display: block; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">Libya B2B</a>
+        <div class="nav-links" id="navLinks">
+            <div class="nav-dropdown" id="accountDropdown">
+                <a href="#" class="nav-dropdown-toggle" id="auth-nav-btn">{{nav.account}}</a>
+                <div class="nav-dropdown-menu" id="accountMenu">
+                    <a href="/seller">{{nav.seller}}</a>
+                    <a href="/buyer">{{nav.buyer}}</a>
+                    <a href="/tracking">{{nav.tracking}}</a>
+                </div>
+            </div>
+            <a href="/ar/verify-email" class="lang-btn" data-lang-switch>{{nav.switch_lang}}</a>
+        </div>
+        <button class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
+    </nav>
+
+    <div class="page-header">
+        <h1>{{verify_email.title}}</h1>
+        <p>{{verify_email.subtitle}}</p>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div style="font-size:3rem;margin-bottom:15px;">✉️</div>
+            <h2>{{verify_email.heading}}</h2>
+            <p>{{verify_email.description}}</p>
+            <input type="text" class="code-input" id="verifyCode" maxlength="6" placeholder="000000" inputmode="numeric" autocomplete="one-time-code">
+            <button class="btn btn-primary" id="verifyBtn" onclick="verifyEmail()">{{verify_email.verify_btn}}</button>
+            <button class="btn btn-secondary" onclick="resendCode()">{{verify_email.resend_btn}}</button>
+            <div id="verifyResult"></div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-bottom"><p>{{landing.footer_copyright}}</p></div>
+    </footer>
+
+    <script src="/static/toast.js"></script>
+    <script src="/static/auth.js"></script>
+    <script>
+        (function(){var btn=document.getElementById('auth-nav-btn');if(btn){btn.onclick=function(e){e.preventDefault();Auth.showLoginModal();}})();
+        (async()=>{try{const user=await Auth.me();const btn=document.getElementById('auth-nav-btn');const dropdown=document.getElementById('accountDropdown');const menu=document.getElementById('accountMenu');if(user){btn.textContent=user.username;btn.onclick=(e)=>{e.preventDefault();menu.classList.toggle('show');};dropdown.classList.add('authenticated');const l=document.createElement('a');l.href='#';l.textContent='{{nav.logout}}';l.onclick=async(e)=>{e.preventDefault();await Auth.logout();location.reload();};menu.appendChild(l);}else{btn.onclick=(e)=>{e.preventDefault();Auth.showLoginModal();};dropdown.classList.remove('authenticated');}}catch(err){var btn=document.getElementById('auth-nav-btn');if(btn){btn.onclick=(e)=>{e.preventDefault();Auth.showLoginModal();};}})();
+
+        async function verifyEmail() {
+            const code = document.getElementById('verifyCode').value.trim();
+            const result = document.getElementById('verifyResult');
+            if (code.length !== 6) { result.innerHTML = '<div class="error-msg">Please enter a 6-digit code</div>'; return; }
+            try {
+                const res = await fetch('/api/auth/verify-email', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({code})
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    result.innerHTML = '<div class="success-msg">' + data.message + '</div>';
+                    if (typeof showToast === 'function') showToast('Email verified!', 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    result.innerHTML = '<div class="error-msg">' + data.detail + '</div>';
+                }
+            } catch(e) { result.innerHTML = '<div class="error-msg">Network error</div>'; }
+        }
+
+        async function resendCode() {
+            try {
+                const res = await fetch('/api/auth/send-verification', { method: 'POST' });
+                const data = await res.json();
+                if (res.ok) {
+                    if (typeof showToast === 'function') showToast('Code resent!', 'success');
+                } else {
+                    if (typeof showToast === 'function') showToast(data.detail || 'Failed', 'error');
+                }
+            } catch(e) { if (typeof showToast === 'function') showToast('Network error', 'error'); }
+        }
+
+        document.getElementById('verifyCode').addEventListener('keypress', e => { if (e.key === 'Enter') verifyEmail(); });
+    </script>
+</body>
+</html>

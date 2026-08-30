@@ -1,0 +1,8 @@
+vapid_keys/
+.env
+src/backend/vapid_private.pem
+src/backend/vapid_public_key.txt
+
+# Virtual environment
+venv/
+

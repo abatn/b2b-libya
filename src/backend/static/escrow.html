@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{escrow.title}} - Libya B2B</title>
+    <style>
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a67d8;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --text: #2d3748;
+            --text-light: #718096;
+            --border: #e2e8f0;
+            --radius: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+        }
+        .navbar-nav {
+            display: flex;
+            gap: 20px;
+            list-style: none;
+        }
+        .navbar-nav a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+        .navbar-nav a:hover { color: white; }
+        .lang-btn {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s;
+        }
+        .lang-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .page-header h1 {
+            font-size: 2rem;
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+        .page-header p {
+            color: var(--text-light);
+        }
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            border: 1px solid var(--border);
+        }
+        .card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            color: var(--text);
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        .btn-success:hover {
+            background: #218838;
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        .btn-warning {
+            background: var(--warning);
+            color: #212529;
+        }
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        .btn-sm {
+            padding: 6px 16px;
+            font-size: 0.85rem;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status-released {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-refunded {
+            background: #cce5ff;
+            color: #004085;
+        }
+        .status-disputed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .escrow-detail {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .detail-item {
+            padding: 12px;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+        .detail-item .label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+        .detail-item .value {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .history-table th,
+        .history-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        .history-table th {
+            background: var(--bg);
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+        }
+        .empty-state .icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 14px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--danger); }
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .footer {
+            background: #1a1a2e;
+            color: rgba(255,255,255,0.6);
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/landing" class="navbar-brand">  Libya B2B</a>
+        <ul class="navbar-nav">
+            <li><a href="/products">{{nav.products}}</a></li>
+            <li><a href="/seller">{{nav.seller}}</a></li>
+            <li><a href="/buyer">{{nav.buyer}}</a></li>
+            <li><a href="/tracking">{{nav.tracking}}</a></li>
+            <li><a href="/escrow" style="color:white;font-weight:600;">{{nav.escrow}}</a></li>
+            <li><a href="/register" class="lang-btn" data-lang-switch>{{nav.register}}</a></li>
+            <li><a href="/register" class="lang-btn" data-lang-switch>AR</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>  {{escrow.title}}</h1>
+            <p>{{escrow.subtitle}}</p>
+        </div>
+
+        <!-- Create Escrow -->
+        <div class="card">
+            <h2>  {{escrow.create}}</h2>
+            <div class="form-group">
+                <label>{{escrow.order_id}}</label>
+                <input type="number" id="escrowOrderId" placeholder="{{escrow.order_id_placeholder}}">
+            </div>
+            <div class="form-group">
+                <label>{{escrow.amount}} (LYD)</label>
+                <input type="number" id="escrowAmount" step="0.01" placeholder="{{escrow.amount_placeholder}}">
+            </div>
+            <div class="form-group">
+                <label>{{escrow.note}}</label>
+                <textarea id="escrowNote" rows="2" placeholder="{{escrow.note_placeholder}}"></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="createEscrow()">{{escrow.create_btn}}</button>
+        </div>
+
+        <!-- Escrow Status Lookup -->
+        <div class="card">
+            <h2>  {{escrow.lookup}}</h2>
+            <div class="form-group">
+                <label>{{escrow.escrow_id}}</label>
+                <input type="number" id="lookupEscrowId" placeholder="{{escrow.escrow_id_placeholder}}">
+            </div>
+            <button class="btn btn-primary" onclick="lookupEscrow()">{{escrow.lookup_btn}}</button>
+        </div>
+
+        <!-- Escrow Details (hidden by default) -->
+        <div class="card" id="escrowDetails" style="display:none;">
+            <h2>  {{escrow.details}}</h2>
+            <div class="escrow-detail">
+                <div class="detail-item">
+                    <div class="label">{{escrow.escrow_id}}</div>
+                    <div class="value" id="detailId">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">{{escrow.order_id}}</div>
+                    <div class="value" id="detailOrderId">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">{{escrow.amount}}</div>
+                    <div class="value" id="detailAmount">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">{{escrow.status}}</div>
+                    <div class="value" id="detailStatus">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">{{escrow.buyer}}</div>
+                    <div class="value" id="detailBuyer">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">{{escrow.supplier}}</div>
+                    <div class="value" id="detailSupplier">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">{{escrow.created}}</div>
+                    <div class="value" id="detailCreated">-</div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">{{escrow.note_label}}</div>
+                    <div class="value" id="detailNote">-</div>
+                </div>
+            </div>
+
+            <div class="btn-group" id="actionButtons" style="display:none;">
+                <button class="btn btn-success btn-sm" onclick="releaseEscrow()">✅ {{escrow.release}}</button>
+                <button class="btn btn-danger btn-sm" onclick="refundEscrow()">  {{escrow.refund}}</button>
+                <button class="btn btn-warning btn-sm" onclick="disputeEscrow()">⚠️ {{escrow.dispute}}</button>
+            </div>
+        </div>
+
+        <!-- Transaction History -->
+        <div class="card">
+            <h2>  {{escrow.history}}</h2>
+            <div id="historyContent">
+                <div class="empty-state">
+                    <div class="icon"> </div>
+                    <p>{{escrow.no_history}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>© 2026 Libya B2B Platform — {{escrow.footer}}</p>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let currentEscrowId = null;
+        const escrowHistory = [];
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+
+        async function createEscrow() {
+            const orderId = parseInt(document.getElementById('escrowOrderId').value);
+            const amount = parseFloat(document.getElementById('escrowAmount').value);
+            const note = document.getElementById('escrowNote').value;
+
+            if (!orderId || !amount) {
+                showToast('Please fill in order ID and amount', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/escrow', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ order_id: orderId, amount: amount, note: note || null })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('Escrow created successfully!');
+                    currentEscrowId = data.id;
+                    showEscrowDetails(data);
+                    escrowHistory.unshift(data);
+                    updateHistory();
+                    document.getElementById('escrowOrderId').value = '';
+                    document.getElementById('escrowAmount').value = '';
+                    document.getElementById('escrowNote').value = '';
+                } else {
+                    showToast(data.detail || 'Error creating escrow', 'error');
+                }
+            } catch (e) {
+                showToast('Network error: ' + e.message, 'error');
+            }
+        }
+
+        async function lookupEscrow() {
+            const id = parseInt(document.getElementById('lookupEscrowId').value);
+            if (!id) {
+                showToast('Please enter an escrow ID', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/escrow/${id}`);
+                const data = await res.json();
+                if (res.ok) {
+                    currentEscrowId = id;
+                    showEscrowDetails(data);
+                } else {
+                    showToast(data.detail || 'Escrow not found', 'error');
+                }
+            } catch (e) {
+                showToast('Network error: ' + e.message, 'error');
+            }
+        }
+
+        function showEscrowDetails(data) {
+            const details = document.getElementById('escrowDetails');
+            details.style.display = 'block';
+
+            document.getElementById('detailId').textContent = data.id;
+            document.getElementById('detailOrderId').textContent = data.order_id;
+            document.getElementById('detailAmount').textContent = data.amount.toFixed(2) + ' ' + data.currency;
+            document.getElementById('detailStatus').innerHTML = `<span class="status-badge status-${data.status}">${data.status.toUpperCase()}</span>`;
+            document.getElementById('detailBuyer').textContent = 'User #' + data.buyer_id;
+            document.getElementById('detailSupplier').textContent = 'User #' + data.supplier_id;
+            document.getElementById('detailCreated').textContent = new Date(data.created_at).toLocaleDateString();
+            document.getElementById('detailNote').textContent = data.note || '-';
+
+            // Show/hide action buttons based on status
+            const actionBtns = document.getElementById('actionButtons');
+            actionBtns.style.display = data.status === 'pending' ? 'flex' : 'none';
+        }
+
+        async function releaseEscrow() {
+            if (!currentEscrowId) return;
+            try {
+                const res = await fetch(`/api/escrow/${currentEscrowId}/release`, { method: 'POST' });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('Escrow released! Funds transferred to supplier.');
+                    showEscrowDetails(data);
+                    updateHistoryItem(data);
+                } else {
+                    showToast(data.detail || 'Error releasing escrow', 'error');
+                }
+            } catch (e) {
+                showToast('Network error: ' + e.message, 'error');
+            }
+        }
+
+        async function refundEscrow() {
+            if (!currentEscrowId) return;
+            try {
+                const res = await fetch(`/api/escrow/${currentEscrowId}/refund`, { method: 'POST' });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('Escrow refunded! Funds returned to buyer.');
+                    showEscrowDetails(data);
+                    updateHistoryItem(data);
+                } else {
+                    showToast(data.detail || 'Error refunding escrow', 'error');
+                }
+            } catch (e) {
+                showToast('Network error: ' + e.message, 'error');
+            }
+        }
+
+        async function disputeEscrow() {
+            if (!currentEscrowId) return;
+            try {
+                const res = await fetch(`/api/escrow/${currentEscrowId}/dispute`, { method: 'POST' });
+                const data = await res.json();
+                if (res.ok) {
+                    showToast('Dispute opened! Awaiting resolution.');
+                    showEscrowDetails(data);
+                    updateHistoryItem(data);
+                } else {
+                    showToast(data.detail || 'Error opening dispute', 'error');
+                }
+            } catch (e) {
+                showToast('Network error: ' + e.message, 'error');
+            }
+        }
+
+        function updateHistoryItem(data) {
+            const idx = escrowHistory.findIndex(e => e.id === data.id);
+            if (idx >= 0) escrowHistory[idx] = data;
+            else escrowHistory.unshift(data);
+            updateHistory();
+        }
+
+        function updateHistory() {
+            const container = document.getElementById('historyContent');
+            if (escrowHistory.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="icon"> </div><p>No escrow transactions yet.</p></div>';
+                return;
+            }
+            let html = '<table class="history-table"><thead><tr><th>ID</th><th>Order</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>';
+            escrowHistory.forEach(e => {
+                html += `<tr>
+                    <td>${e.id}</td>
+                    <td>#${e.order_id}</td>
+                    <td>${e.amount.toFixed(2)} ${e.currency}</td>
+                    <td><span class="status-badge status-${e.status}">${e.status.toUpperCase()}</span></td>
+                    <td>${new Date(e.created_at).toLocaleDateString()}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

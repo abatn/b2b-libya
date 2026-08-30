@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products | Libya B2B Platform</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; }
+        .navbar { background: #1a1a2e; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar h1 { color: #00d2ff; font-size: 1.5rem; }
+        .nav-links { display: flex; gap: 20px; }
+        .nav-links a { color: #8892b0; text-decoration: none; padding: 8px 16px; border-radius: 5px; transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { background: #00d2ff; color: #1a1a2e; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 30px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .header h2 { color: #1a1a2e; }
+        .search-box { display: flex; gap: 10px; }
+        .search-box input { padding: 10px 20px; border: 2px solid #ddd; border-radius: 25px; width: 300px; font-size: 1rem; }
+        .search-box button { padding: 10px 25px; background: #00d2ff; color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; }
+        .filters { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
+        .filter-btn { padding: 8px 20px; border: 2px solid #ddd; border-radius: 20px; background: white; cursor: pointer; transition: 0.3s; }
+        .filter-btn:hover, .filter-btn.active { background: #00d2ff; color: white; border-color: #00d2ff; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+        .product-card { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); transition: transform 0.3s; cursor: pointer; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 5px 20px rgba(0,0,0,0.15); }
+        .product-image { height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; font-size: 4rem; }
+        .product-info { padding: 20px; }
+        .product-name { font-size: 1.2rem; font-weight: bold; color: #1a1a2e; margin-bottom: 5px; }
+        .product-name-ar { font-size: 0.9rem; color: #8892b0; margin-bottom: 10px; direction: rtl; }
+        .product-price { font-size: 1.4rem; color: #00d2ff; font-weight: bold; }
+        .product-category { display: inline-block; background: #e8f4fd; color: #00d2ff; padding: 4px 12px; border-radius: 15px; font-size: 0.8rem; margin-top: 10px; }
+        .product-stock { color: #28a745; font-size: 0.9rem; margin-top: 5px; }
+        .product-stock.out { color: #dc3545; }
+        .add-to-cart { width: 100%; padding: 12px; background: #00d2ff; color: white; border: none; border-radius: 0 0 15px 15px; cursor: pointer; font-weight: bold; font-size: 1rem; transition: 0.3s; }
+        .add-to-cart:hover { background: #00b8d9; }
+        .lang-switch { position: fixed; top: 20px; right: 20px; z-index: 1000; display: flex; border-radius: 25px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .lang-btn { padding: 8px 16px; border: none; cursor: pointer; font-weight: bold; }
+        .lang-btn.active { background: #00d2ff; color: #1a1a2e; }
+        .lang-btn:not(.active) { background: rgba(26,26,46,0.8); color: white; }
+        .cart-count { position: fixed; top: 20px; right: 120px; background: #dc3545; color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; z-index: 1000; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="lang-switch">
+        <a href="/products" class="lang-btn active">EN</a>
+        <a href="/ar/products" class="lang-btn">AR</a>
+    </div>
+    
+    <div class="cart-count" onclick="window.location.href='/cart'">
+        Cart: <span id="cart-count">0</span>
+    </div>
+
+    <nav class="navbar">
+        <h1>Libya B2B Platform</h1>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/products" class="active">Products</a>
+            <a href="/cart">Cart</a>
+            <a href="/seller">Seller</a>
+            <a href="/tracking">Track Order</a>
+            <a href="/docs">API</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h2>Product Catalog</h2>
+            <div class="search-box">
+                <input type="text" id="search" placeholder="Search products..." onkeyup="filterProducts()">
+                <button onclick="filterProducts()">Search</button>
+            </div>
+        </div>
+
+        <div class="filters">
+            <button class="filter-btn active" onclick="filterByCategory('all', this)">All</button>
+            <button class="filter-btn" onclick="filterByCategory('Bau', this)">Bau</button>
+            <button class="filter-btn" onclick="filterByCategory('Elektro', this)">Elektro</button>
+            <button class="filter-btn" onclick="filterByCategory('Hardware', this)">Hardware</button>
+            <button class="filter-btn" onclick="filterByCategory('Office', this)">Office</button>
+        </div>
+
+        <div class="products-grid" id="products-grid">
+            <!-- Products loaded via JS -->
+        </div>
+    </div>
+
+    <script>
+        let products = [];
+        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        updateCartCount();
+
+        async function loadProducts() {
+            try {
+                const response = await fetch('/api/products');
+                products = await response.json();
+                renderProducts(products);
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+
+        function renderProducts(items) {
+            const grid = document.getElementById('products-grid');
+            const icons = {'Bau': ' ', 'Elektro': '⚡', 'Hardware': ' ', 'Office': ' '};
+            
+            grid.innerHTML = items.map(p => `
+                <div class="product-card" data-category="${p.category || 'All'}">
+                    <div class="product-image">${icons[p.category] || ' '}</div>
+                    <div class="product-info">
+                        <div class="product-name">${p.name}</div>
+                        <div class="product-name-ar">${p.name_arabic || ''}</div>
+                        <div class="product-price">${p.price.toFixed(2)} ${p.currency}</div>
+                        <span class="product-category">${p.category || 'General'}</span>
+                        <div class="product-stock ${p.stock_quantity > 0 ? '' : 'out'}">
+                            ${p.stock_quantity > 0 ? `In Stock (${p.stock_quantity})` : 'Out of Stock'}
+                        </div>
+                    </div>
+                    <button class="add-to-cart" onclick="addToCart(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price}, '${p.currency}')">
+                        Add to Cart
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function filterByCategory(category, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            if (category === 'all') {
+                renderProducts(products);
+            } else {
+                renderProducts(products.filter(p => p.category === category));
+            }
+        }
+
+        function filterProducts() {
+            const search = document.getElementById('search').value.toLowerCase();
+            renderProducts(products.filter(p => 
+                p.name.toLowerCase().includes(search) || 
+                (p.name_arabic && p.name_arabic.includes(search))
+            ));
+        }
+
+        function addToCart(id, name, price, currency) {
+            const existing = cart.find(item => item.id === id);
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({ id, name, price, currency, quantity: 1 });
+            }
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartCount();
+            alert(`${name} added to cart!`);
+        }
+
+        function updateCartCount() {
+            document.getElementById('cart-count').textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+        }
+
+        loadProducts();
+    </script>
+</body>
+</html>

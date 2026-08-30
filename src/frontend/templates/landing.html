@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{landing.title}}</title>
+    <meta name="description" content="{{landing.meta_description}}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; }
+        :root { --primary: #ff6a00; --primary-dark: #e55d00; --secondary: #1a1a2e; --accent: #00d2ff; --success: #28a745; --warning: #ffc107; --danger: #dc3545; --border: #e8e8e8; --radius: 12px; }
+
+        /* ═══════════════════════════════════════════════════════════════════
+           NAV — Alibaba 3-Layer Structure
+           Layer 1: Top Bar (Utility)
+           Layer 2: Main Bar (Search + Account)
+           Layer 3: Category Nav (Scrollable Tabs)
+           ═══════════════════════════════════════════════════════════════════ */
+
+        /* HERO */
+        .hero { background: linear-gradient(135deg, rgba(26,26,46,0.85) 0%, rgba(22,33,62,0.85) 50%, rgba(15,52,96,0.85) 100%), url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1920&q=80') center/cover no-repeat; padding: 120px 30px 80px; min-height: 360px; text-align: center; color: white; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(0,210,255,0.05) 0%, transparent 50%); animation: heroGlow 8s ease-in-out infinite; }
+        @keyframes heroGlow { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(20px, -20px); } }
+        .hero h1 { font-size: 3rem; margin-bottom: 10px; background: linear-gradient(90deg, #ff6a00, #ff9a56); -webkit-background-clip: text; -webkit-text-fill-color: transparent; position: relative; }
+        .hero p { font-size: 1.2rem; color: #8892b0; margin-bottom: 30px; position: relative; }
+        .hero-search { max-width: 800px; margin: 0 auto 30px; display: flex; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.3); position: relative; }
+        .hero-search select { padding: 16px 12px; border: none; background: #f8f9fa; font-size: 0.9rem; color: #555; border-right: 1px solid #eee; min-width: 160px; }
+        .hero-search input { flex: 1; padding: 16px 20px; border: none; font-size: 1.05rem; outline: none; }
+        .hero-search button { padding: 16px 35px; background: var(--primary); color: white; border: none; font-size: 1.05rem; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .hero-search button:hover { background: var(--primary-dark); }
+        .hero-badges { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 25px; position: relative; }
+        .hero-badge { background: rgba(255,106,0,0.15); color: var(--primary); padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+
+        /* SEARCH TABS */
+        .search-tabs { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; position: relative; }
+        .search-tab { padding: 10px 24px; border-radius: 8px 8px 0 0; cursor: pointer; font-weight: 600; font-size: 0.95rem; transition: 0.3s; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); border: none; }
+        .search-tab:hover { background: rgba(255,255,255,0.15); color: white; }
+        .search-tab.active { background: var(--primary); color: white; }
+        .search-tab svg { width: 18px; height: 18px; margin-right: 6px; vertical-align: middle; }
+
+        /* STATS */
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; max-width: 1200px; margin: -30px auto 40px; padding: 0 30px; position: relative; z-index: 10; }
+        .stat-card { background: white; border-radius: var(--radius); padding: 22px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .stat-number { font-size: 2rem; font-weight: bold; color: var(--primary); }
+        .stat-label { color: #888; font-size: 0.85rem; margin-top: 4px; }
+
+        /* BREADCRUMB */
+        .breadcrumb { background: #f8f9fa; padding: 10px 30px; max-width: 1200px; margin: 0 auto; font-size: 0.85rem; }
+        .breadcrumb a { color: var(--primary); text-decoration: none; font-weight: 600; }
+        .breadcrumb span { color: #888; margin: 0 6px; }
+
+        /* CATEGORIES - Flyout Menu */
+        .categories-section { max-width: 1200px; margin: 0 auto 40px; padding: 0 30px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .section-header h2 { font-size: 1.5rem; color: var(--secondary); }
+        .section-header a { color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+        .categories-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 14px; }
+        .cat-card { background: white; border-radius: var(--radius); padding: 18px 10px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: 0.2s; text-decoration: none; color: inherit; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+        .cat-card:hover { border-color: var(--primary); transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .cat-icon { font-size: 2rem; margin-bottom: 6px; }
+        .cat-name { font-size: 0.8rem; font-weight: 600; color: #333; }
+        .cat-count { font-size: 0.7rem; color: #888; margin-top: 2px; }
+
+        /* Category Flyout Nav */
+        .category-nav { display: flex; background: white; border-radius: var(--radius); box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 20px; overflow: visible; position: relative; z-index: 50; }
+        .category-item { position: relative; flex: 1; text-align: center; padding: 14px 10px; cursor: pointer; transition: 0.2s; border-bottom: 3px solid transparent; }
+        .category-item:hover { background: rgba(255,106,0,0.05); border-bottom-color: var(--primary); }
+        .category-item-icon { font-size: 1.5rem; display: block; margin-bottom: 4px; }
+        .category-item-name { font-size: 0.8rem; font-weight: 600; color: var(--secondary); }
+        .category-dropdown { display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 0 0 var(--radius) var(--radius); box-shadow: 0 8px 24px rgba(0,0,0,0.12); padding: 16px; z-index: 100; min-width: 260px; text-align: left; }
+        .category-item:hover .category-dropdown,
+        .category-item.touch-active .category-dropdown { display: block; }
+        .category-dropdown a { display: block; padding: 8px 12px; color: var(--secondary); text-decoration: none; font-size: 0.85rem; border-radius: 6px; transition: 0.2s; }
+        .category-dropdown a:hover { background: rgba(255,106,0,0.08); color: var(--primary); }
+        .category-dropdown-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #888; margin-bottom: 8px; font-weight: 600; }
+
+        /* FLOOR SYSTEM */
+        .floor-section { max-width: 1200px; margin: 0 auto 40px; padding: 0 30px; }
+        .floor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--border); }
+        .floor-header h2 { font-size: 1.4rem; color: var(--secondary); display: flex; align-items: center; gap: 10px; }
+        .floor-header .floor-badge { background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .floor-header a { color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
+        .product-card { background: white; border-radius: var(--radius); overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: 0.3s; }
+        .product-card:hover { transform: translateY(-4px); box-shadow: 0 6px 20px rgba(0,0,0,0.12); }
+        .product-image { height: 160px; display: flex; align-items: center; justify-content: center; font-size: 3rem; background: #f0f2f5; position: relative; overflow: hidden; }
+        .product-image img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.4s ease; }
+        .product-image img.lazy { opacity: 0; }
+        .product-image img.loaded { opacity: 1; }
+        .product-image .product-placeholder { font-size: 3rem; }
+        .product-image.bg-fallback { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .product-body { padding: 14px; }
+        .product-name { font-size: 0.95rem; font-weight: 600; color: var(--secondary); margin-bottom: 4px; }
+        .product-name-ar { font-size: 0.8rem; color: #888; margin-bottom: 8px; }
+        .product-price { font-size: 1.15rem; font-weight: bold; color: var(--primary); }
+        .product-supplier { font-size: 0.75rem; color: var(--accent); margin-top: 6px; }
+        .product-btn { width: 100%; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 0 0 var(--radius) var(--radius); cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+        .product-btn:hover { background: var(--primary-dark); }
+        .product-image-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; animation: placeholderPulse 2s ease-in-out infinite; }
+        @keyframes placeholderPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        /* TRUST */
+        .trust-section { background: white; padding: 60px 30px; margin-bottom: 40px; }
+        .trust-section h2 { text-align: center; font-size: 1.8rem; color: var(--secondary); margin-bottom: 40px; }
+        .trust-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; max-width: 1000px; margin: 0 auto; }
+        .trust-card { text-align: center; padding: 30px 20px; }
+        .trust-icon { font-size: 3rem; margin-bottom: 15px; }
+        .trust-card h3 { color: var(--secondary); margin-bottom: 10px; font-size: 1.15rem; }
+        .trust-card p { color: #888; line-height: 1.6; font-size: 0.9rem; }
+        .secure-payment-section { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 50px 30px; margin-bottom: 40px; border-radius: 20px; max-width: 1000px; margin-left: auto; margin-right: auto; }
+        .secure-payment-content { display: flex; align-items: center; gap: 40px; max-width: 900px; margin: 0 auto; }
+        .secure-payment-icon { font-size: 4rem; flex-shrink: 0; }
+        .secure-payment-text h3 { color: var(--secondary); font-size: 1.5rem; margin-bottom: 12px; }
+        .secure-payment-text p { color: #666; font-size: 1rem; line-height: 1.7; margin-bottom: 8px; }
+        .secure-payment-text .highlight { color: var(--primary); font-weight: 600; }
+        .secure-payment-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--success); color: white; padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; margin-top: 15px; }
+        @media (max-width: 768px) { .secure-payment-content { flex-direction: column; text-align: center; } .secure-payment-icon { font-size: 3rem; } }
+
+        /* HOW IT WORKS */
+        .how-section { max-width: 1000px; margin: 0 auto 50px; padding: 0 30px; }
+        .how-section h2 { text-align: center; font-size: 1.8rem; color: var(--secondary); margin-bottom: 40px; }
+        .how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+        .how-card { text-align: center; padding: 25px; position: relative; }
+        .how-step { width: 50px; height: 50px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: bold; margin: 0 auto 15px; }
+        .how-card h3 { color: var(--secondary); margin-bottom: 8px; }
+        .how-card p { color: #888; font-size: 0.9rem; line-height: 1.5; }
+        .how-arrow { display: none; }
+
+        /* WHY */
+        .why-section { background: var(--secondary); padding: 60px 30px; margin-bottom: 0; color: white; }
+        .why-section h2 { text-align: center; font-size: 1.8rem; margin-bottom: 40px; }
+        .why-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; max-width: 1100px; margin: 0 auto; }
+        .why-card { background: rgba(255,255,255,0.08); border-radius: var(--radius); padding: 25px; text-align: center; }
+        .why-icon { font-size: 2.5rem; margin-bottom: 12px; }
+        .why-card h3 { margin-bottom: 8px; color: var(--primary); }
+        .why-card p { color: #8892b0; font-size: 0.85rem; line-height: 1.5; }
+
+        /* FOOTER */
+        .footer { background: #111827; color: #8892b0; padding: 50px 30px 30px; }
+        .footer-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; max-width: 1200px; margin: 0 auto; }
+        .footer h4 { color: white; margin-bottom: 15px; font-size: 1rem; }
+        .footer ul { list-style: none; }
+        .footer ul li { margin-bottom: 8px; }
+        .footer ul a { color: #8892b0; text-decoration: none; font-size: 0.85rem; transition: 0.2s; }
+        .footer ul a:hover { color: var(--primary); }
+        .footer-bottom { text-align: center; padding-top: 30px; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.8rem; }
+        .social-links { display: flex; gap: 12px; margin-top: 10px; }
+        .social-links a { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.08); color: #8892b0; text-decoration: none; transition: 0.2s; }
+        .social-links a:hover { background: var(--primary); color: white; }
+
+        /* MOBILE */
+        @media (max-width: 768px) {
+            .hero { padding: 80px 20px 60px; min-height: 300px; }
+            .hero h1 { font-size: 2rem; }
+            .hero p { font-size: 1rem; }
+            .search-tabs { flex-wrap: wrap; justify-content: center; }
+            .search-tab { font-size: 0.85rem; padding: 8px 16px; }
+            .hero-search { flex-direction: column; }
+            .hero-search select { border-right: none; border-bottom: 1px solid #eee; }
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .category-nav { flex-wrap: wrap; }
+            .category-item { flex: 0 0 calc(50% - 4px); padding: 10px 8px; }
+            .category-dropdown { position: static; box-shadow: none; border-top: 1px solid var(--border); padding: 10px; }
+            .categories-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+            .products-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+            .trust-grid { grid-template-columns: 1fr; }
+            .how-grid { grid-template-columns: 1fr; }
+            .why-grid { grid-template-columns: repeat(2, 1fr); }
+            .footer-grid { grid-template-columns: repeat(2, 1fr); }
+            .breadcrumb { padding: 8px 15px; font-size: 0.8rem; }
+            .floor-header { flex-direction: column; gap: 8px; align-items: flex-start; }
+        }
+        @media (max-width: 480px) {
+            .hero { padding: 50px 15px 40px; }
+            .hero h1 { font-size: 1.5rem; }
+            .stats { grid-template-columns: 1fr 1fr; padding: 0 15px; }
+            .why-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+    <!-- NAV_CSS_INCLUDE -->
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Libya B2B Platform",
+        "url": "https://libyab2b.com",
+        "logo": "https://libyab2b.com/static/icons.svg",
+        "description": "Libya's first B2B e-commerce platform for wholesale trade",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Tripoli",
+            "addressCountry": "LY"
+        },
+        "sameAs": []
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Libya B2B Platform",
+        "url": "https://libyab2b.com",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://libyab2b.com/b2b/products?search={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "Libya B2B Platform",
+        "url": "https://libyab2b.com",
+        "description": "Libya's first B2B e-commerce platform for wholesale trade between buyers and suppliers.",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Tripoli",
+            "addressRegion": "Tripoli",
+            "addressCountry": "LY"
+        },
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": "32.8872",
+            "longitude": "13.1913"
+        },
+        "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"],
+            "opens": "08:00",
+            "closes": "18:00"
+        },
+        "priceRange": "$$",
+        "telephone": "+218-XX-XXX-XXXX",
+        "email": "info@libyab2b.com"
+    }
+    </script>
+</head>
+<body>
+    <!-- ═══════════════════════════════════════════════════════════════
+         NAV — Alibaba 3-Layer Structure
+         ═══════════════════════════════════════════════════════════════ -->
+
+
+<!-- NAV_INCLUDE -->
+    <!-- HERO with Search -->
+    <section class="hero">
+        <h1>{{landing.title}}</h1>
+        <p>{{landing.subtitle}}</p>
+        <div class="search-tabs">
+            <button class="search-tab active" onclick="switchSearchTab('products', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                {{nav.products}}
+            </button>
+            <button class="search-tab" onclick="switchSearchTab('suppliers', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                {{nav.suppliers}}
+            </button>
+            <button class="search-tab" onclick="switchSearchTab('b2b', this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                {{nav.b2b}}
+            </button>
+        </div>
+        <div class="hero-search">
+            <select id="heroCategory">
+                <option value="all">{{b2b_feed.all_products}}</option>
+            </select>
+            <input type="text" id="heroSearchInput" placeholder="{{landing.hero_search_placeholder}}">
+            <button onclick="heroSearch()">{{landing.hero_cta}}</button>
+        </div>
+        <div class="hero-badges">
+            <span class="hero-badge">{{landing.badge_cod}}</span>
+            <span class="hero-badge">{{landing.badge_offline}}</span>
+            <span class="hero-badge">{{landing.badge_qr}}</span>
+            <span class="hero-badge">{{landing.badge_chat}}</span>
+        </div>
+    </section>
+
+    <!-- STATS (dynamic from API) -->
+    <div class="stats" id="statsGrid">
+        <div class="stat-card"><div class="stat-number" id="statProducts">...</div><div class="stat-label">{{landing.stat_products}}</div></div>
+        <div class="stat-card"><div class="stat-number" id="statSuppliers">...</div><div class="stat-label">{{landing.stat_suppliers}}</div></div>
+        <div class="stat-card"><div class="stat-number" id="statCategories">...</div><div class="stat-label">{{landing.stat_categories}}</div></div>
+        <div class="stat-card"><div class="stat-number" id="statOrders">...</div><div class="stat-label">{{landing.stat_orders}}</div></div>
+    </div>
+
+    <!-- CATEGORIES (Flyout Nav + Grid) -->
+    <section class="categories-section">
+        <div class="section-header">
+            <h2>{{landing.categories_title}}</h2>
+            <a href="/b2b/products">{{landing.categories_view_all}} →</a>
+        </div>
+        <div class="category-nav" id="categoryNav"></div>
+        <div class="categories-grid" id="categoriesGrid"></div>
+    </section>
+
+    <!-- FLOOR 1: LOCAL STOCK -->
+    <section class="floor-section">
+        <div class="floor-header">
+            <h2>  {{landing.floor_local_title}} <span class="floor-badge">{{landing.floor_local_badge}}</span></h2>
+            <a href="/b2b/products?stock=local">{{landing.trending_view_all}} →</a>
+        </div>
+        <div class="products-grid" id="localStockGrid"></div>
+    </section>
+
+    <!-- FLOOR 2: TRENDING PRODUCTS -->
+    <section class="floor-section">
+        <div class="floor-header">
+            <h2>  {{landing.floor_trending_title}}</h2>
+            <a href="/b2b/products?sort=trending">{{landing.trending_view_all}} →</a>
+        </div>
+        <div class="products-grid" id="trendingGrid"></div>
+    </section>
+
+    <!-- FLOOR 3: RECOMMENDED -->
+    <section class="floor-section">
+        <div class="floor-header">
+            <h2>  {{landing.floor_recommended_title}}</h2>
+            <a href="/b2b/products?sort=recommended">{{landing.trending_view_all}} →</a>
+        </div>
+        <div class="products-grid" id="recommendedGrid"></div>
+    </section>
+
+    <!-- TRUST -->
+    <section class="trust-section">
+        <h2>{{landing.trust_title}}</h2>
+        <div class="trust-grid">
+            <div class="trust-card">
+                <div class="trust-icon">✅</div>
+                <h3>{{landing.trust_verified_title}}</h3>
+                <p>{{landing.trust_verified_desc}}</p>
+            </div>
+            <div class="trust-card">
+                <div class="trust-icon">🛡️</div>
+                <h3>{{landing.trust_trade_title}}</h3>
+                <p>{{landing.trust_trade_desc}}</p>
+            </div>
+            <div class="trust-card">
+                <div class="trust-icon">🔒</div>
+                <h3>{{landing.trust_secure_title}}</h3>
+                <p>{{landing.trust_secure_desc}}</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECURE PAYMENT -->
+    <section class="secure-payment-section">
+        <div class="secure-payment-content">
+            <div class="secure-payment-icon">💳</div>
+            <div class="secure-payment-text">
+                <h3>{{landing.secure_payment_title}}</h3>
+                <p><span class="highlight">{{landing.secure_payment_subtitle}}</span></p>
+                <p>{{landing.secure_payment_desc}}</p>
+                <div class="secure-payment-badge">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    {{landing.secure_payment_badge}}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="how-section">
+        <h2>{{landing.how_it_works_title}}</h2>
+        <div class="how-grid">
+            <div class="how-card">
+                <div class="how-step">1</div>
+                <h3>{{landing.how_step1_title}}</h3>
+                <p>{{landing.how_step1_desc}}</p>
+            </div>
+            <div class="how-card">
+                <div class="how-step">2</div>
+                <h3>{{landing.how_step2_title}}</h3>
+                <p>{{landing.how_step2_desc}}</p>
+            </div>
+            <div class="how-card">
+                <div class="how-step">3</div>
+                <h3>{{landing.how_step3_title}}</h3>
+                <p>{{landing.how_step3_desc}}</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- WHY LIBYA B2B -->
+    <section class="why-section">
+        <h2>{{landing.why_title}}</h2>
+        <div class="why-grid">
+            <div class="why-card">
+                <div class="why-icon">📡</div>
+                <h3>{{landing.why_offline_title}}</h3>
+                <p>{{landing.why_offline_desc}}</p>
+            </div>
+            <div class="why-card">
+                <div class="why-icon">💰</div>
+                <h3>{{landing.why_cod_title}}</h3>
+                <p>{{landing.why_cod_desc}}</p>
+            </div>
+            <div class="why-card">
+                <div class="why-icon">🌐</div>
+                <h3>{{landing.why_arabic_title}}</h3>
+                <p>{{landing.why_arabic_desc}}</p>
+            </div>
+            <div class="why-card">
+                <div class="why-icon">🇱🇾</div>
+                <h3>{{landing.why_local_title}}</h3>
+                <p>{{landing.why_local_desc}}</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-grid">
+            <div>
+                <h4>{{landing.footer_help}}</h4>
+                <ul>
+                    <li><a href="/faq">{{landing.footer_faq}}</a></li>
+                    <li><a href="/b2b/messages">{{landing.footer_contact}}</a></li>
+                    <li><a href="/b2b/messages">{{landing.footer_support}}</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>{{landing.footer_company}}</h4>
+                <ul>
+                    <li><a href="/about">{{landing.footer_about}}</a></li>
+                    <li><a href="/careers">{{landing.footer_careers}}</a></li>
+                    <li><a href="/b2b/suppliers">{{landing.footer_partners}}</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>{{landing.footer_social}}</h4>
+                <div class="social-links">
+                    <a href="https://facebook.com" target="_blank" rel="noopener" title="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+                    <a href="https://twitter.com" target="_blank" rel="noopener" title="Twitter"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+                    <a href="https://instagram.com" target="_blank" rel="noopener" title="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg></a>
+                    <a href="https://linkedin.com" target="_blank" rel="noopener" title="LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2zM4 6a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg></a>
+                </div>
+                <p style="margin-top: 15px; font-size: 0.8rem;">{{landing.footer_built}}</p>
+            </div>
+            <div>
+                <h4>{{landing.footer_legal}}</h4>
+                <ul>
+                    <li><a href="/terms">{{landing.footer_terms}}</a></li>
+                    <li><a href="/privacy">{{landing.footer_privacy}}</a></li>
+                    <li><a href="/cookie">{{landing.footer_cookies}}</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>{{landing.footer_copyright}}</p>
+        </div>
+    </footer>
+
+    <script src="/static/toast.js"></script>
+    <script src="/static/auth.js"></script>
+    <script>
+        // AR/EN base path helper
+        const _base = window.location.pathname.startsWith('/ar/') ? '/ar' : '';
+
+        const categoryIcons = {};
+        const bgClasses = ['bg-1','bg-2','bg-3','bg-4'];
+
+        // Category-to-image mapping (Task 7: Real product images)
+        const categoryImageMap = {
+            'electronics': 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop',
+            'textiles': 'https://images.unsplash.com/photo-1558171813-4c088753af8f?w=400&h=300&fit=crop',
+            'food': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=300&fit=crop',
+            'machinery': 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=300&fit=crop',
+            'construction': 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&h=300&fit=crop',
+            'automotive': 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=400&h=300&fit=crop',
+            'health': 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=300&fit=crop',
+            'beauty': 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=300&fit=crop',
+            'furniture': 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=300&fit=crop',
+            'clothing': 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop',
+            'default': 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=400&h=300&fit=crop'
+        };
+
+        function getCategoryImage(categoryId) {
+            return categoryImageMap[categoryId] || categoryImageMap['default'];
+        }
+
+        // Lazy loading with Intersection Observer (Task 6)
+        const lazyObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                        img.onload = () => { img.classList.add('loaded'); img.classList.remove('lazy'); };
+                        img.onerror = () => { img.parentElement.innerHTML = '<div class="product-image-placeholder">' + (categoryIcons[img.dataset.category] || ' ') + '</div>'; };
+                        lazyObserver.unobserve(img);
+                    }
+                }
+            });
+        }, { rootMargin: '100px' });
+
+        function createProductCard(product, index) {
+            const imageUrl = product.image_url || getCategoryImage(product.category);
+            const bgClass = bgClasses[index % bgClasses.length];
+            return '<div class="product-card">' +
+                '<div class="product-image">' +
+                    '<img class="lazy" data-src="' + imageUrl + '" data-category="' + (product.category || '') + '" alt="' + product.name + '" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">' +
+                '</div>' +
+                '<div class="product-body">' +
+                    '<div class="product-name">' + product.name + '</div>' +
+                    '<div class="product-name-ar">' + (product.name_arabic || '') + '</div>' +
+                    '<div class="product-price">' + product.price.toFixed(2) + ' ' + product.currency + '</div>' +
+                    '<div class="product-supplier">  ' + product.seller_name + '</div>' +
+                '</div>' +
+                '<button class="product-btn" onclick="addToCart(' + product.id + ', \'' + product.name.replace(/'/g, "\\'") + '\', ' + product.price + ')">{{b2b_feed.add_to_cart}}</button>' +
+            '</div>';
+        }
+
+        function renderProducts(gridId, products) {
+            const grid = document.getElementById(gridId);
+            if (!products.length) {
+                grid.innerHTML = '<p style="text-align:center;color:#888;grid-column:1/-1;">{{landing.no_products_yet}}</p>';
+                return;
+            }
+            grid.innerHTML = products.map((p, i) => createProductCard(p, i)).join('');
+            grid.querySelectorAll('img.lazy').forEach(img => lazyObserver.observe(img));
+        }
+
+        // Hero Search Tabs
+        let currentSearchTab = 'products';
+        function switchSearchTab(tab, btn) {
+            document.querySelectorAll('.search-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            currentSearchTab = tab;
+        }
+
+        function heroSearch() {
+            const q = document.getElementById('heroSearchInput').value.trim();
+            const cat = document.getElementById('heroCategory').value;
+            let url = _base + '/';
+            if (currentSearchTab === 'products') {
+                url = _base + '/b2b/products?';
+                if (q) url += 'search=' + encodeURIComponent(q) + '&';
+                if (cat && cat !== 'all') url += 'category=' + cat;
+            } else if (currentSearchTab === 'suppliers') {
+                url = _base + '/b2b/suppliers?search=' + encodeURIComponent(q || '');
+            } else if (currentSearchTab === 'b2b') {
+                url = _base + '/b2b/products?search=' + encodeURIComponent(q || '');
+            }
+            window.location.href = url;
+        }
+        document.getElementById('heroSearchInput').addEventListener('keypress', e => { if (e.key === 'Enter') heroSearch(); });
+
+        // Load stats
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/b2b/stats');
+                const data = await res.json();
+                document.getElementById('statProducts').textContent = data.total_products || 0;
+                document.getElementById('statSuppliers').textContent = data.total_suppliers || 0;
+                document.getElementById('statCategories').textContent = data.total_categories || 0;
+                document.getElementById('statOrders').textContent = data.total_orders || 0;
+            } catch (e) { console.error(e); }
+        }
+
+        // Load categories + flyout nav (Task 4)
+        async function loadCategories() {
+            try {
+                const res = await fetch('/api/b2b/categories');
+                const data = await res.json();
+                const grid = document.getElementById('categoriesGrid');
+                const nav = document.getElementById('categoryNav');
+                const select = document.getElementById('heroCategory');
+                const categories = data.categories || [];
+                const topCategories = categories.slice(0, 5);
+
+                // Language-aware name helper
+                const _lname = (item) => _base ? (item.name_ar || item.name_en) : item.name_en;
+
+                // Build flyout nav
+                nav.innerHTML = topCategories.map(cat => {
+                    const subcategories = categories.filter(c => c.parent_id === cat.id);
+                    const subLinks = subcategories.length
+                        ? subcategories.map(s => '<a href="' + _base + '/b2b/products?category=' + s.id + '">' + s.icon + ' ' + _lname(s) + '</a>').join('')
+                        : '<a href="' + _base + '/b2b/products?category=' + cat.id + '">' + cat.icon + ' {{landing.categories_view_all}} ' + _lname(cat) + '</a>';
+                    return '<div class="category-item" onmouseenter="this.classList.add(\'touch-active\')" onmouseleave="this.classList.remove(\'touch-active\')" onclick="this.classList.toggle(\'touch-active\')">' +
+                        '<span class="category-item-icon">' + cat.icon + '</span>' +
+                        '<span class="category-item-name">' + _lname(cat) + '</span>' +
+                        '<div class="category-dropdown">' +
+                            '<div class="category-dropdown-title">' + _lname(cat) + '</div>' +
+                            subLinks +
+                        '</div>' +
+                    '</div>';
+                }).join('');
+
+                // Build grid
+                grid.innerHTML = categories.map(c => {
+                    categoryIcons[c.id] = c.icon;
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.textContent = c.icon + ' ' + _lname(c);
+                    select.appendChild(opt);
+                    return '<a href="' + _base + '/b2b/products?category=' + c.id + '" class="cat-card">' +
+                        '<div class="cat-icon">' + c.icon + '</div>' +
+                        '<div class="cat-name">' + _lname(c) + '</div>' +
+                        '<div class="cat-count">' + c.count + ' {{landing.category_products}}</div>' +
+                    '</a>';
+                }).join('');
+            } catch (e) { console.error(e); }
+        }
+
+        // Load Floor 1: Local Stock
+        async function loadLocalStock() {
+            try {
+                const res = await fetch('/api/b2b/products?stock=local&limit=8');
+                const data = await res.json();
+                renderProducts('localStockGrid', data.products || []);
+            } catch (e) { console.error(e); }
+        }
+
+        // Load Floor 2: Trending
+        async function loadTrending() {
+            try {
+                const res = await fetch('/api/b2b/products?sort_by=name&limit=8');
+                const data = await res.json();
+                renderProducts('trendingGrid', data.products || []);
+            } catch (e) { console.error(e); }
+        }
+
+        // Load Floor 3: Recommended
+        async function loadRecommended() {
+            try {
+                const res = await fetch('/api/b2b/products?sort=recommended&limit=8');
+                const data = await res.json();
+                renderProducts('recommendedGrid', data.products || []);
+            } catch (e) { console.error(e); }
+        }
+
+        function addToCart(id, name, price) {
+            Cart.add(id, name, price);
+        }
+
+        // Init
+        loadStats();
+        loadCategories();
+        loadLocalStock();
+        loadTrending();
+        loadRecommended();
+    </script>
+
+    <script src="/static/cart.js"></script>
+    <script src="/static/chatbot-widget.js"></script>
+<!-- NAV_JS_INCLUDE -->
+</body>
+</html>

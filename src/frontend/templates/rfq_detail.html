@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{rfq_detail.title}}</title>
+    <meta name="description" content="{{rfq_detail.meta_description}}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; }
+        :root { --primary: #ff6a00; --primary-dark: #e55d00; --secondary: #1a1a2e; --accent: #00d2ff; --success: #28a745; --warning: #ffc107; --danger: #dc3545; --border: #e8e8e8; --radius: 12px; }
+        .lang-btn.active { background: var(--primary); color: white; }
+        .lang-btn:not(.active) { background: rgba(26,26,46,0.8); color: white; }
+
+        .breadcrumb { max-width: 900px; margin: 0 auto; padding: 15px 30px 0; font-size: 0.85rem; color: #888; }
+        .breadcrumb a { color: var(--primary); text-decoration: none; }
+        .container { max-width: 900px; margin: 0 auto; padding: 15px 30px 30px; }
+        .detail-card { background: white; border-radius: var(--radius); padding: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 25px; }
+        .detail-card h3 { color: var(--secondary); margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--primary); }
+        .detail-row { display: flex; padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .detail-label { font-weight: 600; color: #555; min-width: 180px; }
+        .detail-value { color: #333; }
+        .status-badge { display: inline-block; padding: 4px 14px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+        .status-pending { background: #fff3e0; color: #e67e22; }
+        .status-quoted { background: #e8f4fd; color: var(--accent); }
+        .status-accepted { background: #e6f9ee; color: var(--success); }
+        .status-rejected { background: #fde8e8; color: var(--danger); }
+        .quote-card { background: #f8f9fa; border-radius: var(--radius); padding: 20px; margin-top: 15px; border-left: 4px solid var(--primary); }
+        .quote-price { font-size: 1.3rem; font-weight: bold; color: var(--primary); margin: 8px 0; }
+        .quote-actions { display: flex; gap: 10px; margin-top: 12px; }
+        .btn-accept { padding: 8px 20px; background: var(--success); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .btn-reject { padding: 8px 20px; background: white; color: var(--danger); border: 2px solid var(--danger); border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .no-quotes { text-align: center; padding: 30px; color: #888; }
+        .btn-back { display: inline-block; margin-top: 15px; color: var(--primary); text-decoration: none; font-weight: 600; }
+        footer { background: var(--secondary); color: #8892b0; padding: 30px; text-align: center; margin-top: 40px; }
+
+        @media (max-width: 640px) {
+            .detail-row { flex-direction: column; }
+            .detail-label { min-width: auto; margin-bottom: 4px; }
+        }
+    /* ═══════════════════════════════════════════════════════════════════
+           NAV — Alibaba 3-Layer Structure
+           Layer 1: Top Bar (Utility)
+           Layer 2: Main Bar (Search + Account)
+           Layer 3: Category Nav (Scrollable Tabs)
+           ═══════════════════════════════════════════════════════════════════ */
+
+        /* --- LAYER 1: Top Bar --- */
+
+        /* --- LAYER 2: Main Bar --- */
+
+        /* --- LAYER 3: Category Nav --- */
+
+        /* --- MOBILE BOTTOM NAV --- */
+        .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); z-index: 200; padding: 6px 0; }
+        .mobile-bottom-nav .bottom-nav-items { display: flex; justify-content: space-around; }
+        .mobile-bottom-nav .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: #888; font-size: 0.65rem; padding: 4px 8px; }
+        .mobile-bottom-nav .bottom-nav-item.active { color: var(--primary); }
+        .mobile-bottom-nav .bottom-nav-item svg { width: 22px; height: 22px; }
+        .mobile-bottom-nav .bottom-nav-item .bnav-badge { background: var(--primary); color: white; font-size: 0.55rem; padding: 1px 4px; border-radius: 6px; position: absolute; top: -2px; right: -4px; }
+        .mobile-bottom-nav .bottom-nav-item span { position: relative; }
+
+        /* --- RTL SUPPORT --- */
+        [dir="rtl"] .hero-search { direction: rtl; }
+        [dir="rtl"] .hero-search select { border-right: none; border-left: 1px solid #eee; }
+        [dir="rtl"] .breadcrumb { text-align: right; }
+        [dir="rtl"] .categories-grid { direction: rtl; }
+        [dir="rtl"] .category-nav { direction: rtl; }
+        [dir="rtl"] .category-dropdown { text-align: right; right: 0; left: auto; }
+        [dir="rtl"] .products-grid { direction: rtl; }
+        [dir="rtl"] .product-supplier { direction: ltr; }
+        [dir="rtl"] .trust-grid { direction: rtl; }
+        [dir="rtl"] .how-grid { direction: rtl; }
+        [dir="rtl"] .how-arrow { transform: scaleX(-1); }
+        [dir="rtl"] .why-grid { direction: rtl; }
+        [dir="rtl"] .footer-grid { direction: rtl; }
+        [dir="rtl"] .section-header { flex-direction: row-reverse; }
+        [dir="rtl"] .section-header a::before { content: '← '; }
+        [dir="rtl"] .section-header a::after { content: ''; }
+        [dir="rtl"] .floor-header { flex-direction: row-reverse; }
+        [dir="rtl"] .stats { direction: rtl; }
+
+        
+        <!-- NAV_CSS_INCLUDE -->
+    </style>
+</head>
+<body>
+<!-- NAV_INCLUDE -->
+    <div class="breadcrumb">
+        <a href="/b2b/rfq">B2B</a> &gt; <a href="/b2b/rfq">{{nav.rfq}}</a> &gt; <span id="bc-id">...</span>
+    </div>
+
+        <h1 style="font-size:1.8rem;color:var(--secondary);margin-bottom:0;">{{rfq_detail.title}}</h1>
+    <div class="container">
+        <div class="detail-card">
+            <h3>{{rfq_detail.title}} <span id="rfqId"></span></h3>
+            <div class="detail-row"><span class="detail-label">{{rfq_detail.product}}</span><span class="detail-value" id="productName">...</span></div>
+            <div class="detail-row"><span class="detail-label">{{rfq_detail.quantity}}</span><span class="detail-value" id="quantity">...</span></div>
+            <div class="detail-row"><span class="detail-label">{{rfq_detail.delivery_address}}</span><span class="detail-value" id="deliveryAddress">...</span></div>
+            <div class="detail-row"><span class="detail-label">{{rfq_detail.message}}</span><span class="detail-value" id="message">...</span></div>
+            <div class="detail-row"><span class="detail-label">{{rfq_detail.status}}</span><span class="detail-value" id="status"></span></div>
+            <div class="detail-row"><span class="detail-label">{{rfq_detail.created}}</span><span class="detail-value" id="createdAt">...</span></div>
+        </div>
+
+        <div class="detail-card">
+            <h3>{{rfq_detail.quotes}}</h3>
+            <div id="quotesContainer">
+                <div class="no-quotes" id="noQuotes">{{rfq_detail.no_quotes}}</div>
+                <div class="quote-card" id="demoQuote" style="display:none;">
+                    <strong>Libya Building Materials Co.</strong>
+                    <div class="quote-price">145.00 LYD per unit</div>
+                    <p style="color:#888;font-size:0.9rem;">Delivery: 7 days | MOQ: 100 units</p>
+                    <div class="quote-actions">
+                        <button class="btn-accept" onclick="updateStatus('accepted')">{{rfq_detail.accept_quote}}</button>
+                        <button class="btn-reject" onclick="updateStatus('rejected')">{{rfq_detail.reject_quote}}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a href="/b2b/rfq" class="btn-back">← {{rfq_detail.back_to_list}}</a>
+    </div>
+
+    <footer>
+        <p>Libya B2B Platform | {{landing.footer_built}}</p>
+    </footer>
+
+    <script src="/static/auth.js"></script>
+    <script>
+        (async () => {
+            const user = await Auth.requireAuth();
+            if (!user) return;
+            Auth.updateNavAuth(user);
+        })();
+        let rfqId = null;
+        async function loadRFQ() {
+            rfqId = window.location.pathname.split('/').pop();
+            try {
+                const res = await fetch(`/api/b2b/rfq/${rfqId}`);
+                if (!res.ok) return;
+                const r = await res.json();
+                document.getElementById('rfqId').textContent = `{{rfq_detail.rfq_id}}-${r.id}`;
+                document.getElementById('bc-id').textContent = `{{rfq_detail.rfq_id}}-${r.id}`;
+                document.getElementById('productName').textContent = r.product_name;
+                document.getElementById('quantity').textContent = r.quantity;
+                document.getElementById('deliveryAddress').textContent = r.delivery_address || '-';
+                document.getElementById('message').textContent = r.message || '-';
+                document.getElementById('createdAt').textContent = new Date(r.created_at).toLocaleString();
+                const statusClass = { pending: 'status-pending', quoted: 'status-quoted', accepted: 'status-accepted', rejected: 'status-rejected' };
+                document.getElementById('status').innerHTML = `<span class="status-badge ${statusClass[r.status] || ''}">${r.status}</span>`;
+                if (r.status === 'quoted' || r.status === 'pending') {
+                    document.getElementById('demoQuote').style.display = 'block';
+                }
+            } catch (e) { console.error(e); }
+        }
+        async function updateStatus(status) {
+            try {
+                await fetch(`/api/b2b/rfq/${rfqId}?status=${status}`, { method: 'PUT' });
+                loadRFQ();
+            } catch (e) { console.error(e); }
+        }
+        loadRFQ();
+    </script>
+    <script>
+        const _base = window.location.pathname.startsWith('/ar/') ? '/ar' : '';
+
+        // Load categories for nav dropdown
+        (async () => {
+            try {
+                const res = await fetch('/api/b2b/categories');
+                const cats = await res.json();
+                const select = document.getElementById('navCatSelect');
+                if (select && Array.isArray(cats)) {
+                    cats.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.icon + ' ' + (_base ? (c.name_ar || c.name_en) : c.name_en);
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (e) { console.error('Categories load failed:', e); }
+        })();
+
+            </script>
+<!-- NAV_JS_INCLUDE -->
+<script>
+(async () => {
+    try {
+        const user = await Auth.me();
+        if (!user) { Auth.showLoginModal(); return; }
+    } catch(e) { Auth.showLoginModal(); }
+})();
+</script>
+</body>
+</html>

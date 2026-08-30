@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{checkout.title}}</title>
+    <meta name="description" content="{{checkout.meta_description}}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; }
+        :root { --primary: #ff6a00; --primary-dark: #e55d00; --secondary: #1a1a2e; --accent: #00d2ff; --success: #28a745; --warning: #ffc107; --danger: #dc3545; --border: #e8e8e8; --radius: 12px; }
+        .lang-btn.active { background: var(--primary); color: white; }
+        .lang-btn:not(.active) { background: rgba(26,26,46,0.8); color: white; }
+
+        @media (max-width: 640px) {
+            .container { padding: 15px; }
+            .order-summary { padding: 15px; }
+            .place-order-btn { font-size: 1rem; padding: 14px; }
+        }
+        @media (max-width: 640px) {
+            .container { padding: 15px; }
+            .order-summary { padding: 15px; }
+            .place-order-btn { font-size: 1rem; padding: 14px; }
+        }
+    /* ═══════════════════════════════════════════════════════════════════
+           NAV — Alibaba 3-Layer Structure
+           Layer 1: Top Bar (Utility)
+           Layer 2: Main Bar (Search + Account)
+           Layer 3: Category Nav (Scrollable Tabs)
+           ═══════════════════════════════════════════════════════════════════ */
+
+        /* --- LAYER 1: Top Bar --- */
+
+        /* --- LAYER 2: Main Bar --- */
+
+        /* --- LAYER 3: Category Nav --- */
+
+        /* --- MOBILE BOTTOM NAV --- */
+        .mobile-bottom-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); z-index: 200; padding: 6px 0; }
+        .mobile-bottom-nav .bottom-nav-items { display: flex; justify-content: space-around; }
+        .mobile-bottom-nav .bottom-nav-item { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: #888; font-size: 0.65rem; padding: 4px 8px; }
+        .mobile-bottom-nav .bottom-nav-item.active { color: var(--primary); }
+        .mobile-bottom-nav .bottom-nav-item svg { width: 22px; height: 22px; }
+        .mobile-bottom-nav .bottom-nav-item .bnav-badge { background: var(--primary); color: white; font-size: 0.55rem; padding: 1px 4px; border-radius: 6px; position: absolute; top: -2px; right: -4px; }
+        .mobile-bottom-nav .bottom-nav-item span { position: relative; }
+
+        /* --- RTL SUPPORT --- */
+        [dir="rtl"] .hero-search { direction: rtl; }
+        [dir="rtl"] .hero-search select { border-right: none; border-left: 1px solid #eee; }
+        [dir="rtl"] .breadcrumb { text-align: right; }
+        [dir="rtl"] .categories-grid { direction: rtl; }
+        [dir="rtl"] .category-nav { direction: rtl; }
+        [dir="rtl"] .category-dropdown { text-align: right; right: 0; left: auto; }
+        [dir="rtl"] .products-grid { direction: rtl; }
+        [dir="rtl"] .product-supplier { direction: ltr; }
+        [dir="rtl"] .trust-grid { direction: rtl; }
+        [dir="rtl"] .how-grid { direction: rtl; }
+        [dir="rtl"] .how-arrow { transform: scaleX(-1); }
+        [dir="rtl"] .why-grid { direction: rtl; }
+        [dir="rtl"] .footer-grid { direction: rtl; }
+        [dir="rtl"] .section-header { flex-direction: row-reverse; }
+        [dir="rtl"] .section-header a::before { content: '← '; }
+        [dir="rtl"] .section-header a::after { content: ''; }
+        [dir="rtl"] .floor-header { flex-direction: row-reverse; }
+        [dir="rtl"] .stats { direction: rtl; }
+
+        
+        <!-- NAV_CSS_INCLUDE -->
+    </style>
+</head>
+<body>
+<!-- NAV_INCLUDE -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+      <symbol id="icon-checkout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></symbol>
+      <symbol id="icon-tracking" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
+      <symbol id="icon-b2b" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+    </svg>
+
+    <div class="container">        <h1 style="font-size:1.8rem;color:var(--secondary);margin-bottom:0;">{{checkout.title}}</h1>
+
+        <h2>{{checkout.title}}</h2>
+        <div class="order-summary"><h3>{{checkout.summary}}</h3><div id="order-items"></div><div class="order-total" id="order-total">0 LYD</div></div>
+        <div class="form-group"><label>{{checkout.full_name}}</label><input type="text" id="name" required></div>
+        <div class="form-group"><label>{{checkout.phone}}</label><input type="tel" id="phone" required></div>
+        <div class="form-group"><label>{{checkout.address}}</label><textarea id="address" rows="3" required></textarea></div>
+        <div class="form-group"><label>{{checkout.city}}</label><select id="city" required><option value="">{{checkout.select_city}}</option><option value="Tripolis">Tripolis</option><option value="Benghazi">Benghazi</option><option value="Misrata">Misrata</option></select></div>
+        <div class="payment-option"><input type="radio" checked disabled><div><strong>{{checkout.cod}}</strong><p style="color:#8892b0;font-size:0.9rem;">{{checkout.cod_desc}}</p></div></div>
+        <button class="place-order-btn" onclick="placeOrder()">{{checkout.place_order}}</button>
+    </div>
+    <script src="/static/auth.js"></script>
+    <script src="/static/toast.js"></script>
+    <script>
+        (async () => {
+            const user = await Auth.requireAuth('buyer');
+            if (!user) return;
+            Auth.updateNavAuth(user);
+        })();
+        let serverCart = [];
+        async function renderOrderSummary() {
+            serverCart = await Cart.getAll();
+            const total = serverCart.reduce((sum, item) => sum + (item.product_price || 0) * item.quantity, 0);
+            document.getElementById('order-items').innerHTML = serverCart.map(item => `
+                <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eee;">
+                    <div>
+                        <span>${item.product_name || 'Product'} x${item.quantity}</span>
+                        ${item.supplier_name ? '<br><small style='color:#888;'>by ' + item.supplier_name + '</small>' : ''}
+                    </div>
+                    <span>${((item.product_price || 0) * item.quantity).toFixed(2)} LYD</span>
+                </div>
+            `).join('');
+            document.getElementById('order-total').textContent = total.toFixed(2) + ' LYD';
+        }
+        async function placeOrder() {
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const address = document.getElementById('address').value;
+            const city = document.getElementById('city').value;
+            if (!name || !phone || !address || !city) { showToast('Please fill all required fields', 'warning'); return; }
+            if (serverCart.length === 0) { showToast('Cart is empty', 'warning'); return; }
+            const total = serverCart.reduce((sum, item) => sum + (item.product_price || 0) * item.quantity, 0);
+            // Build line items with supplier mapping
+            const items = serverCart.map(item => ({
+                product_id: item.product_id,
+                supplier_id: item.supplier_id || null,
+                quantity: item.quantity,
+                unit_price: item.product_price || 0,
+                moq: item.moq || 1,
+            }));
+            // Use first supplier as order-level seller_id (Alibaba pattern)
+            const primarySellerId = items[0]?.supplier_id || null;
+            const response = await fetch('/api/orders', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    buyer_id: null, // server gets from auth
+                    seller_id: primarySellerId,
+                    total_amount: total,
+                    currency: 'LYD',
+                    payment_method: 'COD',
+                    delivery_address: `${name}, ${phone}, ${address}, ${city}`,
+                    items: items,
+                }),
+            });
+            const order = await response.json();
+            await Cart.clear();
+            showToast('Order placed! ' + order.order_number, 'success', 5000);
+            setTimeout(() => window.location.href = '/tracking', 1500);
+        }
+        renderOrderSummary();
+    </script>
+    <script src="/static/chatbot-widget.js"></script>
+    <script>
+        const _base = window.location.pathname.startsWith('/ar/') ? '/ar' : '';
+
+        // Load categories for nav dropdown
+        (async () => {
+            try {
+                const res = await fetch('/api/b2b/categories');
+                const cats = await res.json();
+                const select = document.getElementById('navCatSelect');
+                if (select && Array.isArray(cats)) {
+                    cats.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.icon + ' ' + (_base ? (c.name_ar || c.name_en) : c.name_en);
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (e) { console.error('Categories load failed:', e); }
+        })();
+
+            </script>
+<!-- NAV_JS_INCLUDE -->
+<script>
+(async () => {
+    try {
+        const user = await Auth.me();
+        if (!user) { Auth.showLoginModal(); return; }
+    } catch(e) { Auth.showLoginModal(); }
+})();
+</script>
+</body>
+</html>
