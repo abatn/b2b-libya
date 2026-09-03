@@ -1,7 +1,8 @@
 # Rebuild Plan: Libya B2B — alsouk-platform Architecture as Reference
 
 > **Status:** Planning only. No code changes.
-> **Revert-Stand:** `8a84de7` — feat: Libya B2B Platform v6.0 (312 products, 30 suppliers, 357 tests)
+> **Revert-Stand:** `b0316e3` — docs: rebuild plan (previous PLAN.md)
+> **Code-Stand:** `8a84de7` — feat: Libya B2B Platform v6.0 (312 products, 30 suppliers, 357 tests)
 > **Reference:** github.com/abatn/alsouk-platform (337 commits, Next.js + Supabase)
 
 ---
@@ -23,10 +24,10 @@
 
 ### P2 — SAME-ORIGIN (Frontend + API unter einer Domain)
 
-**Prinzip:** Browser ruft `/api/*` auf derselben Origin wie die Seite. Kein CORS nötig.
+**Prinzip:** Browser ruft `/api/*` auf derselben Origin wie die Seite auf. Kein CORS nötig.
 
 **Beweis:**
-- `middleware.ts` leitet alle Requests durch (Session-Refresh)
+- `middleware.ts`: `import { updateSession } from "@/lib/supabase/middleware"` — Session-Refresh bei jedem Request
 - Keine `CORSMiddleware`-Konfiguration im gesamten Codebase
 - `next.config.mjs`: `allowedDevOrigins: ['127.0.0.1']` (nur für Dev, kein Production-CORS)
 
@@ -52,7 +53,7 @@
 **Prinzip:** Supabase Auth verwaltet Sessions via Cookies. RLS-Policies schützen Datenbankzeilen.
 
 **Beweis:**
-- `middleware.ts`: `import { updateSession } from "@/lib/supabase/middleware"` — Session-Refresh bei jedem Request
+- `middleware.ts`: `import { updateSession } from "@/lib/supabase/middleware"` — Session-Refresh
 - `lib/supabase/middleware.ts`: `supabase.auth.getUser()` — Session-Validierung
 - `supabase/schema.sql`: `create policy "Owners can insert their company" on public.companies for insert with check (owner_id = auth.uid())`
 - Admin-Check: `isAdmin()` nutzt Service-Key + PostgREST für `admin_users`-Tabelle
@@ -113,35 +114,153 @@
 
 ---
 
-## Part II: Libya B2B Current State (Revert-Stand 8a84de7)
+## Part II: Libya B2B Current State (Code-Stand 8a84de7)
+
+### Komponenten-Übersicht
 
 | Komponente | Technologie | Status |
 |---|---|---|
 | **Backend** | FastAPI (Python), 40+ Dateien | 21+ Route-Module, 357 Tests |
-| **Frontend** | Python HTTP-Server (`server.py`), 34 HTML-Templates | Jinja-Rendering auf Port 3000 |
+| **Frontend** | Python HTTP-Server (`server.py`), 35 HTML-Templates | Jinja-Rendering auf Port 3000 |
 | **Datenbank** | SQLite (offline-first) | 52 Pydantic-Modelle, 27 SQLAlchemy-Tables |
-| **Auth** | JWT + bcrypt (services/auth.py) | Custom, kein框架-Integration |
+| **Auth** | Session-Cookie + bcrypt | `services/auth.py`, `routes/auth_routes.py` |
 | **API** | FastAPI auf Port 8000 | CORS: `allow_origins=["*"]` (cross-origin) |
 | **Deploy** | Docker Compose (2 Container) | Backend:8000 + Frontend:3000 |
 | **Daten** | 312 Produkte, 30 Suppliers | Seed-Data in `seed_data.py` |
-| **Tests** | pytest, 357 Tests | `tests/test_backend.py` |
+| **Tests** | pytest, 357 Tests | `tests/test_backend.py` + 20 weitere Dateien |
 | **Offline-First** | SQLite, Sync-Engine | `sync_engine.py` mit Delta-Sync |
 | **Budget** | 20 EUR/Monat | Keine Cloud-Dependencies |
 
 ---
 
-## Part III: Principle-by-Principle Comparison
+## Part III: Principle-by-Principle Comparison mit konkreten Beweisen
 
-| # | alsouk-Prinzip | Libya B2B Umsetzung | Risiko | Entscheidung |
-|---|---|---|---|---|
-| **P1** | Eine Runtime | Zwei Prozesse (FastAPI:8000 + server.py:3000) | Hoch: Cross-Origin, zwei Deploys, Port-Konflikte | **Übernehmen** — Ein Prozess muss HTML + API bedienen |
-| **P2** | Same-Origin | CORS `allow_origins=["*"]` — by design cross-origin | Hoch: Cookie-Security, CSRF, Preflight-Overhead | **Übernehmen** — Same-Origin eliminiert CORS komplett |
-| **P3** | Supabase = DB + API | SQLite + FastAPI als API-Layer | Niedrig: SQLite ist offline-first-kompatibel | **Anpassen** — SQLite beibehalten, aber FastAPI zum selben Origin machen |
-| **P4** | Auth via Framework + RLS | Custom JWT + bcrypt, keine RLS | Mittel: Kein框架-Schutz, manuelle Auth-Checks | **Anpassen** — FastAPI Session + SQLite-basierte "RLS" via Dependency Injection |
-| **P5** | Service-Keys serverseitig | Alle Keys in Environment-Variablen, Backend nicht公开 | Niedrig: Bereits korrekt implementiert | **Beibehalten** — Kein Änderungsbedarf |
-| **P6** | Single Auto-Deploy | Docker Compose (2 Container) | Mittel: Manuelles Deploy, kein Preview | **Anpassen** — Docker beibehalten (Budget), aber single-compose优化 |
-| **P7** | Thin Pages, Heavy Components | `server.py` rendert 34 Templates mit logik | Niedrig: Template-Logik ist gut strukturiert | **Anpassen** — Templates beibehalten, aber API-Logik trennen |
-| **P8** | i18n via Dictionary | `locales/en.json` + `locales/ar.json`, RTL-Support | Niedrig: Bereits implementiert | **Beibehalten** — Exakte Copy-Strategie übernehmen |
+### P1: EINE Runtime
+
+**alsouk:** Ein `npm run dev` startet alles.
+
+**Libya B2B Lücke:** Zwei separate Prozesse.
+
+| Komponente | Datei | Beweis |
+|---|---|---|
+| Backend | `src/backend/main.py:21-25` | `app = FastAPI(...)` — eigener Prozess |
+| Frontend | `src/frontend/server.py:15-16` | `PORT = 3000`, `BACKEND_URL = "http://localhost:8000"` |
+| Docker | `docker-compose.yml:9-64` | Zwei Services: `backend` + `frontend` |
+
+**Was sich ändern muss:** Frontend wird zu FastAPI-Routen degradiert. Ein Prozess.
+
+---
+
+### P2: SAME-ORIGIN
+
+**alsouk:** Keine CORS-Konfiguration, `/api/*` same-origin.
+
+**Libya B2B Lücke:** Cross-Origin mit CORS `*`.
+
+| Komponente | Datei | Beweis |
+|---|---|---|
+| CORS | `src/backend/main.py:30-36` | `allow_origins=["*"]` — explizit cross-origin |
+| Proxy | `src/frontend/server.py:439-469` | `proxy_request()` leitet `/api/*` an Backend weiter |
+| Frontend URL | `src/frontend/server.py:16` | `BACKEND_URL = "http://localhost:8000"` |
+| JS-Fetches | `src/frontend/static/auth.js:37` | `fetch('/api/auth/register')` — relativ, aber cross-origin durch 2 Prozesse |
+
+**Was sich ändern muss:** Ein Prozess, CORS entfernen, keine Proxy-Logik nötig.
+
+---
+
+### P3: DB + API in einem
+
+**alsouk:** Supabase = Postgres + PostgREST + Auth + Storage.
+
+**Libya B2B Status:** SQLite + FastAPI (akzeptabel für Offline-First).
+
+| Komponente | Datei | Beweis |
+|---|---|---|
+| DB | `src/backend/config.py` | SQLite-Engine, `init_db()` |
+| API | `src/backend/main.py:88` | `register_routes(app)` — FastAPI-Routen |
+| Sync | `src/backend/sync_engine.py` | Delta-Sync für Offline-First |
+
+**Was sich ändern muss:** Nichts (Offline-First-Constraint). SQLite + FastAPI bleibt.
+
+---
+
+### P4: Auth via Framework + RLS
+
+**alsouk:** Supabase Auth + RLS-Policies in der DB.
+
+**Libya B2B Status:** Custom Session-Cookie + Dependency Injection.
+
+| Komponente | Datei | Beweis |
+|---|---|---|
+| Session | `src/backend/routes/auth_routes.py:34` | `SESSION_COOKIE_NAME = "b2b_session"` |
+| Login | `src/backend/routes/auth_routes.py:90-100` | `@router.post("/register")` mit Cookie-Setzung |
+| Protected Routes | `src/backend/routes/auth_routes.py:43-62` | `get_current_user(request, db)` — Dependency |
+| Password | `src/backend/services/auth.py:19-25` | `hash_password()` mit bcrypt |
+
+**Was sich ändern muss:** Auth ist bereits Framework-integriert (FastAPI Dependencies). Kein RLS nötig (SQLite).
+
+---
+
+### P5: Service-Keys serverseitig
+
+**alsouk:** `SUPABASE_SERVICE_ROLE_KEY` ohne `NEXT_PUBLIC_`.
+
+**Libya B2B Status:** Bereits korrekt.
+
+| Komponente | Datei | Beweis |
+|---|---|---|
+| Env | `src/backend/config.py` | `DATABASE_URL` nur serverseitig |
+| Keys | `docker-compose.yml:17` | `DATABASE_URL=sqlite:///./libya_b2b.db` — kein PUBLIC_ |
+
+**Was sich ändern muss:** Nichts. Bereits korrekt implementiert.
+
+---
+
+### P6: Single Auto-Deploy
+
+**alsouk:** Push to main → Vercel deployed.
+
+**Libya B2B Status:** Docker Compose (2 Container).
+
+| Komponente | Datei | Beweis |
+|---|---|---|
+| Docker | `docker-compose.yml:9-64` | Zwei Services: `backend` + `frontend` |
+| Healthcheck | `docker-compose.yml:22-27` | `curl -f http://localhost:8000/health` |
+| Network | `docker-compose.yml:86-88` | `libya-b2b-network` Bridge |
+
+**Was sich ändern muss:** Ein Container statt zwei.
+
+---
+
+### P7: Thin Pages, Heavy Components
+
+**alsouk:** `app/page.tsx` minimal, Features in `components/`.
+
+**Libya B2B Status:** Templates mit eingebetteter Logik.
+
+| Komponente | Datei | Beweis |
+|---|---|---|
+| Templates | `src/frontend/templates/*.html` | 35 Dateien mit Inline-JavaScript |
+| JS-Logik | `src/frontend/static/*.js` | 24 Dateien mit API-Logik |
+| Render | `src/frontend/server.py:102-177` | `render_template()` — Jinja2-Rendering |
+
+**Was sich ändern muss:** Templates bleiben (Jinja2), aber Logik wird getrennt.
+
+---
+
+### P8: i18n Dictionary + RTL
+
+**alsouk:** Hand-rolled Dictionary, RTL via Context.
+
+**Libya B2B Status:** Bereits implementiert.
+
+| Komponente | Datei | Beweis |
+|---|---|---|
+| Locales | `src/frontend/locales/en.json`, `ar.json` | Dictionary-Dateien |
+| RTL | `src/frontend/server.py:172-175` | `<html lang="ar" dir="rtl">` dynamisch |
+| Navigation | `src/frontend/server.py:32-99` | `rewrite_nav_links()` für /ar/ Prefix |
+
+**Was sich ändern muss:** Nichts. Bereits implementiert.
 
 ---
 
@@ -181,9 +300,14 @@
 
 **Ziel:** Ein Prozess, ein Port, kein CORS.
 
+**Was sich ändert:**
+- `src/backend/main.py` bekommt StaticFiles-Mount + Jinja2-Rendering
+- `src/frontend/server.py` wird zu FastAPI-Router degradiert
+- CORS-Middleware wird entfernt
+
 **Betroffene Dateien:**
 - `src/backend/main.py` — FastAPI rendert HTML + API
-- `src/frontend/server.py` — Wird zu FastAPI-Router degradiert
+- `src/frontend/server.py` — Wird zu FastAPI-Route
 - `src/frontend/templates/` — Bleiben als Jinja2-Templates
 - `src/frontend/static/` — Werden zu FastAPI-StaticFiles
 
@@ -194,6 +318,7 @@ curl -s http://localhost:8000/ | head -5  # HTML
 curl -s http://localhost:8000/api/v1/products | head -5  # JSON
 # Kein CORS-Header nötig
 curl -s -I http://localhost:8000/api/v1/products | grep -i "access-control"
+# Erwartung: Kein Output (kein CORS-Header)
 ```
 
 **Push-Punkt:** `refactor: consolidate to single FastAPI server on :8000`
@@ -202,22 +327,27 @@ curl -s -I http://localhost:8000/api/v1/products | grep -i "access-control"
 
 ### Phase 2: Session-Based Auth (Framework-Integration)
 
-**Ziel:** Auth via FastAPI-Sessions (Cookie-basiert) + Dependency Injection für "RLS".
+**Ziel:** Auth via FastAPI-Sessions (Cookie-basiert) + Dependency Injection.
+
+**Was sich ändert:**
+- Cookie-Middleware in `main.py` hinzufügen
+- `get_current_user` wird zur globalen Dependency
+- Alle geschützten Routes bekommen `Depends(get_current_user)`
 
 **Betroffene Dateien:**
-- `src/backend/services/auth.py` — Erweitern um Session-Management
-- `src/backend/main.py` — Cookie-Middleware hinzufügen
-- `src/backend/routes/` — Dependency `get_current_user` für alle geschützten Routes
-- `src/backend/models.py` — Session-Model hinzufügen
+- `src/backend/services/auth.py` — Session-Management (bereits vorhanden)
+- `src/backend/main.py` — Cookie-Middleware
+- `src/backend/routes/` — Dependency `get_current_user` für alle Routes
+- `src/backend/models.py` — Session-Model (bereits vorhanden)
 
 **Verifikation:**
 ```bash
 # Login → Set-Cookie
-curl -v -X POST http://localhost:8000/api/v1/auth/login \
-  -d '{"email":"test@libya.ly","password":"test"}' 2>&1 | grep -i "set-cookie"
+curl -v -X POST http://localhost:8000/api/auth/login \
+  -d '{"username":"test","password":"test"}' 2>&1 | grep -i "set-cookie"
 # Protected Route → Cookie noetig
-curl -s http://localhost:8000/api/v1/orders  # 401
-curl -s -b "session=..." http://localhost:8000/api/v1/orders  # 200
+curl -s http://localhost:8000/api/orders  # 401
+curl -s -b "b2b_session=..." http://localhost:8000/api/orders  # 200
 ```
 
 **Push-Punkt:** `feat: session-based auth with cookie middleware`
@@ -228,17 +358,22 @@ curl -s -b "session=..." http://localhost:8000/api/v1/orders  # 200
 
 **Ziel:** Row-Level-Security-Äquivalent in SQLite via FastAPI Dependencies.
 
+**Was sich ändert:**
+- `get_owner_scope()` Dependency für supplier-spezifische Routen
+- Scope-Filter in Queries einbauen
+- Owner-Feld in relevanten Tabellen (bereits vorhanden)
+
 **Betroffene Dateien:**
 - `src/backend/routes/` — Jede Route bekommt `Depends(get_owner_scope)`
-- `src/backend/services/` — Scope-Filter in Queries einbauen
-- `src/backend/models.py` — Owner-Feld in relevanten Tabellen
+- `src/backend/services/` — Scope-Filter in Queries
+- `src/backend/models.py` — Owner-Feld (bereits vorhanden)
 
 **Verifikation:**
 ```bash
 # Supplier A kann nur eigene Produkte sehen
-curl -s -b "session=a" http://localhost:8000/api/v1/products?owner=me
+curl -s -b "session=a" http://localhost:8000/api/products?owner=me
 # Supplier B sieht nichts von A
-curl -s -b "session=b" http://localhost:8000/api/v1/products?owner=a  # 403
+curl -s -b "session=b" http://localhost:8000/api/products?owner=a  # 403
 ```
 
 **Push-Punkt:** `feat: row-level scope via dependency injection`
@@ -247,12 +382,17 @@ curl -s -b "session=b" http://localhost:8000/api/v1/products?owner=a  # 403
 
 ### Phase 4: Frontend-Integration (Jinja2 + Same-Origin)
 
-**Ziel:** Alle API-Calls nutzen realtive Pfade (`/api/v1/*`), keine externen URLs.
+**Ziel:** Alle API-Calls nutzen relative Pfade (`/api/*`), keine externen URLs.
+
+**Was sich ändert:**
+- Templates bleiben unverändert (bereits relative Pfade)
+- `BACKEND_URL` wird aus server.py entfernt
+- StaticFiles-Mount in main.py
 
 **Betroffene Dateien:**
-- `src/frontend/templates/*.html` — API-URLs anpassen
-- `src/frontend/static/*.js` — `BACKEND_URL` entfernen
-- `src/frontend/server.py` — Zur FastAPI-Route degradiert
+- `src/frontend/templates/*.html` — Unverändert (bereits relativ)
+- `src/frontend/static/*.js` — Unverändert (bereits relativ)
+- `src/frontend/server.py` — Wird zu FastAPI-Route
 
 **Verifikation:**
 ```bash
@@ -260,6 +400,7 @@ curl -s -b "session=b" http://localhost:8000/api/v1/products?owner=a  # 403
 curl -s http://localhost:8000/ | grep -o 'src="[^"]*"' | head -5
 # JavaScript ruft API auf (same-origin)
 curl -s http://localhost:8000/static/auth.js | grep "fetch(" | head -3
+# Erwartung: fetch('/api/auth/register') — relativ
 ```
 
 **Push-Punkt:** `refactor: frontend same-origin API calls`
@@ -270,6 +411,11 @@ curl -s http://localhost:8000/static/auth.js | grep "fetch(" | head -3
 
 **Ziel:** Ein einziger Container statt zwei.
 
+**Was sich ändert:**
+- Ein Dockerfile für alles
+- docker-compose.yml mit einem Service
+- Makefile angepasst
+
 **Betroffene Dateien:**
 - `Dockerfile` (neu oder erweitert)
 - `docker-compose.prod.yml` — Ein Service statt zwei
@@ -279,7 +425,7 @@ curl -s http://localhost:8000/static/auth.js | grep "fetch(" | head -3
 ```bash
 docker compose up -d
 curl -s http://localhost:8000/ | head -3  # HTML
-curl -s http://localhost:8000/api/v1/health  # {"status":"ok"}
+curl -s http://localhost:8000/api/health  # {"status":"ok"}
 docker compose ps  # Ein Container
 ```
 
@@ -291,10 +437,13 @@ docker compose ps  # Ein Container
 
 **Ziel:** 357 Tests laufen gegen Same-Origin-Architektur.
 
-**Betroffene Dateien:**
+**Was sich ändert:**
 - `tests/conftest.py` — Client-Setup anpassen
-- `tests/test_backend.py` — URL-Patterns anpassen
-- `tests/` — Cross-Origin-Tests entfernen
+- Tests laufen gegen Port 8000 statt 3000+8000
+
+**Betroffene Dateien:**
+- `tests/conftest.py` — Client-Setup
+- `tests/test_backend.py` — URL-Patterns
 
 **Verifikation:**
 ```bash
@@ -310,6 +459,10 @@ cd src/backend && python -m pytest ../tests/ -v
 
 **Ziel:** 312 Produkte, 30 Suppliers, alles auf neue Architektur.
 
+**Was sich ändert:**
+- Nichts (Seed-Data bleibt)
+- Production-Config angepasst
+
 **Betroffene Dateien:**
 - `src/backend/seed_data.py` — Unverändert
 - `docker-compose.prod.yml` — Production-Config
@@ -317,9 +470,9 @@ cd src/backend && python -m pytest ../tests/ -v
 **Verifikation:**
 ```bash
 make setup && make dev
-curl -s http://localhost:8000/api/v1/products | python -c "import sys,json; print(len(json.load(sys.stdin)))"
+curl -s http://localhost:8000/api/products | python -c "import sys,json; print(len(json.load(sys.stdin)))"
 # 312
-curl -s http://localhost:8000/api/v1/suppliers | python -c "import sys,json; print(len(json.load(sys.stdin)))"
+curl -s http://localhost:8000/api/b2b/suppliers | python -c "import sys,json; print(len(json.load(sys.stdin)))"
 # 30
 ```
 
@@ -360,7 +513,7 @@ curl -s http://localhost:8000/api/v1/suppliers | python -c "import sys,json; pri
 
 ---
 
-### 3. Deploy-Race-Bedingingung
+### 3. Deploy-Race-Bedingung
 
 **Fall:** Zwei Container starten parallel → Backend ist noch nicht bereit, Frontend schon → API-Timeouts, Fehler im UI.
 
@@ -384,6 +537,21 @@ curl -s http://localhost:8000/api/v1/suppliers | python -c "import sys,json; pri
 
 ---
 
+## Part VIII: Was NICHT geändert wird
+
+| Komponente | Grund |
+|---|---|
+| **SQLite** | Offline-first Requirement, Budget, Libyen-spezifisch |
+| **Bestehende Auth** | Session-Cookie + bcrypt bereits implementiert (357 Tests) |
+| **API-Pfade** | `/api/*` Pfade bleiben identisch |
+| **357 Tests** | Alle bleiben, werden nur gegen neue Architektur angepasst |
+| **Seed-Data** | 312 Produkte, 30 Suppliers bleiben |
+| **i18n** | locales/en.json + ar.json bleiben |
+| **RTL-Support** | Bereits implementiert |
+| **Sync-Engine** | Offline-First bleibt |
+
+---
+
 ## Appendix: Quick Commands (nach Umbau)
 
 ```bash
@@ -397,4 +565,29 @@ docker compose up   # Ein Container: HTML + API auf :8000
 
 ---
 
-*Erstellt: 2026-09-03 | Basis: Revert-Stand 8a84de7 | Referenz: alsouk-platform (337 Commits)*
+## Appendix: Code-Beweise (aktuell)
+
+### Fetch-Aufrufe in Templates (99 Stück)
+- Alle relativ: `fetch('/api/...')`
+- Keine absoluten URLs: `fetch('http://localhost:8000/api/...')`
+
+### Fetch-Aufrufe in Static JS (33 Stück)
+- Alle relativ: `fetch('/api/...')`
+- Beispiele: `auth.js:37`, `cart.js:9`, `nav.js:101`
+
+### CORS-Konfiguration
+- `main.py:30-36`: `allow_origins=["*"]`
+- `server.py:462`: `Access-Control-Allow-Origin: *` (im Proxy)
+
+### Docker Services
+- `docker-compose.yml:9-34`: Backend (Port 8000)
+- `docker-compose.yml:39-64`: Frontend (Port 3000)
+
+### Test-Anzahl
+- 357 Test-Funktionen
+- 14 Test-Klassen
+- 21 Test-Dateien
+
+---
+
+*Erstellt: 2026-09-03 | Basis: Code-Stand 8a84de7 | Referenz: alsouk-platform (337 Commits)*
