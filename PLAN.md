@@ -94,8 +94,10 @@
 #### Schritte
 
 1. **FastAPI mount static in `main.py`**
-   - `app.mount("/static", StaticFiles(directory="src/backend/static"), name="static")`
+   - `app.mount("/static", StaticFiles(directory="../frontend/static"), name="static")` — lokal vom Backend-Cwd `src/backend`
+   - ⚠️ Die echten Assets liegen in `src/frontend/static/` (27 Dateien: auth.js, cart.js, nav.js, …). `src/backend/static/` ist VERALTETER MÜLL (alte HTML-Duplikate aus der gescheiterten build_static-Ära) — NIEMALS mounten, in Block 1 löschen.
    - ⚠️ **NUR `/static` mounten** — Templates werden AUSSCHLIESSLICH via `Jinja2Templates` gerendert, NICHT als statische Dateien ausgeliefert (sonst rohe `{{Variablen}}`)
+   - Docker-Pfad: mit `WORKDIR /app/src/backend` lautet der Pfad `../frontend/static` — im Dockerfile muss `src/frontend` mitkopiert werden (COPY ../frontend geht nicht → Projektstruktur: COPY am Root, WORKDIR-Wechsel im CMD)
 
 2. **Routen aus `server.py` nach `src/backend/routes/static_pages.py` migrieren**
    - 34 HTML-Routen werden zu FastAPI-Endpunkten
@@ -146,13 +148,14 @@
 1. **Root-Dockerfile erstellen** (bewährtes Muster für src/backend)
    ```dockerfile
    FROM python:3.12-slim
+   WORKDIR /app
+   COPY src/backend/requirements.txt ./src/backend/requirements.txt
+   RUN pip install --no-cache-dir -r src/backend/requirements.txt
+   COPY src/ ./src/
    WORKDIR /app/src/backend
-   COPY requirements.txt .
-   RUN pip install --no-cache-dir -r requirements.txt
-   COPY . .
    CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
    ```
-   **Begründung:** `requirements.txt` liegt in `src/backend/` (nicht am Root), `src/` und `src/backend/` haben KEIN `__init__.py`, daher muss `WORKDIR` direkt in `src/backend/` sein, damit `uvicorn main:app` funktioniert.
+   **Begründung:** `requirements.txt` liegt in `src/backend/` (nicht am Root), `src/` und `src/backend/` haben KEIN `__init__.py`, daher muss `uvicorn main:app` mit WORKDIR `/app/src/backend` laufen. COPY mit Projektstruktur am Root (`COPY src/ ./src/`), dann WORKDIR-Wechsel — so sind auch die Frontend-Assets (`src/frontend/static`) für den `/static`-Mount erreichbar (`../frontend/static`).
 
 2. **`render.yaml` erstellen**
    ```yaml
