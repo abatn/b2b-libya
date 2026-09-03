@@ -2,7 +2,10 @@ vapid_keys/
 .env
 src/backend/vapid_private.pem
 src/backend/vapid_public_key.txt
+src/backend/static/
+libya_b2b.db
 
 # Virtual environment
 venv/
+__pycache__/
 
