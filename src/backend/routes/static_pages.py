@@ -149,11 +149,9 @@ def _render(template_name: str, lang: str, request: Request) -> HTMLResponse:
         nav_js_tag = '<script src="/static/nav.js"></script>'
         content = content.replace("<!-- NAV_JS_INCLUDE -->", nav_js_tag)
 
-    # Render with Jinja2 (locale vars like {{nav.home}} are resolved here)
-    rendered = templates.TemplateResponse(
-        request, f"{template_name}.html", context=locale
-    )
-    html = rendered.body.decode("utf-8")
+    # Render Jinja2 from the in-memory content (with nav includes already injected)
+    jinja_tpl = templates.env.from_string(content)
+    html = jinja_tpl.render(**locale)
 
     # Post-process: rewrite nav links
     html = _rewrite_nav_links(html, lang)
