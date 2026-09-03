@@ -429,7 +429,7 @@ SUPPLIER_LOGOS = {
 # Product-specific Pexels images (verified HTTP 200)
 # Each product gets its own image, cycling through category-specific photo IDs
 PRODUCT_IMAGES = {
-    "24\" LED Monitor": "https://m.media-amazon.com/images/I/719DX6o1RPL._AC_UY218_.jpg",
+    '24" LED Monitor': "https://m.media-amazon.com/images/I/719DX6o1RPL._AC_UY218_.jpg",
     "A4 Copy Paper 500 sheets": "https://m.media-amazon.com/images/I/513cYch6rcL._AC_SL1073_.jpg",
     "Access Control Keypad": "https://m.media-amazon.com/images/I/710sFD3St+L._AC_SL1500_.jpg",
     "Adhesive Tile Glue": "https://m.media-amazon.com/images/I/71VrmuECtfL._SL1500_.jpg",
@@ -742,8 +742,6 @@ PRODUCT_IMAGES = {
     "Work Gloves Leather": "https://m.media-amazon.com/images/I/81XWaebPCNL._AC_UL320_.jpg",
     "Work Uniform Set": "https://m.media-amazon.com/images/I/61Sfr-4Ef7L._AC_UL320_.jpg",
 }
-
-
 
 
 # Supplier Multi-Categories (JSON array per supplier)
@@ -3407,7 +3405,13 @@ def seed_database():
                 stock_quantity=p.get("stock", 100),
                 seller_id=uid,
                 is_active=True,
-                image_url=PRODUCT_IMAGES.get(p["name"], CATEGORY_IMAGES.get(p["category"], "https://m.media-amazon.com/images/I/91lP2eOp7LL._AC_UL320_.jpg")),
+                image_url=PRODUCT_IMAGES.get(
+                    p["name"],
+                    CATEGORY_IMAGES.get(
+                        p["category"],
+                        "https://m.media-amazon.com/images/I/91lP2eOp7LL._AC_UL320_.jpg",
+                    ),
+                ),
             )
             db.add(product)
             product_count += 1

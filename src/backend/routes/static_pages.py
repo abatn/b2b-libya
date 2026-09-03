@@ -73,9 +73,7 @@ def _rewrite_nav_links(content: str, lang: str) -> str:
                 return tag.replace(f'href="{href}"', f'href="/ar{href}"')
             return tag
 
-        content = re.sub(
-            r'<a\s[^>]*href="(/[^"]*)"[^>]*>', _add_ar_prefix, content
-        )
+        content = re.sub(r'<a\s[^>]*href="(/[^"]*)"[^>]*>', _add_ar_prefix, content)
     else:
 
         def _remove_ar_prefix(match):
@@ -87,9 +85,7 @@ def _rewrite_nav_links(content: str, lang: str) -> str:
                 return tag.replace(f'href="{href}"', f'href="{href[3:]}"')
             return tag
 
-        content = re.sub(
-            r'<a\s[^>]*href="(/ar/[^"]*)"[^>]*>', _remove_ar_prefix, content
-        )
+        content = re.sub(r'<a\s[^>]*href="(/ar/[^"]*)"[^>]*>', _remove_ar_prefix, content)
 
     return content
 
@@ -99,9 +95,7 @@ def _render(template_name: str, lang: str, request: Request) -> HTMLResponse:
     locale = _load_locale(lang)
 
     tpl_data = locale.get(template_name, {})
-    locale["title"] = tpl_data.get(
-        "title", locale.get("landing", {}).get("title", "Libya B2B")
-    )
+    locale["title"] = tpl_data.get("title", locale.get("landing", {}).get("title", "Libya B2B"))
     locale["meta_description"] = tpl_data.get(
         "meta_description",
         locale.get("landing", {}).get("meta_description", ""),
@@ -674,7 +668,7 @@ def sitemap_xml():
     urls_xml = ""
     for path, priority, changefreq in static_urls:
         urls_xml += (
-            f'  <url><loc>{base}{path}</loc><lastmod>{today}</lastmod>'
+            f"  <url><loc>{base}{path}</loc><lastmod>{today}</lastmod>"
             f"<changefreq>{changefreq}</changefreq><priority>{priority}</priority></url>\n"
         )
 
@@ -682,12 +676,12 @@ def sitemap_xml():
         db = next(get_db())
         for p in db.query(Product).limit(50).all():
             urls_xml += (
-                f'  <url><loc>{base}/products#{p.id}</loc><lastmod>{today}</lastmod>'
+                f"  <url><loc>{base}/products#{p.id}</loc><lastmod>{today}</lastmod>"
                 f"<changefreq>weekly</changefreq><priority>0.6</priority></url>\n"
             )
         for s in db.query(Supplier).limit(30).all():
             urls_xml += (
-                f'  <url><loc>{base}/supplier/{s.id}</loc><lastmod>{today}</lastmod>'
+                f"  <url><loc>{base}/supplier/{s.id}</loc><lastmod>{today}</lastmod>"
                 f"<changefreq>weekly</changefreq><priority>0.6</priority></url>\n"
             )
     except Exception:
