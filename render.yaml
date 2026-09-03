@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: libya-b2b
+    env: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite:///./libya_b2b.db
