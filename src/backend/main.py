@@ -79,10 +79,10 @@ async def api_version_middleware(request: Request, call_next):
     return response
 
 
-# Mount static files
-static_dir = os.path.join(os.path.dirname(__file__), "static")
-if os.path.exists(static_dir):
-    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+# Mount static files from frontend (the real assets live there)
+frontend_static = os.path.join(os.path.dirname(__file__), "..", "frontend", "static")
+if os.path.exists(frontend_static):
+    app.mount("/static", StaticFiles(directory=frontend_static), name="static")
 
 # Register all route modules
 register_routes(app)

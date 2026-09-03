@@ -403,14 +403,19 @@ def test_verify_email_without_code_fails():
 FRONTEND_DIR = os.path.join(
     os.path.dirname(__file__), "..", "src", "frontend"
 )
-sys.path.insert(0, os.path.join(FRONTEND_DIR))
 
 
 def _render(template_name, lang="en"):
-    """Helper to render a frontend template."""
-    from server import render_template
-
-    return render_template(template_name, lang)
+    """Helper to render a frontend template via FastAPI."""
+    url_map = {
+        "landing": "/",
+        "login": "/login",
+    }
+    base = url_map.get(template_name, f"/{template_name}")
+    if lang == "ar":
+        base = f"/ar{base}"
+    resp = client.get(base)
+    return resp.text
 
 
 class TestRegisterTemplateEN:
@@ -685,21 +690,18 @@ class TestI18nKeys:
 
 
 class TestServerRouting:
-    """Verify the frontend server routes /register correctly."""
+    """Verify the FastAPI routes serve /register correctly."""
 
-    def test_register_in_template_map(self):
-        """/register route exists in server.py template_map."""
-        server_path = os.path.join(FRONTEND_DIR, "server.py")
-        with open(server_path, encoding="utf-8") as f:
-            source = f.read()
-        assert '"/register": "register"' in source
+    def test_register_route_exists(self):
+        """/register route returns HTML."""
+        resp = client.get("/register")
+        assert resp.status_code == 200
+        assert "register" in resp.text.lower() or "account" in resp.text.lower()
 
-    def test_ar_prefix_stripping(self):
-        """/ar/register works via /ar/ prefix stripping."""
-        server_path = os.path.join(FRONTEND_DIR, "server.py")
-        with open(server_path, encoding="utf-8") as f:
-            source = f.read()
-        assert 'clean_path = path.replace("/ar/", "/")' in source
+    def test_ar_register_route_exists(self):
+        """/ar/register route returns HTML."""
+        resp = client.get("/ar/register")
+        assert resp.status_code == 200
 
     def test_auth_js_links_to_register(self):
         """auth.js Register button links to /register page (with base prefix for AR)."""
