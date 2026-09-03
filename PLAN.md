@@ -93,11 +93,11 @@
 
 #### Schritte
 
-1. **FastAPI mount static + templates in `main.py`**
-   - `app.mount("/static", StaticFiles(directory="static"), name="static")`
-   - `app.mount("/templates", StaticFiles(directory="templates"), name="templates")`
+1. **FastAPI mount static in `main.py`**
+   - `app.mount("/static", StaticFiles(directory="src/backend/static"), name="static")`
+   - ⚠️ **NUR `/static` mounten** — Templates werden AUSSCHLIESSLICH via `Jinja2Templates` gerendert, NICHT als statische Dateien ausgeliefert (sonst rohe `{{Variablen}}`)
 
-2. **Routen aus `server.py` nach `routes/static_pages.py` migrieren**
+2. **Routen aus `server.py` nach `src/backend/routes/static_pages.py` migrieren**
    - 34 HTML-Routen werden zu FastAPI-Endpunkten
    - `Jinja2Templates` für Template-Rendering
    - `from fastapi.templating import Jinja2Templates`
@@ -123,13 +123,13 @@
    # Muss: 200 für alle
    
    # Unaufgelöste Variablen → 0
-   grep -r "{{.*}}" templates/*.html | grep -v "{%.*%}" | wc -l
+   grep -r "{{.*}}" src/backend/templates/*.html | grep -v "{%.*%}" | wc -l
    # Muss: 0
    ```
 
 #### Deliverables
-- [ ] `main.py` mounted static + templates
-- [ ] `routes/static_pages.py` enthält 34 HTML-Routen
+- [ ] `main.py` mounted static (NICHT templates)
+- [ ] `routes/static_pages.py` enthält 34 HTML-Routen mit Jinja2Templates
 - [ ] `server.py` gelöscht
 - [ ] pytest: 357 passed
 - [ ] curl: alle Routen 200
@@ -143,15 +143,16 @@
 
 #### Schritte
 
-1. **Ein `Dockerfile` erstellen** (am Projekt-Root)
+1. **Root-Dockerfile erstellen** (bewährtes Muster für src/backend)
    ```dockerfile
    FROM python:3.12-slim
-   WORKDIR /app
+   WORKDIR /app/src/backend
    COPY requirements.txt .
    RUN pip install --no-cache-dir -r requirements.txt
    COPY . .
-   CMD ["uvicorn", "src.backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+   CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
    ```
+   **Begründung:** `requirements.txt` liegt in `src/backend/` (nicht am Root), `src/` und `src/backend/` haben KEIN `__init__.py`, daher muss `WORKDIR` direkt in `src/backend/` sein, damit `uvicorn main:app` funktioniert.
 
 2. **`render.yaml` erstellen**
    ```yaml
@@ -166,17 +167,19 @@
            value: sqlite:///./libya_b2b.db
    ```
 
-3. **`/health` Endpoint in `main.py`**
-   ```python
-   @app.get("/health")
-   async def health():
-       return {"status": "ok", "version": "1.0.0"}
+3. **`/health` bestätigen** — existiert bereits in `src/backend/routes/monitoring.py:8-16`
+   ```bash
+   curl -s http://localhost:8000/health | python -m json.tool
+   # Muss: {"status":"healthy","version":"2.0.0","database":"sqlite","offline_capable":true}
+   curl -sI http://localhost:8000/health | grep -i x-api-version
+   # Muss: X-API-Version: 1.0
    ```
+   ⚠️ **NICHT neu anlegen** — bestehenden Endpoint verwenden.
 
-4. **Alte Dockerfiles löschen**
-   - `src/backend/Dockerfile` → löschen
-   - `src/frontend/Dockerfile` → löschen
-   - `docker-compose.yml` → löschen (Render ersetzt Compose)
+4. **Alte Dockerfiles beibehalten** (lokale Dev + CI-Docker-Build-Test)
+   - `src/backend/Dockerfile` → bleibt (lokale Entwicklung)
+   - `src/frontend/Dockerfile` → bleibt (lokale Entwicklung)
+   - `docker-compose.yml` → bleibt (lokale Dev + CI), aber auf **EINEN Service** reduziert
 
 5. **pytest-357 Gate**
    ```bash
@@ -191,14 +194,14 @@
    # Muss: <title>Libya B2B</title> oder ähnlich
    
    curl -s https://libya-b2b.onrender.com/health
-   # Muss: {"status":"ok","version":"1.0.0"}
+   # Muss: {"status":"healthy","version":"2.0.0",...}
    ```
 
 #### Deliverables
-- [ ] Ein `Dockerfile` am Root
+- [ ] Root-Dockerfile mit `WORKDIR /app/src/backend`
 - [ ] `render.yaml` konfiguriert
-- [ ] `/health` Endpoint antwortet
-- [ ] Alte Dockerfiles + Compose gelöscht
+- [ ] `/health` antwortet mit `X-API-Version` Header
+- [ ] Alte Dockerfiles + Compose bleiben (Dev/CI)
 - [ ] pytest: 357 passed
 - [ ] Render-Deploy: HTTPS erreichbar
 - [ ] `/health` → 200
@@ -219,21 +222,21 @@
 
 2. **Same-Origin Auth-Flow testen**
    ```bash
-   # Login via same-origin
+   # Login via same-origin (echte Seed-Credentials aus seed_data.py)
    curl -c cookies.txt -X POST http://localhost:8000/api/auth/login \
      -H "Content-Type: application/json" \
-     -d '{"email":"test@test.com","password":"test123"}'
+     -d '{"email":"admin@libya-b2b.ly","password":"admin123"}'
    
    # API-Aufruf mit Cookie
-   -b cookies.txt http://localhost:8000/api/products
+   curl -b cookies.txt http://localhost:8000/api/products
    # Muss: 200 + JSON
    ```
 
-3. **Seed-Check: 312 Produkte + 30 Lieferanten**
+3. **Seed-Check: 312 Produkte + 30 Lieferanten** (Top-Level-Imports im Backend-Kontext)
    ```bash
-   python -c "
-   from src.backend.config import get_db
-   from src.backend.models import Product, Supplier
+   cd src/backend && python -c "
+   from config import get_db
+   from models import Product, Supplier
    db = next(get_db())
    products = db.query(Product).count()
    suppliers = db.query(Supplier).count()
@@ -297,7 +300,7 @@
 | Template-Migration fehlerhaft | Pages kaputt | 357 Tests + curl-Verifikation |
 | Auth-Cookie same-origin Bug | Login unmöglich | Block 3 explizit testen |
 | Render-Deploy dauert >10min | Verzögerung | `/health` als Frühindikator |
-| SQLite auf Render: Persistence | Datenverlust | Render Disk Mount nötig |
+| **SQLite auf Render Free Tier** | **Datenverlust bei jedem Redeploy** | Render Free Tier hat KEINEN persistenten Disk → `init_db()` + Seed beim Startup (implizit im Deploy-Step) |
 
 ---
 
@@ -311,4 +314,5 @@ Plan: PLAN.md (dieses Dokument)
 
 ---
 
-*Erstellt von Analyse-Agent | 2026-09-03*
+*Erstellt von Analyse-Agent | 2026-09-03*  
+*Korrigiert: 5 verifizierte Fehler (docker paths, template mount, invented details, sqlite ephemerality)*
