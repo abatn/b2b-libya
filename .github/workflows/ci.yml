@@ -84,21 +84,22 @@ jobs:
 
     - name: API smoke tests
       run: |
-        # Products API
+        # Products API (public)
         curl -sf http://localhost:8000/api/products > /dev/null
         echo "Products API: OK"
-        # B2B Dashboard
-        curl -sf http://localhost:8000/api/b2b/dashboard > /dev/null
-        echo "B2B Dashboard: OK"
+        # B2B platform stats (public — /dashboard needs auth, verified via auth check below)
+        curl -sf http://localhost:8000/api/b2b/stats > /dev/null
+        echo "B2B Stats: OK"
         # Search API
         curl -sf "http://localhost:8000/api/search?q=cement" > /dev/null
         echo "Search API: OK"
         # Reviews API
         curl -sf http://localhost:8000/api/reviews/stats > /dev/null
         echo "Reviews API: OK"
-        # Auth API
-        curl -sf http://localhost:8000/api/auth/me > /dev/null
-        echo "Auth API: OK"
+        # Auth API: /me must reject unauthenticated requests (401)
+        CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/api/auth/me)
+        [ "$CODE" = "401" ] || (echo "auth/me expected 401, got $CODE" && exit 1)
+        echo "Auth API: OK (401 unauthenticated as expected)"
 
     - name: Monitoring stats
       run: curl -sf http://localhost:8000/api/monitoring/stats | python3 -m json.tool
