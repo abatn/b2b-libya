@@ -7,7 +7,11 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter
 
+from config import IS_POSTGRES
+
 router = APIRouter(tags=["monitoring"])
+
+_DB_LABEL = "postgresql" if IS_POSTGRES else "sqlite"
 
 
 @router.get("/health")
@@ -15,8 +19,8 @@ def health_check():
     return {
         "status": "healthy",
         "version": "2.0.0",
-        "database": "sqlite",
-        "offline_capable": True,
+        "database": _DB_LABEL,
+        "offline_capable": not IS_POSTGRES,
     }
 
 
@@ -52,8 +56,8 @@ def get_detailed_health():
 
     return {
         "status": "healthy",
-        "database": "sqlite",
-        "offline_capable": True,
+        "database": _DB_LABEL,
+        "offline_capable": not IS_POSTGRES,
         "cpu_count": psutil.cpu_count(),
         "memory_total_gb": round(psutil.virtual_memory().total / 1024 / 1024 / 1024, 2),
         "memory_available_gb": round(psutil.virtual_memory().available / 1024 / 1024 / 1024, 2),
