@@ -88,7 +88,9 @@ def _log_login(db: Session, user_id: int, request: Request, success: bool):
 
 
 @router.post("/register", response_model=SessionResponse)
-def register(user_data: UserCreate, response: Response, db: Session = Depends(get_db)):
+def register(
+    user_data: UserCreate, request: Request, response: Response, db: Session = Depends(get_db)
+):
     """Register a new user and set session cookie."""
     existing = db.query(User).filter(User.username == user_data.username).first()
     if existing:
@@ -123,6 +125,7 @@ def register(user_data: UserCreate, response: Response, db: Session = Depends(ge
         httponly=True,
         max_age=SESSION_DURATION_HOURS * 3600,
         samesite="lax",
+        secure=request.url.scheme == "https",
     )
 
     return SessionResponse(session_token=token, user=UserResponse.model_validate(user))
@@ -164,6 +167,7 @@ def login(
         httponly=True,
         max_age=duration_hours * 3600,
         samesite="lax",
+        secure=request.url.scheme == "https",
     )
 
     return SessionResponse(session_token=token, user=UserResponse.model_validate(user))
