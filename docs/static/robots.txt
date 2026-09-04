@@ -1,0 +1,18 @@
+# Libya B2B Platform - robots.txt
+# https://libyab2b.com
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /static/
+Disallow: /ar/api/
+
+# Sitemaps
+Sitemap: https://libyab2b.com/sitemap.xml
+
+# Crawl-delay
+User-agent: Googlebot
+Crawl-delay: 1
+
+User-agent: Bingbot
+Crawl-delay: 2

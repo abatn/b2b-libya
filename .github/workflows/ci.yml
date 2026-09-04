@@ -1,5 +1,5 @@
 # Libya B2B Platform - GitHub Actions CI/CD Pipeline
-# v2.0: Lint → Test → Docker → Health Check → Deploy
+# v3.0: Lint → Test → Docker (single same-origin service) → Health Check
 
 name: CI/CD
 
@@ -53,7 +53,7 @@ jobs:
         echo "Test result: $RESULT"
 
   # ============================================================
-  # STAGE 3: Docker Build & Health Check
+  # STAGE 3: Docker Build & Health Check (single service — HTML+API+static)
   # ============================================================
   docker:
     runs-on: ubuntu-latest
@@ -61,26 +61,26 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Build backend image
-      run: docker build -t libya-b2b-backend ./src/backend
+    - name: Build single-service image
+      run: docker build -t libya-b2b .
 
-    - name: Build frontend image
-      run: docker build -t libya-b2b-frontend ./src/frontend
-
-    - name: Start services
+    - name: Start service
       run: |
-        docker-compose up -d
-        sleep 10
+        docker compose up -d
+        sleep 15
 
-    - name: Health check - Backend
+    - name: Health check
       run: |
-        curl -sf http://localhost:8000/health || (docker-compose logs backend && exit 1)
+        curl -sf http://localhost:8000/health || (docker compose logs backend && exit 1)
         echo "Backend health: OK"
 
-    - name: Health check - Frontend
+    - name: Page smoke test (rendered HTML, no unresolved template vars)
       run: |
-        curl -sf http://localhost:3000/health || (docker-compose logs frontend && exit 1)
-        echo "Frontend health: OK"
+        curl -sf http://localhost:8000/ | grep -q "<title>" \
+          || (echo "FAIL: / does not return HTML" && exit 1)
+        UNRESOLVED=$(curl -sf http://localhost:8000/products | grep -c "{{" || true)
+        echo "Unresolved vars on /products: $UNRESOLVED"
+        [ "$UNRESOLVED" -eq 0 ] || (echo "FAIL: unresolved template vars" && exit 1)
 
     - name: API smoke tests
       run: |
@@ -105,7 +105,7 @@ jobs:
 
     - name: Collect logs
       if: failure()
-      run: docker-compose logs --tail=50 > docker-logs.txt
+      run: docker compose logs --tail=50 > docker-logs.txt
 
     - name: Upload logs
       if: failure()
@@ -114,12 +114,12 @@ jobs:
         name: docker-logs
         path: docker-logs.txt
 
-    - name: Stop services
+    - name: Stop service
       if: always()
-      run: docker-compose down
+      run: docker compose down
 
   # ============================================================
-  # STAGE 4: Deploy (only on main push)
+  # STAGE 4: Deploy (Render auto-deploys from main — placeholder kept for hook)
   # ============================================================
   deploy:
     runs-on: ubuntu-latest

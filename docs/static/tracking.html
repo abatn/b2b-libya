@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Order | Libya B2B Platform</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; }
+        .navbar { background: #1a1a2e; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar h1 { color: #00d2ff; font-size: 1.5rem; }
+        .nav-links { display: flex; gap: 20px; }
+        .nav-links a { color: #8892b0; text-decoration: none; padding: 8px 16px; border-radius: 5px; transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { background: #00d2ff; color: #1a1a2e; }
+        .container { max-width: 800px; margin: 0 auto; padding: 60px 30px; }
+        .search-box { background: white; border-radius: 15px; padding: 40px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; }
+        .search-box h2 { color: #1a1a2e; margin-bottom: 20px; }
+        .search-box p { color: #8892b0; margin-bottom: 30px; }
+        .search-input { display: flex; gap: 10px; justify-content: center; }
+        .search-input input { padding: 15px 25px; border: 2px solid #ddd; border-radius: 25px; width: 400px; font-size: 1.1rem; }
+        .search-input button { padding: 15px 30px; background: #00d2ff; color: white; border: none; border-radius: 25px; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
+        .tracking-result { display: none; background: white; border-radius: 15px; padding: 30px; margin-top: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .tracking-result h3 { color: #1a1a2e; margin-bottom: 20px; }
+        .tracking-step { display: flex; align-items: center; gap: 15px; padding: 15px 0; border-bottom: 1px solid #eee; }
+        .tracking-step:last-child { border-bottom: none; }
+        .step-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .step-pending { background: #f0f0f0; color: #999; }
+        .step-active { background: #00d2ff; color: white; }
+        .step-done { background: #28a745; color: white; }
+        .step-info { flex: 1; }
+        .step-title { font-weight: bold; }
+        .step-time { color: #8892b0; font-size: 0.9rem; }
+        .lang-switch { position: fixed; top: 20px; right: 20px; z-index: 1000; display: flex; border-radius: 25px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .lang-btn { padding: 8px 16px; border: none; cursor: pointer; font-weight: bold; }
+        .lang-btn.active { background: #00d2ff; color: #1a1a2e; }
+        .lang-btn:not(.active) { background: rgba(26,26,46,0.8); color: white; }
+    </style>
+</head>
+<body>
+    <div class="lang-switch">
+        <a href="/tracking" class="lang-btn active">EN</a>
+        <a href="/ar/tracking" class="lang-btn">AR</a>
+    </div>
+
+    <nav class="navbar">
+        <h1>Libya B2B Platform</h1>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/products">Products</a>
+            <a href="/cart">Cart</a>
+            <a href="/tracking" class="active">Track Order</a>
+            <a href="/docs">API</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="search-box">
+            <h2>Track Your Order</h2>
+            <p>Enter your order number to see the current status</p>
+            <div class="search-input">
+                <input type="text" id="order-input" placeholder="Order number (e.g., LYB-20260815-123456)">
+                <button onclick="trackOrder()">Track</button>
+            </div>
+        </div>
+
+        <div class="tracking-result" id="tracking-result">
+            <h3>Order Status: <span id="order-status"></span></h3>
+            <div id="tracking-steps"></div>
+            <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+                <strong>Order Details:</strong>
+                <p>Order Number: <span id="detail-number"></span></p>
+                <p>Total: <span id="detail-amount"></span> LYD</p>
+                <p>Payment: <span id="detail-payment"></span></p>
+                <p>Created: <span id="detail-date"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function trackOrder() {
+            const orderNumber = document.getElementById('order-input').value.trim();
+            if (!orderNumber) {
+                alert('Please enter an order number');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${window.API_BASE}/api/orders`));
+                const orders = await response.json();
+                const order = orders.find(o => o.order_number === orderNumber);
+
+                if (!order) {
+                    alert('Order not found');
+                    return;
+                }
+
+                document.getElementById('tracking-result').style.display = 'block';
+                document.getElementById('order-status').textContent = order.status.toUpperCase();
+                document.getElementById('detail-number').textContent = order.order_number;
+                document.getElementById('detail-amount').textContent = order.total_amount.toFixed(2);
+                document.getElementById('detail-payment').textContent = order.payment_method;
+                document.getElementById('detail-date').textContent = new Date(order.created_at).toLocaleDateString();
+
+                const steps = [
+                    { title: 'Order Placed', done: true, time: new Date(order.created_at).toLocaleString() },
+                    { title: 'Order Confirmed', done: order.status !== 'pending', time: order.status !== 'pending' ? 'Confirmed' : 'Pending' },
+                    { title: 'Out for Delivery', done: order.status === 'delivered', time: order.status === 'delivered' ? 'Delivered' : 'Pending' },
+                    { title: 'Delivered', done: order.status === 'delivered', time: order.delivery_timestamp ? new Date(order.delivery_timestamp).toLocaleString() : 'Pending' }
+                ];
+
+                document.getElementById('tracking-steps').innerHTML = steps.map(step => `
+                    <div class="tracking-step">
+                        <div class="step-icon ${step.done ? 'step-done' : 'step-pending'}">
+                            ${step.done ? '✓' : '○'}
+                        </div>
+                        <div class="step-info">
+                            <div class="step-title">${step.title}</div>
+                            <div class="step-time">${step.time}</div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                alert('Error tracking order');
+            }
+        }
+    </script>
+</body>
+</html>

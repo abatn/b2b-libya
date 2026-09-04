@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>انشاء حساب</title>
+    <meta name="description" content="انشئ حسابك على منصة B2B ليبيا. سجل كبائع أو مشتري في 3 خطوات بسيطة.">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; color: #333; min-height: 100vh; }
+        :root { --primary: #ff6a00; --primary-dark: #e55d00; --secondary: #1a1a2e; --accent: #00d2ff; --border: #e8e8e8; --radius: 12px; --success: #28a745; --danger: #dc3545; }
+
+        /* NAV */
+        .navbar { background: var(--secondary); padding: 0 30px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; height: 60px; }
+        .navbar-brand { color: var(--primary); font-size: 1.4rem; font-weight: bold; text-decoration: none; }
+        .lang-btn { background: rgba(255,106,0,0.15) !important; color: var(--primary) !important; font-weight: bold !important; }
+        .hamburger { display: none; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+
+        /* PAGE HEADER */
+        .page-header { background: linear-gradient(135deg, var(--secondary) 0%, #16213e 100%); padding: 60px 30px; text-align: center; color: white; }
+        .page-header h1 { font-size: 2.2rem; margin-bottom: 10px; }
+        .page-header p { color: #8892b0; font-size: 1.1rem; }
+
+        /* CONTAINER */
+        .container { max-width: 520px; margin: 40px auto; padding: 0 30px; }
+        .card { background: white; border-radius: var(--radius); padding: 40px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        .card h2 { font-size: 1.4rem; color: var(--secondary); margin-bottom: 20px; text-align: center; }
+
+        /* STEP INDICATOR */
+        .step-indicator { display: flex; justify-content: center; gap: 8px; margin-bottom: 30px; }
+        .step-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--border); transition: 0.3s; }
+        .step-dot.active { background: var(--primary); }
+        .step-dot.done { background: var(--success); }
+        .step-labels { display: flex; justify-content: space-between; margin-bottom: 30px; padding: 0 10px; }
+        .step-label { font-size: 0.75rem; color: #888; text-align: center; flex: 1; }
+        .step-label.active { color: var(--primary); font-weight: 600; }
+        .step-label.done { color: var(--success); font-weight: 600; }
+
+        /* STEPS */
+        .step { display: none; }
+        .step.active { display: block; }
+
+        /* FORM */
+        .form-group .hint { font-size: 0.8rem; color: #888; margin-top: 4px; }
+        .form-group .error-text { font-size: 0.8rem; color: var(--danger); margin-top: 4px; display: none; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        /* PASSWORD STRENGTH */
+        .password-strength { height: 4px; border-radius: 2px; background: var(--border); margin-top: 6px; overflow: hidden; }
+        .password-strength-bar { height: 100%; width: 0; border-radius: 2px; transition: 0.3s; }
+
+        /* BUTTONS */
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+        .btn-row { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-row .btn { flex: 1; }
+
+        /* VERIFICATION CODE */
+        .code-input { width: 100%; padding: 16px; border: 2px solid var(--border); border-radius: 8px; font-size: 1.5rem; text-align: center; letter-spacing: 12px; font-weight: bold; color: var(--secondary); margin-bottom: 20px; }
+        .code-input:focus { border-color: var(--primary); outline: none; }
+        .code-hint { text-align: center; color: #888; font-size: 0.85rem; margin-bottom: 20px; }
+        .code-email { color: var(--primary); font-weight: 600; }
+        .resend-link { text-align: center; margin-top: 15px; }
+        .resend-link a { color: var(--primary); text-decoration: none; font-size: 0.85rem; cursor: pointer; }
+        .resend-link a:hover { text-decoration: underline; }
+
+        /* TERMS */
+        .terms-check { display: flex; align-items: flex-start; gap: 10px; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; }
+        .terms-check input[type="checkbox"] { margin-top: 3px; width: 18px; height: 18px; accent-color: var(--primary); flex-shrink: 0; }
+        .terms-check label { font-size: 0.85rem; color: #555; line-height: 1.5; cursor: pointer; }
+        .terms-check a { color: var(--primary); text-decoration: none; }
+        .terms-check a:hover { text-decoration: underline; }
+
+        /* ROLE SELECTOR */
+        .role-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+        .role-option { padding: 20px 15px; border: 2px solid var(--border); border-radius: 10px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .role-option:hover { border-color: var(--primary); }
+        .role-option.selected { border-color: var(--primary); background: rgba(255,106,0,0.05); }
+        .role-option input { display: none; }
+        .role-icon { font-size: 2rem; margin-bottom: 8px; }
+        .role-name { font-weight: 600; color: var(--secondary); font-size: 0.95rem; }
+        .role-desc { font-size: 0.75rem; color: #888; margin-top: 4px; }
+
+        /* MESSAGES */
+        .success-msg { background: #e6f9ee; color: var(--success); padding: 15px; border-radius: 8px; text-align: center; font-weight: 600; margin-bottom: 15px; display: none; }
+        .error-msg { background: #fde8e8; color: var(--danger); padding: 15px; border-radius: 8px; text-align: center; font-weight: 600; margin-bottom: 15px; display: none; }
+
+        /* LOGIN LINK */
+        .login-link { text-align: center; margin-top: 20px; font-size: 0.9rem; color: #888; }
+        .login-link a { color: var(--primary); text-decoration: none; font-weight: 600; }
+        .login-link a:hover { text-decoration: underline; }
+
+        /* FOOTER */
+        .footer { background: var(--secondary); color: #8892b0; padding: 40px 30px 20px; margin-top: 60px; }
+        .footer-bottom { text-align: center; font-size: 0.8rem; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+
+        /* RTL */
+        [dir="rtl"] .terms-check { flex-direction: row-reverse; }
+        [dir="rtl"] .step-labels { direction: rtl; }
+
+        /* MOBILE */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .hamburger { display: block; }
+            .form-row { grid-template-columns: 1fr; }
+            .card { padding: 25px; }
+            .role-selector { grid-template-columns: 1fr; }
+        }
+    </style>
+    <!-- COMPONENTS_CSS_INCLUDE -->
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/b2b-libya/" class="navbar-brand">Libya B2B</a>
+        <div class="nav-links" id="navLinks">
+            <div class="nav-dropdown" id="accountDropdown">
+                <a href="#" class="nav-dropdown-toggle" id="auth-nav-btn">حسابي</a>
+                <div class="nav-dropdown-menu" id="accountMenu">
+                    <a href="/b2b-libya/seller">المتجر</a>
+                    <a href="/b2b-libya/buyer">طلباتي</a>
+                    <a href="/b2b-libya/tracking">تتبع الطلب</a>
+                </div>
+            </div>
+            <a href="/b2b-libya/register" class="lang-btn" data-lang-switch>EN</a>
+        </div>
+        <button class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')">☰</button>
+    </nav>
+
+    <div class="page-header">
+        <h1>انشاء حساب</h1>
+        <p>انضم الى منصة B2B ليبيا — اول منصة B2B للشركات الليبية</p>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <!-- Step Indicators -->
+            <div class="step-indicator">
+                <div class="step-dot active" id="dot1"></div>
+                <div class="step-dot" id="dot2"></div>
+                <div class="step-dot" id="dot3"></div>
+            </div>
+            <div class="step-labels">
+                <div class="step-label active" id="label1">الحساب</div>
+                <div class="step-label" id="label2">التحقق</div>
+                <div class="step-label" id="label3">الملف الشخصي</div>
+            </div>
+
+            <div class="error-msg" id="globalError"></div>
+            <div class="success-msg" id="globalSuccess"></div>
+
+            <!-- STEP 1: Email + Password -->
+            <div class="step active" id="step1">
+                <h2>انشئ حسابك</h2>
+                <form id="step1Form" onsubmit="return goToStep2(event)">
+                    <div class="form-group">
+                        <label>البريد الالكتروني *</label>
+                        <input type="email" id="reg-email" required placeholder="you@company.com" autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label>كلمة المرور *</label>
+                        <input type="password" id="reg-password" required placeholder="6 احرف على الاقل" autocomplete="new-password" oninput="checkPasswordStrength()">
+                        <div class="password-strength"><div class="password-strength-bar" id="strengthBar"></div></div>
+                        <div class="hint">استخدم 6 احرف او اكثر مع احرف وارقام ورموز لكلمة مرور قوية.</div>
+                    </div>
+                    <div class="form-group">
+                        <label>تاكيد كلمة المرور *</label>
+                        <input type="password" id="reg-password-confirm" required placeholder="اعد ادخال كلمة المرور" autocomplete="new-password">
+                        <div class="error-text" id="passwordMatchError">كلمتا المرور غير متطابقتين</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">التالي</button>
+                </form>
+                <div class="login-link">لديك حساب بالفعل؟ <a href="/b2b-libya/">سجل الدخول هنا</a></div>
+            </div>
+
+            <!-- STEP 2: Verification Code -->
+            <div class="step" id="step2">
+                <h2>تحقق من بريدك</h2>
+                <div style="font-size:3rem;margin-bottom:15px;text-align:center;">✉️</div>
+                <p class="code-hint">ارسلنا رمز تكوين من 6 ارقام الى <span class="code-email" id="codeEmail"></span></p>
+                <input type="text" class="code-input" id="reg-code" maxlength="6" placeholder="000000" inputmode="numeric" autocomplete="one-time-code">
+                <button class="btn btn-primary" onclick="verifyCode()">تحقق من الرمز</button>
+                <div class="resend-link">
+                    <a onclick="resendCode()" id="resendBtn">اعد ارسال الرمز</a>
+                </div>
+                <div class="btn-row">
+                    <button class="btn btn-secondary" onclick="goToStep(1)">رجوع</button>
+                </div>
+            </div>
+
+            <!-- STEP 3: Profile Completion -->
+            <div class="step" id="step3">
+                <h2>اكمل ملفك الشخصي</h2>
+
+                <!-- Role Selection -->
+                <label style="display:block;margin-bottom:8px;font-weight:600;color:#555;font-size:0.9rem;">اريد *</label>
+                <div class="role-selector">
+                    <label class="role-option selected" onclick="selectRole('buyer', this)">
+                        <input type="radio" name="role" value="buyer" checked>
+                        <div class="role-icon">  </div>
+                        <div class="role-name">شراء منتجات</div>
+                        <div class="role-desc">الحصول على منتجات من الموردين الليبيين المعتمدين</div>
+                    </label>
+                    <label class="role-option" onclick="selectRole('seller', this)">
+                        <input type="radio" name="role" value="seller">
+                        <div class="role-icon"> ️</div>
+                        <div class="role-name">بيع منتجات</div>
+                        <div class="role-desc">عرض ومنتجاتك وبيعها للشركات</div>
+                    </label>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>اسم الشركة (انجليزي) *</label>
+                        <input type="text" id="reg-company" placeholder="مثال: شركة طرابلس للتجارة" required>
+                    </div>
+                    <div class="form-group">
+                        <label>اسم الشركة (عربي)</label>
+                        <input type="text" id="reg-company-ar" placeholder="اسم الشركة بالعربية" dir="rtl">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>رقم الهاتف * *</label>
+                        <input type="tel" id="reg-phone" placeholder="+218 91 234 5678" required>
+                    </div>
+                    <div class="form-group">
+                        <label>الدولة * *</label>
+                        <select id="reg-country" required>
+                            <option value="">اختر الدولة</option>
+                            <option value="LY">ليبيا</option>
+                            <option value="TN">تونس</option>
+                            <option value="EG">مصر</option>
+                            <option value="DZ">الجزائر</option>
+                            <option value="MA">المغرب</option>
+                            <option value="SA">المملكة العربية السعودية</option>
+                            <option value="AE">الامارات العربية المتحدة</option>
+                            <option value="TR">تركيا</option>
+                            <option value="CN">الصين</option>
+                            <option value="IN">الهند</option>
+                            <option value="OTHER">اخرى</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Terms Checkbox -->
+                <div class="terms-check">
+                    <input type="checkbox" id="reg-terms">
+                    <label for="reg-terms">اوافق على <a href="/b2b-libya/terms" target="_blank">شروط الخدمة</a> وسياسة الخصوصية</label>
+                </div>
+
+                <button class="btn btn-primary" id="registerBtn" onclick="submitRegistration()" disabled>انشاء حساب</button>
+                <div class="btn-row">
+                    <button class="btn btn-secondary" onclick="goToStep(2)">رجوع</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-bottom"><p>© 2026 منصة B2B ليبيا. جميع الحقوق محفوظة.</p></div>
+    </footer>
+
+    <script src="../../static/toast.js"></script>
+    <script src="../../static/auth.js"></script>
+    <script>
+        /* ── Nav auth (same as other pages) ── */
+        (function(){var btn=document.getElementById('auth-nav-btn');if(btn){btn.onclick=function(e){e.preventDefault();Auth.showLoginModal();}}})();
+        (async()=>{try{const user=await Auth.me();const btn=document.getElementById('auth-nav-btn');const dropdown=document.getElementById('accountDropdown');const menu=document.getElementById('accountMenu');if(user){btn.textContent=user.username;btn.onclick=(e)=>{e.preventDefault();menu.classList.toggle('show');};dropdown.classList.add('authenticated');const l=document.createElement('a');l.href='#';l.textContent='تسجيل الخروج';l.onclick=async(e)=>{e.preventDefault();await Auth.logout();location.reload();};menu.appendChild(l);}else{btn.onclick=(e)=>{e.preventDefault();Auth.showLoginModal();};dropdown.classList.remove('authenticated');}}catch(err){var btn=document.getElementById('auth-nav-btn');if(btn){btn.onclick=(e)=>{e.preventDefault();Auth.showLoginModal();};}})();
+
+        /* ── State ── */
+        let selectedRole = 'buyer';
+        let regEmail = '';
+
+        /* ── Password strength ── */
+        function checkPasswordStrength() {
+            const pw = document.getElementById('reg-password').value;
+            const bar = document.getElementById('strengthBar');
+            let score = 0;
+            if (pw.length >= 6) score++;
+            if (pw.length >= 10) score++;
+            if (/[A-Z]/.test(pw)) score++;
+            if (/[0-9]/.test(pw)) score++;
+            if (/[^A-Za-z0-9]/.test(pw)) score++;
+
+            const colors = ['#dc3545', '#dc3545', '#ffc107', '#28a745', '#28a745'];
+            const widths = ['0%', '20%', '40%', '70%', '100%'];
+            bar.style.width = pw.length === 0 ? '0%' : widths[Math.min(score, 4)];
+            bar.style.background = pw.length === 0 ? 'transparent' : colors[Math.min(score, 4)];
+        }
+
+        /* ── Step navigation ── */
+        function goToStep(n) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step' + n).classList.add('active');
+            for (let i = 1; i <= 3; i++) {
+                const dot = document.getElementById('dot' + i);
+                const label = document.getElementById('label' + i);
+                dot.className = 'step-dot';
+                label.className = 'step-label';
+                if (i < n) { dot.classList.add('done'); label.classList.add('done'); }
+                if (i === n) { dot.classList.add('active'); label.classList.add('active'); }
+            }
+            hideMessages();
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('globalError');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+        function showSuccess(msg) {
+            const el = document.getElementById('globalSuccess');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+        function hideMessages() {
+            document.getElementById('globalError').style.display = 'none';
+            document.getElementById('globalSuccess').style.display = 'none';
+        }
+
+        /* ── Step 1 → Step 2: Register user + send verification email ── */
+        async function goToStep2(e) {
+            e.preventDefault();
+            hideMessages();
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const confirm = document.getElementById('reg-password-confirm').value;
+
+            if (!email || !password || !confirm) {
+                showError('Please fill in all fields');
+                return false;
+            }
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters');
+                return false;
+            }
+            if (password !== confirm) {
+                document.getElementById('passwordMatchError').style.display = 'block';
+                return false;
+            }
+            document.getElementById('passwordMatchError').style.display = 'none';
+
+            regEmail = email;
+            const username = email.split('@')[0];
+            const step1Btn = document.querySelector('#step1 .btn-primary');
+            step1Btn.disabled = true;
+            step1Btn.textContent = 'جاري التحميل...';
+
+            try {
+                // Register user with minimal fields (email + password only)
+                const result = await Auth.register({
+                    username: username,
+                    email: email,
+                    password: password,
+                    role: 'buyer',
+                });
+
+                // Now send verification email via backend
+                const sendResp = await fetch(`${window.API_BASE}/api/auth/send-verification`, { method: 'POST' });
+                const sendData = await sendResp.json();
+
+                if (!sendResp.ok) {
+                    throw new Error(sendData.detail || 'Failed to send verification email');
+                }
+
+                document.getElementById('codeEmail').textContent = email;
+                if (typeof showToast === 'function') {
+                    showToast('Verification code sent to your email!', 'success');
+                }
+
+                goToStep(2);
+            } catch (err) {
+                showError(err.message || 'Registration failed. Please try again.');
+            } finally {
+                step1Btn.disabled = false;
+                step1Btn.textContent = 'التالي';
+            }
+            return false;
+        }
+
+        /* ── Step 2: Verify code against backend ── */
+        async function verifyCode() {
+            hideMessages();
+            const code = document.getElementById('reg-code').value.trim();
+            if (code.length !== 6) {
+                showError('Please enter a 6-digit code');
+                return;
+            }
+
+            try {
+                const resp = await fetch(`${window.API_BASE}/api/auth/verify-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: code }),
+                });
+                const data = await resp.json();
+
+                if (resp.ok) {
+                    if (typeof showToast === 'function') {
+                        showToast('Email verified!', 'success');
+                    }
+                    goToStep(3);
+                } else {
+                    showError(data.detail || 'Invalid verification code');
+                }
+            } catch (err) {
+                showError('Network error. Please try again.');
+            }
+        }
+
+        async function resendCode() {
+            try {
+                const resp = await fetch(`${window.API_BASE}/api/auth/send-verification`, { method: 'POST' });
+                const data = await resp.json();
+
+                if (resp.ok) {
+                    if (typeof showToast === 'function') {
+                        showToast('New verification code sent!', 'success');
+                    }
+                } else {
+                    showError(data.detail || 'Failed to resend code');
+                    return;
+                }
+            } catch (err) {
+                showError('Network error. Please try again.');
+                return;
+            }
+
+            const btn = document.getElementById('resendBtn');
+            btn.style.pointerEvents = 'none';
+            btn.style.opacity = '0.5';
+            let countdown = 60;
+            const timer = setInterval(() => {
+                btn.textContent = 'Resend (' + countdown + 's)';
+                countdown--;
+                if (countdown < 0) {
+                    clearInterval(timer);
+                    btn.textContent = 'اعد ارسال الرمز';
+                    btn.style.pointerEvents = 'auto';
+                    btn.style.opacity = '1';
+                }
+            }, 1000);
+        }
+
+        document.getElementById('reg-code').addEventListener('keypress', e => { if (e.key === 'Enter') verifyCode(); });
+
+        /* ── Step 3: Role selection ── */
+        function selectRole(role, el) {
+            selectedRole = role;
+            document.querySelectorAll('.role-option').forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+            el.querySelector('input').checked = true;
+        }
+
+        /* ── Terms checkbox → enable button ── */
+        document.getElementById('reg-terms').addEventListener('change', function() {
+            document.getElementById('registerBtn').disabled = !this.checked;
+        });
+
+        /* ── Submit registration (Step 3: update profile) ── */
+        async function submitRegistration() {
+            hideMessages();
+            const terms = document.getElementById('reg-terms');
+            if (!terms.checked) {
+                showError('Please accept the Terms of Service');
+                return;
+            }
+
+            const company = document.getElementById('reg-company').value.trim();
+            const phone = document.getElementById('reg-phone').value.trim();
+            const country = document.getElementById('reg-country').value;
+
+            if (!company || !phone || !country) {
+                showError('Please fill in all required fields');
+                return;
+            }
+
+            const btn = document.getElementById('registerBtn');
+            btn.disabled = true;
+            btn.textContent = 'جاري التحميل...';
+
+            try {
+                // Update profile with role, company, phone via backend
+                const resp = await fetch(`${window.API_BASE}/api/auth/me`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        role: selectedRole,
+                        business_name: company,
+                        business_name_arabic: document.getElementById('reg-company-ar').value.trim() || null,
+                        phone: phone,
+                    }),
+                });
+
+                if (!resp.ok) {
+                    const data = await resp.json();
+                    throw new Error(data.detail || 'Failed to update profile');
+                }
+
+                if (typeof showToast === 'function') {
+                    showToast('Account created! Welcome!', 'success');
+                }
+
+                // Redirect based on role
+                const redirectUrl = '/welcome';
+                setTimeout(() => { window.location.href = redirectUrl; }, 800);
+
+            } catch (e) {
+                btn.disabled = false;
+                btn.textContent = 'انشاء حساب';
+                showError(e.message || 'Registration failed');
+            }
+        }
+    </script>
+</body>
+</html>
